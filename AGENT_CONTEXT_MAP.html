@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<title>Markmap</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+}
+#mindmap {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+}
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/markmap-toolbar@0.17.2/dist/style.css">
+</head>
+<body>
+<svg id="mindmap"></svg>
+<script src="https://cdn.jsdelivr.net/npm/d3@7.8.5/dist/d3.min.js"></script><script src="https://cdn.jsdelivr.net/npm/markmap-view@0.17.2/dist/browser/index.js"></script><script src="https://cdn.jsdelivr.net/npm/markmap-toolbar@0.17.2/dist/index.js"></script><script>((r) => {
+            setTimeout(r);
+          })(() => {
+  const { markmap, mm } = window;
+  const toolbar = new markmap.Toolbar();
+  toolbar.attach(mm);
+  const el = toolbar.render();
+  el.setAttribute("style", "position:absolute;bottom:20px;right:20px");
+  document.body.append(el);
+})</script><script>((getMarkmap, getOptions, root2, jsonOptions) => {
+              const markmap = getMarkmap();
+              window.mm = markmap.Markmap.create(
+                "svg#mindmap",
+                (getOptions || markmap.deriveOptions)(jsonOptions),
+                root2
+              );
+            })(() => window.markmap,null,{"content":"Agent Context Map","children":[{"content":"Fencer Agents","children":[{"content":"Action Execution Tools","children":[{"content":"Command Execution","children":[],"payload":{"lines":"4,5"}},{"content":"System Operations","children":[],"payload":{"lines":"5,6"}},{"content":"File Management","children":[],"payload":{"lines":"6,7"}},{"content":"Process Control","children":[],"payload":{"lines":"7,9"}}],"payload":{"lines":"3,4"}},{"content":"Observation Tools","children":[{"content":"Real-time Monitoring","children":[],"payload":{"lines":"10,11"}},{"content":"State Tracking","children":[],"payload":{"lines":"11,12"}},{"content":"Performance Metrics","children":[],"payload":{"lines":"12,13"}},{"content":"Error Detection","children":[],"payload":{"lines":"13,15"}}],"payload":{"lines":"9,10"}},{"content":"Memory Tools","children":[{"content":"State Management","children":[],"payload":{"lines":"16,17"}},{"content":"Cache Operations","children":[],"payload":{"lines":"17,18"}},{"content":"Data Persistence","children":[],"payload":{"lines":"18,19"}},{"content":"Resource Tracking","children":[],"payload":{"lines":"19,21"}}],"payload":{"lines":"15,16"}}],"payload":{"lines":"2,3"}},{"content":"Analyst Agents","children":[{"content":"Analysis Tools","children":[{"content":"Code Analysis","children":[],"payload":{"lines":"23,24"}},{"content":"Performance Profiling","children":[],"payload":{"lines":"24,25"}},{"content":"Pattern Detection","children":[],"payload":{"lines":"25,26"}},{"content":"Quality Assessment","children":[],"payload":{"lines":"26,28"}}],"payload":{"lines":"22,23"}},{"content":"Planning Tools","children":[{"content":"Task Decomposition","children":[],"payload":{"lines":"29,30"}},{"content":"Resource Planning","children":[],"payload":{"lines":"30,31"}},{"content":"Risk Assessment","children":[],"payload":{"lines":"31,32"}},{"content":"Strategy Formation","children":[],"payload":{"lines":"32,34"}}],"payload":{"lines":"28,29"}},{"content":"Feedback Tools","children":[{"content":"Metrics Collection","children":[],"payload":{"lines":"35,36"}},{"content":"Impact Analysis","children":[],"payload":{"lines":"36,37"}},{"content":"Trend Detection","children":[],"payload":{"lines":"37,38"}},{"content":"Recommendation Engine","children":[],"payload":{"lines":"38,40"}}],"payload":{"lines":"34,35"}}],"payload":{"lines":"21,22"}},{"content":"Halo Tools","children":[{"content":"Development Tools","children":[{"content":"Version Control","children":[],"payload":{"lines":"42,43"}},{"content":"Build Systems","children":[],"payload":{"lines":"43,44"}},{"content":"Testing Frameworks","children":[],"payload":{"lines":"44,45"}},{"content":"Deployment Tools","children":[],"payload":{"lines":"45,47"}}],"payload":{"lines":"41,42"}},{"content":"Integration Tools","children":[{"content":"API Connectors","children":[],"payload":{"lines":"48,49"}},{"content":"Data Pipelines","children":[],"payload":{"lines":"49,50"}},{"content":"Service Mesh","children":[],"payload":{"lines":"50,51"}},{"content":"Message Brokers","children":[],"payload":{"lines":"51,53"}}],"payload":{"lines":"47,48"}},{"content":"Security Tools","children":[{"content":"Authentication","children":[],"payload":{"lines":"54,55"}},{"content":"Authorization","children":[],"payload":{"lines":"55,56"}},{"content":"Encryption","children":[],"payload":{"lines":"56,57"}},{"content":"Audit Logging","children":[],"payload":{"lines":"57,59"}}],"payload":{"lines":"53,54"}},{"content":"Monitoring Tools","children":[{"content":"Health Checks","children":[],"payload":{"lines":"60,61"}},{"content":"Alerting Systems","children":[],"payload":{"lines":"61,62"}},{"content":"Metrics Dashboard","children":[],"payload":{"lines":"62,63"}},{"content":"Log Aggregation","children":[],"payload":{"lines":"63,65"}}],"payload":{"lines":"59,60"}}],"payload":{"lines":"40,41"}},{"content":"Shared Context","children":[{"content":"Communication","children":[{"content":"Message Passing","children":[],"payload":{"lines":"67,68"}},{"content":"Event Broadcasting","children":[],"payload":{"lines":"68,69"}},{"content":"State Synchronization","children":[],"payload":{"lines":"69,70"}},{"content":"Protocol Handling","children":[],"payload":{"lines":"70,72"}}],"payload":{"lines":"66,67"}},{"content":"Resource Management","children":[{"content":"Memory Allocation","children":[],"payload":{"lines":"73,74"}},{"content":"CPU Scheduling","children":[],"payload":{"lines":"74,75"}},{"content":"Network Resources","children":[],"payload":{"lines":"75,76"}},{"content":"Storage Management","children":[],"payload":{"lines":"76,78"}}],"payload":{"lines":"72,73"}},{"content":"Error Handling","children":[{"content":"Exception Management","children":[],"payload":{"lines":"79,80"}},{"content":"Recovery Procedures","children":[],"payload":{"lines":"80,81"}},{"content":"Fallback Mechanisms","children":[],"payload":{"lines":"81,82"}},{"content":"Circuit Breaking","children":[],"payload":{"lines":"82,84"}}],"payload":{"lines":"78,79"}},{"content":"Coordination","children":[{"content":"Service Discovery","children":[],"payload":{"lines":"85,86"}},{"content":"Load Balancing","children":[],"payload":{"lines":"86,87"}},{"content":"Task Distribution","children":[],"payload":{"lines":"87,88"}},{"content":"State Replication","children":[],"payload":{"lines":"88,89"}}],"payload":{"lines":"84,85"}}],"payload":{"lines":"65,66"}}],"payload":{"lines":"0,1"}},null)</script>
+</body>
+</html>
