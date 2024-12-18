@@ -7,7 +7,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "llm_connector"
+name = "redline"
 version = "0.1.0"
 description = "A connector for LLMs"
 authors = [
@@ -33,4 +33,7 @@ test = [
 ]
 
 [tool.hatch.version]
-path = "llm_connector/__init__.py"
+path = "redline/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["redline"]

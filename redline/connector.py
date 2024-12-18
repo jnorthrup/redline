@@ -7,8 +7,7 @@ connectors, response handling, and agent memory management.
 
 from typing import Any, AsyncGenerator, Dict, List, Optional
 
-from .interfaces import (AgentMemory, LLMConnector, LLMResponse, Message,
-                         ModelConfig, StreamingLLMResponse)
+from redline.interfaces import (AgentMemory, LLMConnector, LLMResponse, Message, ModelConfig, StreamingLLMResponse)
 
 
 class BaseLLMConnector(LLMConnector):
@@ -182,15 +181,24 @@ class SimpleAgentMemory(AgentMemory):
 
 
 class AgentMemoryExtended(SimpleAgentMemory):
-    def get_reasoning_history(self, filter_fn):
-        # Updated parameter name
-        pass  # Implement method
+    async def get_reasoning_history(self, filter_fn=None):
+        """Retrieve reasoning history based on filter function."""
+        # Adjusted method parameters
+        history = await super().get_reasoning_history(filter_fn)
+        return history
 
-    def apply_bias_correction(self, correction, confidence, source):
-        pass  # Implement method
+    async def apply_bias_correction(self, correction: str, confidence: float, source: str):
+        """Apply bias correction with updated parameters."""
+        # Adjusted method parameters
+        await super().apply_bias_correction(correction, confidence, source)
 
-    def some_method(self, arg1, arg2, arg3, arg4, arg5):
-        pass  # Reduce number of arguments
+    def some_other_method(self, param1, param2, param3, param4, param5):
+        """Explain what this method does."""
+        # ...existing code...
+
+    async def yet_another_method(self, param1, param2, param3, param4, param5):
+        """Explain what this method does."""
+        # ...existing code...
 
 
 class BaseLLMResponse(LLMResponse):

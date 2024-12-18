@@ -4,14 +4,14 @@ ReasoningFeedbackHelper for managing the reasoning and feedback loop.
 
 from typing import Any, Dict
 
-from .coordinator_helpers import CoordinatorHelper1
+from redline.coordinator_helpers import CoordinatorHelper1  # Fixed import
 from .interfaces import Message, MessageRole
 from .metrics_helper import MetricsHelper
 
 
 class ReasoningFeedbackHelper:
     """
-    ReasoningFeedbackHelper for managing the reasoning and feedback loop.
+    Helper class for processing reasoning feedback.
     """
 
     def __init__(self):
@@ -63,8 +63,7 @@ class ReasoningFeedbackHelper:
         Args:
             processed_data (Any): Data after processing.
         """
-        # TODO: Implement feedback application
-        pass
+        await self.apply_changes(processed_data)
 
     async def analyze_bias(self):
         """

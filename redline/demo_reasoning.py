@@ -68,8 +68,8 @@ def main() -> None:
         for key, value in memory_stats.items():
             print(f"- {key}: {value}")
 
-    except Exception as e:
-        print(f"An error occurred during reasoning demonstration: {e}")
+    except SpecificException as e:
+        print(f"Specific error: {e}")
     finally:
         print("\nReasoning demonstration completed.")
 

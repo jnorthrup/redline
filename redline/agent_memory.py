@@ -222,11 +222,28 @@ class DefaultAgentMemory:
             "bias_corrections": len(self._bias_history),
         }
 
-    def receive_handoff(self, handoff_data: Dict[str, Any]) -> None:
-        """Process received handoff data from previous stage"""
-        self._current_handoff = handoff_data
-        if handoff_data.get("bias_corrections"):
-            self.apply_bias_correction(
-                handoff_data["bias_corrections"]["correction"],
-                handoff_data["bias_corrections"].get("confidence", 0.5),
-            )
+    def apply_bias_correction(self, correction, confidence, source):
+        """
+        Apply bias correction with detailed tracking.
+
+        Args:
+            correction (str): Bias correction instruction
+            confidence (float): Confidence in the correction (0.0-1.0)
+            source (Optional[str]): Origin of the bias correction
+        """
+        correction_entry = {
+            "correction": correction,
+            "timestamp": datetime.now(),
+            "confidence": confidence,
+            "source": source,
+        }
+        self._bias_history.append(correction_entry)
+
+        self.bias = correction
+
+        return {
+            "status": "applied",
+            "total_corrections": len(self._bias_history),
+            "current_bias": self.bias,
+            "confidence_score": confidence,
+        }

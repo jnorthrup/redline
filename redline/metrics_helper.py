@@ -1,8 +1,7 @@
 """
-MetricsHelper for collecting and managing system metrics.
+Helper module for managing metrics.
 """
 
-import asyncio
 import functools
 import time
 from collections import defaultdict
@@ -19,6 +18,7 @@ class MetricsHelper:
         self.stage_metrics: Dict[str, List[Dict[str, Any]]] = {}
         self.technical_debt_offset = 1.0
         self.tokens_used = 0
+        self.exec_start_time = None  # Moved attribute definition to __init__
         self.exec_metrics: Dict[str, Any] = {
             "execution_time": [],
             "success_count": 0,
@@ -59,6 +59,7 @@ class MetricsHelper:
 
     # Exec Metrics Methods
     def record_exec_start(self):
+        """Record the start time of execution."""
         self.exec_start_time = time.time()
 
     def record_exec_end(self, success: bool, error: Optional[str] = None):

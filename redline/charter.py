@@ -9,9 +9,9 @@ system, including models, connectors, and tournaments.
 from abc import ABC
 from typing import Any, Dict, List, Optional
 
-from .interfaces import AgentMemory  # Ensure correct import path
-from .interfaces import LLMResponse, Message, ModelConfig
-from .tournament_evaluation_helper import TournamentEvaluationHelper
+from redline.interfaces import AgentMemory
+from redline.interfaces import LLMResponse, Message, ModelConfig
+from redline.tournament_evaluation_helper import TournamentEvaluationHelper
 
 
 class AbstractCharter(ABC):

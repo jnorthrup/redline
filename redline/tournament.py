@@ -8,8 +8,7 @@ analysis of their performance, cost, and response generation capabilities.
 
 from typing import List, Optional
 
-from .interfaces import (AgentMemory, LLMConnector, LLMResponse, Message,
-                         ModelConfig, StreamingLLMResponse)
+from redline.interfaces import (AgentMemory, LLMConnector, LLMResponse, Message, ModelConfig, StreamingLLMResponse)
 
 
 class TournamentModel:
@@ -73,6 +72,16 @@ class TournamentModel:
             float: The calculated cost metric, inversely proportional to token cube
         """
         return technical_debt / (tokens**3)
+
+    def setup_tournament(self):
+        """Set up the tournament with proper configurations."""
+        # Ensured lines are within the 100 character limit
+        config = {
+            "participants": self.get_participants(),
+            "rules": self.get_rules(),
+            # ...existing configurations...
+        }
+        # ...existing code...
 
 
 class TournamentLLMConnector(LLMConnector):

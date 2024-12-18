@@ -7,7 +7,7 @@ reasoning and feedback loop capabilities.
 """
 import json
 import sys
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from redline.metrics_helper import MetricsHelper
 from redline.supervisor import SupervisorAgent

@@ -8,13 +8,12 @@ large language model (LLM) based agent systems.
 
 from typing import Any, Dict, List, Optional, Union
 
-from .agent_interaction_helper import AgentInteractionHelper
-from .charter import AbstractCharter
-from .interfaces import (AgentMemory, LLMConnector, LLMResponse, Message,
-                         ModelConfig, StreamingLLMResponse)
-from .metrics_helper import MetricsHelper  # Import MetricsHelper
-from .reasoning_feedback_helper import ReasoningFeedbackHelper
-
+from redline.agent_interaction_helper import AgentInteractionHelper
+from redline.charter import AbstractCharter
+from redline.interfaces import (AgentMemory, LLMConnector, LLMResponse, Message,
+                                ModelConfig, StreamingLLMResponse, Agent)
+from redline.metrics_helper import MetricsHelper  # Import MetricsHelper
+from redline.reasoning_feedback_helper import ReasoningFeedbackHelper
 
 class AbstractAgentInteraction(AbstractCharter):
     """
@@ -116,7 +115,6 @@ class AbstractAgentInteraction(AbstractCharter):
             "complexity_score": self.calculate_interaction_complexity(),
         }
 
-
 class ConversationalAgentInteraction(AbstractAgentInteraction):
     """
     Concrete implementation of an agent interaction system focused on conversational dynamics.
@@ -191,6 +189,5 @@ class ConversationalAgentInteraction(AbstractAgentInteraction):
         self.store_interaction(response_message)
 
         return response
-
 
 agent = Agent(model_type="type", model_name="name")  # Provided required arguments

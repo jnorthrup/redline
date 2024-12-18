@@ -10,7 +10,7 @@ from __future__ import annotations
 import abc
 import dataclasses
 import enum
-from typing import Any, AsyncGenerator, Dict, List, Optional, Protocol
+from typing import Any, AsyncGenerator, Dict, List, Optional, Protocol, Type
 
 
 class ModelType(enum.Enum):

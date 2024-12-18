@@ -5,7 +5,12 @@ Handles interactions with the OpenRouter service.
 """
 
 # Update import statements
-from processor import Processor
+from redline.processor import Processor
+from redline.cognitive_agent import CognitiveAgent
+from redline.planning_agent import PlanningAgent
+from redline.action_agent import ActionAgent
+from redline.feedback_agent import FeedbackAgent
+from typing import Dict, Any
 
 DEFAULT_MODEL = "qwen"  # Keep this reference
 

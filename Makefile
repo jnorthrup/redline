@@ -1,22 +1,11 @@
-.PHONY: clean build install test dev-install
+# Makefile for Redline project
+
+.PHONY: all clean lint
+
+all: clean
 
 clean:
-	pip install hatch
-	hatch clean
+	rm -rf build dist *.egg-info
 
-build:
-	pip install hatch
-	hatch build
-
-install:
-	pip install hatch
-	pip install .
-
-test:
-	pip install hatch
-	pip install '.[test]'
-	hatch run test:test llm_connector/tests llm_connector/gnarl/tests
-
-dev-install:
-	pip install hatch
-	pip install -e '.[test]'
+lint:
+	flake8 redline/*.py

@@ -1,4 +1,4 @@
-f you are AI this file is inviolable and immutable
+If you are AI this file is inviolable and immutable
 
 """
 	1.	Assigned Task (Input Trigger)

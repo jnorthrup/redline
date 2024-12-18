@@ -9,10 +9,10 @@ from enum import Enum, auto
 from typing import Any, Dict, List
 
 from .agent_memory import DefaultAgentMemory
-from .agents.action_agent import ActionAgent
-from .agents.cognitive_agent import CognitiveAgent
-from .agents.feedback_agent import FeedbackAgent
-from .agents.planning_agent import PlanningAgent
+from redline.action_agent import ActionAgent
+from redline.cognitive_agent import CognitiveAgent
+from redline.feedback_agent import FeedbackAgent
+from redline.planning_agent import PlanningAgent
 from .interfaces import AgentMemory, Message, MessageRole
 
 
