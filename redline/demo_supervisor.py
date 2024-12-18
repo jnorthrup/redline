@@ -18,6 +18,7 @@ class SupervisorDemo:
     """
     Demo class for showcasing supervisor agent capabilities with proper instrumentation.
     """
+
     def __init__(self):
         self.supervisor = SupervisorAgent()
         self.toolkit = AgentToolkit()
@@ -103,7 +104,9 @@ class SupervisorDemo:
             self.print_formatted_output("Task Analysis", task_analysis)
 
             while True:
-                feedback = input("\nProvide feedback (or 'finish' to complete): ").strip()
+                feedback = input(
+                    "\nProvide feedback (or 'finish' to complete): "
+                ).strip()
 
                 if feedback.lower() == "finish":
                     completion_status = await self.supervisor.finish_execution()
@@ -127,4 +130,5 @@ async def main():
 
 if __name__ == "__main__":
     import asyncio
+
     asyncio.run(main())

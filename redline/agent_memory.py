@@ -222,7 +222,6 @@ class DefaultAgentMemory:
             "bias_corrections": len(self._bias_history),
         }
 
-
     def receive_handoff(self, handoff_data: Dict[str, Any]) -> None:
         """Process received handoff data from previous stage"""
         self._current_handoff = handoff_data

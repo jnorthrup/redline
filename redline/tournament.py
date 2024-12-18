@@ -8,14 +8,8 @@ analysis of their performance, cost, and response generation capabilities.
 
 from typing import List, Optional
 
-from .interfaces import (
-    AgentMemory,
-    LLMConnector,
-    LLMResponse,
-    Message,
-    ModelConfig,
-    StreamingLLMResponse,
-)
+from .interfaces import (AgentMemory, LLMConnector, LLMResponse, Message,
+                         ModelConfig, StreamingLLMResponse)
 
 
 class TournamentModel:

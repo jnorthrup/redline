@@ -9,12 +9,8 @@ system, including models, connectors, and tournaments.
 from abc import ABC
 from typing import Any, Dict, List, Optional
 
-from .interfaces import (  # Ensure correct import path
-    AgentMemory,
-    LLMResponse,
-    Message,
-    ModelConfig,
-)
+from .interfaces import AgentMemory  # Ensure correct import path
+from .interfaces import LLMResponse, Message, ModelConfig
 from .tournament_evaluation_helper import TournamentEvaluationHelper
 
 
