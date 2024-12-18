@@ -74,11 +74,10 @@ class CoordinatorHelper1:
             content="Analyzing task",
             complexity_score=0.7
         )
-        self.agent_memory.store_reasoning_step(reasoning_message)
+        await self.agent_memory.store_reasoning_step_async(reasoning_message)
         
         # Process through cognitive agent
         return await self.cognitive_agent.process({"message": reasoning_message})
-
     def process_feedback(self, feedback: str) -> Dict[str, Any]:
         """
         Process user or system feedback to refine reasoning.

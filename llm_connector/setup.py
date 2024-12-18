@@ -5,11 +5,16 @@ setup(
     version='0.1.0',
     packages=find_packages(),
     install_requires=[
-        # Add your dependencies here
+        'asyncio',
+        'typing',
+        'statistics'
     ],
     entry_points={
         'console_scripts': [
-            'llm-connector=llm_connector.gnarl.supervisor:main',
+            'llm-connector=llm_connector.main:main',
+            'llm-connector-supervisor=llm_connector.gnarl.supervisor:main'
         ],
     },
+    package_dir={'': '.'},
+    python_requires='>=3.7',
 )

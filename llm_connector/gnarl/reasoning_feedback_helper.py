@@ -111,7 +111,7 @@ class ReasoningFeedbackHelper:
         )
         # TODO: Implement agent memory storage and feedback processing
         return {
-            "message": feedback_message,
+            "message": repr(feedback_message),
             "complexity": feedback_message.complexity_score
         }
 
