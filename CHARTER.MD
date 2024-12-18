@@ -40,14 +40,12 @@ Additional Agents:
 
   Compresses and encodes information for efficient processing, assisting in reducing complexity during data transmission.
 """
- 
+
 
 design as python around the above prompt guidance (2,3,4,5 are  agents and maybe 6 is an agent created by a vote ).  agents are reused and have privately scoped tools and memories.  Agents have an upstream and downstream handoff.  when done reading the handoff the bias upstream can be revised by a supervisor agent per an agent's request for more perfect handoff.
 
-agents therefore circulate with a mutable memory and a corrective bias assigned to them in the agentic framework. 
+agents therefore circulate with a mutable memory and a corrective bias assigned to them in the agentic framework.
 
-reward systems can be selected in the framework to create or limit agentic models based on tools bias  and model variations 
+reward systems can be selected in the framework to create or limit agentic models based on tools bias  and model variations
 
 design model cost metrics and selectable model,agent,etc. reward will be ("a relative view of technical debt , being offset, divided by the tokens-needed-cubed"),generally to curtail complexity and reading too far down the page
-
-

@@ -2,21 +2,23 @@
 MemoryManagementHelper for comprehensive memory management.
 """
 
-from .metrics_helper import MetricsHelper
 from typing import List, Optional
+
 from .interfaces import Message, create_system_message
+from .metrics_helper import MetricsHelper
+
 
 class MemoryManagementHelper:
     """
     Helper class for managing memory storage and retrieval.
     """
-    
+
     def __init__(self):
         # Initialize memory structures
         self.memory: List[Message] = []
         self.metrics_helper = MetricsHelper()  # Initialize MetricsHelper
-        # TODO 
-    
+        # TODO
+
     @MetricsHelper.async_metrics_decorator
     async def manage_memory(self):
         """
@@ -26,7 +28,7 @@ class MemoryManagementHelper:
         default_message = create_system_message("Memory management initialization")
         await self.store_memory_async(default_message)
         await self.retrieve_memory_async()
-    
+
     @MetricsHelper.async_metrics_decorator
     async def store_memory_async(self, message: Message):
         """
@@ -34,7 +36,7 @@ class MemoryManagementHelper:
         """
         self.memory.append(message)
         await self.prune_memory_async()
-    
+
     @MetricsHelper.async_metrics_decorator
     async def retrieve_memory_async(self, limit: Optional[int] = None) -> List[Message]:
         """
@@ -43,7 +45,7 @@ class MemoryManagementHelper:
         if limit:
             return self.memory[-limit:]
         return self.memory
-    
+
     @MetricsHelper.async_metrics_decorator
     async def prune_memory_async(self):
         """
@@ -52,7 +54,7 @@ class MemoryManagementHelper:
         max_size = 100  # Example limit
         if len(self.memory) > max_size:
             self.memory = self.memory[-max_size:]
-    
+
     def get_memory_stats(self):
         """
         Retrieve memory usage statistics.

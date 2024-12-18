@@ -7,14 +7,14 @@ system, including models, connectors, and tournaments.
 """
 
 from abc import ABC
-from typing import List, Optional, Dict, Any
+from typing import Any, Dict, List, Optional
 
-from .interfaces import (
+from .interfaces import (  # Ensure correct import path
+    AgentMemory,
+    LLMResponse,
     Message,
     ModelConfig,
-    AgentMemory,
-    LLMResponse
-)  # Ensure correct import path
+)
 from .tournament_evaluation_helper import TournamentEvaluationHelper
 
 
@@ -171,7 +171,7 @@ class AbstractTournament(AbstractCharter):
         Run a tournament with the given connectors.
 
         Args:
-            connectors (List[AbstractConnector]): List of connectors to participate 
+            connectors (List[AbstractConnector]): List of connectors to participate
                 in the tournament
             messages (List[Message]): Conversation history and current prompt
             config (ModelConfig): Configuration for the tournament
@@ -180,7 +180,9 @@ class AbstractTournament(AbstractCharter):
         Raises:
             NotImplementedError: Must be implemented by subclasses.
         """
-        return self.tournament_helper.run_tournament(connectors, messages, config, agent_memory)
+        return self.tournament_helper.run_tournament(
+            connectors, messages, config, agent_memory
+        )
 
     def get_tournament_results(self) -> dict:
         """

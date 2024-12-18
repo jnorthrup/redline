@@ -1,17 +1,18 @@
 """
 Agent Memory implementation for the GNARL (Generative Neural Adaptive Reasoning Layer) system.
 
-Provides a concrete implementation of the AgentMemory protocol with advanced 
+Provides a concrete implementation of the AgentMemory protocol with advanced
 tracking capabilities for reasoning history, technical debt, and bias correction.
 """
 
+import statistics  # Added missing import
 from datetime import datetime
 from typing import Any, Dict, List, Optional
-import statistics  # Added missing import
 
 from .interfaces import Message, MessageRole
 from .memory_management_helper import MemoryManagementHelper
 from .metrics_helper import MetricsHelper
+
 
 class DefaultAgentMemory:
     """
@@ -92,9 +93,13 @@ class DefaultAgentMemory:
             float: Comprehensive technical debt score
         """
         complexity_factor = self.reasoning_complexity
-        memory_size_penalty = len(self.memory_helper.get_all_messages()) / self.memory_capacity
+        memory_size_penalty = (
+            len(self.memory_helper.get_all_messages()) / self.memory_capacity
+        )
         bias_correction_frequency = (
-            len(self._bias_history) / len(self.memory_helper.get_all_messages()) if self.memory_helper.get_all_messages() else 0
+            len(self._bias_history) / len(self.memory_helper.get_all_messages())
+            if self.memory_helper.get_all_messages()
+            else 0
         )
         roles = [msg.role for msg in self.memory_helper.get_all_messages()]
         role_diversity = len(set(roles)) / len(MessageRole)
@@ -166,7 +171,7 @@ class DefaultAgentMemory:
             "stage_result": stage_result,
             "memory_state": self._get_base_stats(),
             "technical_debt": self.calculate_technical_debt(),
-            "bias_corrections": self._bias_history[-1] if self._bias_history else None
+            "bias_corrections": self._bias_history[-1] if self._bias_history else None,
         }
         self._current_handoff = handoff
         return handoff
@@ -182,13 +187,13 @@ class DefaultAgentMemory:
         if handoff_data.get("bias_corrections"):
             self.apply_bias_correction(
                 handoff_data["bias_corrections"]["correction"],
-                handoff_data["bias_corrections"].get("confidence", 0.5)
+                handoff_data["bias_corrections"].get("confidence", 0.5),
             )
 
     def _get_base_stats(self) -> Dict[str, Any]:
         """
         Get base memory statistics without handoff data.
-        
+
         Returns:
             Dict with base memory metrics
         """
@@ -217,16 +222,6 @@ class DefaultAgentMemory:
             "bias_corrections": len(self._bias_history),
         }
 
-    def prepare_handoff(self, stage_result: Dict[str, Any]) -> Dict[str, Any]:
-        """Prepare memory state for handoff between agents"""
-        handoff = {
-            "stage_result": stage_result,
-            "memory_state": self._get_base_stats(),
-            "technical_debt": self.calculate_technical_debt(),
-            "bias_corrections": self._bias_history[-1] if self._bias_history else None
-        }
-        self._current_handoff = handoff
-        return handoff
 
     def receive_handoff(self, handoff_data: Dict[str, Any]) -> None:
         """Process received handoff data from previous stage"""
@@ -234,5 +229,5 @@ class DefaultAgentMemory:
         if handoff_data.get("bias_corrections"):
             self.apply_bias_correction(
                 handoff_data["bias_corrections"]["correction"],
-                handoff_data["bias_corrections"].get("confidence", 0.5)
+                handoff_data["bias_corrections"].get("confidence", 0.5),
             )

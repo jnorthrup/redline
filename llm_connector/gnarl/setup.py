@@ -8,12 +8,12 @@ with open("README.md", encoding="utf-8") as f:
     long_description = f.read()
 
 setup(
-    name="gnarl",
+    name="redline",
     version="0.1.0",
     packages=find_packages(),
     entry_points={
         "console_scripts": [
-            "gnarl_supervisor_demo=gnarl.demo_supervisor:interactive_demo",
+            "redline_supervisor_demo=redline.demo_supervisor:interactive_demo",
         ],
     },
     install_requires=[

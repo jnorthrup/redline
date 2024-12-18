@@ -1,18 +1,20 @@
 """
 Supervisor Agent for the GNARL (Generative Neural Adaptive Reasoning Layer) system.
 
-Implements the core reasoning and feedback loop mechanism for 
+Implements the core reasoning and feedback loop mechanism for
 adaptive, iterative agent-based reasoning.
 """
 
 from enum import Enum, auto
 from typing import Any, Dict, List
+
 from .agent_memory import DefaultAgentMemory
-from .interfaces import AgentMemory, Message, MessageRole
-from .agents.cognitive_agent import CognitiveAgent
-from .agents.planning_agent import PlanningAgent
 from .agents.action_agent import ActionAgent
+from .agents.cognitive_agent import CognitiveAgent
 from .agents.feedback_agent import FeedbackAgent
+from .agents.planning_agent import PlanningAgent
+from .interfaces import AgentMemory, Message, MessageRole
+
 
 class ReasoningStage(Enum):
     """
@@ -28,6 +30,7 @@ class ReasoningStage(Enum):
     OBSERVATION_COLLECTION = auto()
     ITERATIVE_REFINEMENT = auto()
     COMPLETION = auto()
+
 
 class SupervisorAgent:
     """
@@ -51,24 +54,24 @@ class SupervisorAgent:
 
     async def process_task(self, task: str) -> Dict[str, Any]:
         """Process task through charter-defined stages using agent pipeline."""
-        
+
         # Stage 1: Input Trigger
         initial_result = self._process_initial_trigger(task)
-        
+
         # Stage 2: Cognitive Agent
         cognitive_result = await self.cognitive_agent.process(initial_result)
         cognitive_handoff = self.agent_memory.prepare_handoff(cognitive_result)
-        
+
         # Stage 3: Planning Agent
         self.agent_memory.receive_handoff(cognitive_handoff)
         planning_result = await self.planning_agent.process(cognitive_result)
         planning_handoff = self.agent_memory.prepare_handoff(planning_result)
-        
+
         # Stage 4: Action Agent
         self.agent_memory.receive_handoff(planning_handoff)
         action_result = await self.action_agent.process(planning_result)
         action_handoff = self.agent_memory.prepare_handoff(action_result)
-        
+
         # Stage 5: Feedback Agent
         self.agent_memory.receive_handoff(action_handoff)
         return await self.feedback_agent.process(action_result)
@@ -93,11 +96,13 @@ class SupervisorAgent:
 
         # Process through cognitive reasoning agent
         reasoning_insights = self._process_cognitive_stage()
-        self.agent_memory.store_reasoning_step(Message(
-            role=MessageRole.REASONING,
-            content=reasoning_insights,
-            complexity_score=0.8,
-        ))
+        self.agent_memory.store_reasoning_step(
+            Message(
+                role=MessageRole.REASONING,
+                content=reasoning_insights,
+                complexity_score=0.8,
+            )
+        )
 
         return {
             "stage": self.current_stage.name,
@@ -253,6 +258,7 @@ def main():
     task = "Example task to process"
     result = supervisor.process_task(task)
     print(result)
+
 
 if __name__ == "__main__":
     main()

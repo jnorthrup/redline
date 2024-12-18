@@ -1,7 +1,7 @@
 """
 Test module for LLM Connector interfaces.
 
-This module provides type checking and basic interface validation 
+This module provides type checking and basic interface validation
 to ensure the core protocols are correctly defined.
 """
 
@@ -9,9 +9,15 @@ import typing
 
 import pytest
 
-from llm_connector.interfaces import (LLMConnector, LLMResponse, Message,
-                                      MessageRole, ModelConfig, ModelType,
-                                      StreamingLLMResponse)
+from llm_connector.gnarl.interfaces import (
+    LLMConnector,
+    LLMResponse,
+    Message,
+    MessageRole,
+    ModelConfig,
+    ModelType,
+    StreamingLLMResponse,
+)
 
 
 def test_model_config_creation():
@@ -114,25 +120,22 @@ class MockLLMConnector:
         return True
 
 
-def test_mock_connector():
+@pytest.mark.asyncio
+async def test_mock_connector():
     """
     Demonstrate a basic usage of a mock LLM connector.
     """
     connector = MockLLMConnector()
 
-    async def test_connector():
-        # Test generate method
-        messages = [Message(role=MessageRole.USER, content="Hello")]
-        response = await connector.generate(messages)
-        assert response.text == "Mock response"
+    # Test generate method
+    messages = [Message(role=MessageRole.USER, content="Hello")]
+    response = await connector.generate(messages)
+    assert response.text == "Mock response"
 
-        # Test streaming method
-        stream_response = await connector.generate_stream(messages)
-        collected = []
-        async for token in stream_response:
-            collected.append(token)
+    # Test streaming method
+    stream_response = await connector.generate_stream(messages)
+    collected = []
+    async for token in stream_response:
+        collected.append(token)
 
-        assert "".join(collected) == "Mock streaming response"
-
-    # Note: In a real test, you'd use pytest.asyncio.run() or similar
-    # This is just a demonstration of the interface
+    assert "".join(collected) == "Mock streaming response"

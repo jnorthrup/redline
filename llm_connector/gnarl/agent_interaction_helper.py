@@ -2,9 +2,11 @@
 AgentInteractionHelper for managing agent interactions.
 """
 
-from typing import Dict, Any
-from .metrics_helper import MetricsHelper
+from typing import Any, Dict
+
 from .interfaces import Message, MessageRole
+from .metrics_helper import MetricsHelper
+
 
 class AgentInteractionHelper:
     """
@@ -14,7 +16,7 @@ class AgentInteractionHelper:
     def __init__(self):
         # Initialize agent interaction settings
         self.metrics_helper = MetricsHelper()
-        # TODO 
+        # TODO
 
     def manage_agent_interactions(self):
         """
@@ -23,7 +25,9 @@ class AgentInteractionHelper:
         self.initialize_agents()
         self.coordinate_agents()
         # Log the interaction
-        self.metrics_helper.record_syslog_entry(level="INFO", message="Managed agent interactions.")
+        self.metrics_helper.record_syslog_entry(
+            level="INFO", message="Managed agent interactions."
+        )
 
     def communicate_with_agent(self, message):
         """
@@ -35,9 +39,13 @@ class AgentInteractionHelper:
         try:
             response = self.send_message(message)
             self.receive_message(response)
-            self.metrics_helper.record_syslog_entry(level="INFO", message="Successful communication with agent.")
+            self.metrics_helper.record_syslog_entry(
+                level="INFO", message="Successful communication with agent."
+            )
         except Exception as e:
-            self.metrics_helper.record_syslog_entry(level="ERROR", message=f"Communication failed: {str(e)}")
+            self.metrics_helper.record_syslog_entry(
+                level="ERROR", message=f"Communication failed: {str(e)}"
+            )
 
     def initialize_agents(self):
         """
@@ -60,7 +68,9 @@ class AgentInteractionHelper:
         Args:
             message (Message): The message to send.
         """
-        self.metrics_helper.record_syslog_entry(level="DEBUG", message=f"Sending message: {message.content}")
+        self.metrics_helper.record_syslog_entry(
+            level="DEBUG", message=f"Sending message: {message.content}"
+        )
         # ...implementation...
         return message
 
@@ -71,7 +81,9 @@ class AgentInteractionHelper:
         Args:
             response (Message): The received message.
         """
-        self.metrics_helper.record_syslog_entry(level="DEBUG", message=f"Received response: {response.content}")
+        self.metrics_helper.record_syslog_entry(
+            level="DEBUG", message=f"Received response: {response.content}"
+        )
         # ...implementation...
 
     # ...other methods related to agent interactions...
@@ -85,10 +97,12 @@ class AgentInteractionHelper:
         # ...implementation...
         pass
 
+
 class InteractionHelper:
     """
     Additional interaction helper class.
     """
+
     def interact(self):
         """
         Interaction method.

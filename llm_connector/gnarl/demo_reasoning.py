@@ -61,7 +61,7 @@ def main() -> None:
 
         # Apply bias correction
         agent_memory.apply_bias_correction("Reduce unnecessary complexity")
-        
+
         # Retrieve and display bias corrections
         memory_stats = agent_memory.get_memory_stats()
         print("\nMemory Statistics:")

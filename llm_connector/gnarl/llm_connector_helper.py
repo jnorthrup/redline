@@ -4,19 +4,22 @@ LLMConnectorHelper for interacting with Large Language Models.
 
 import typing  # Fixed import order
 from typing import List
+
+from .interfaces import LLMResponse, Message
 from .metrics_helper import MetricsHelper
-from .interfaces import Message, LLMResponse
+
 
 class LLMConnectorHelper:
     """
     Helper class for LLM Connector functionalities.
     """
+
     def __init__(self, config):
         # Initialize LLM connector with configuration
         self.config = config
         self.metrics_helper = MetricsHelper()
-        # TODO 
-    
+        # TODO
+
     @MetricsHelper.async_metrics_decorator
     async def interact_with_llm(self, prompt: str) -> LLMResponse:
         """
@@ -30,7 +33,7 @@ class LLMConnectorHelper:
         except Exception as e:
             self.metrics_helper.record_exec_end(success=False, error=str(e))
             raise e
-    
+
     @MetricsHelper.async_metrics_decorator
     async def generate_response(self, messages: List[Message]) -> LLMResponse:
         """
@@ -45,7 +48,7 @@ class LLMConnectorHelper:
         except Exception as e:
             self.metrics_helper.record_exec_end(success=False, error=str(e))
             raise e
-    
+
     async def send_prompt(self, prompt: str) -> LLMResponse:
         """
         Send a prompt to the LLM.
@@ -70,16 +73,12 @@ class LLMConnectorHelper:
         """
         combined = "\n".join([msg.content for msg in messages])
         return combined
-        return combined
 
     async def some_async_method(self):
-        # TODO 
-        pass
-
-    # ...other methods related to LLM interaction...
-
-    async def some_async_method(self):
-        # TODO 
+        """
+        Asynchronous method for LLM interaction.
+        """
+        # TODO: Implement async LLM interaction
         pass
 
     # ...other methods related to LLM interaction...

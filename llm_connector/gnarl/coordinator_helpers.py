@@ -3,17 +3,17 @@ Module for coordinator helper classes.
 """
 
 import logging
-from typing import Dict, Any
 from enum import Enum
-from .interfaces import (
-    AgentMemory, 
-    Message, 
-    MessageRole
-)
+from typing import Any, Dict
+
+from .interfaces import AgentMemory, Message, MessageRole
 from .prompt_manager import PromptManager
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
 
 class ReasoningStage(Enum):
     INITIAL_REASONING = "Initial Reasoning"
@@ -31,10 +31,10 @@ class CoordinatorHelper1:
     def _calculate_feedback_complexity(self, feedback: str) -> float:
         """
         Calculate the complexity of the feedback.
-        
+
         Args:
             feedback (str): Feedback to analyze.
-        
+
         Returns:
             float: Complexity score.
         """
@@ -43,7 +43,7 @@ class CoordinatorHelper1:
     def _identify_reasoning_gaps(self) -> list:
         """
         Identify potential reasoning gaps.
-        
+
         Returns:
             list: Identified reasoning gaps.
         """
@@ -52,7 +52,7 @@ class CoordinatorHelper1:
     def _derive_initial_findings(self) -> dict:
         """
         Derive initial findings from reasoning.
-        
+
         Returns:
             dict: Initial findings.
         """
@@ -61,7 +61,7 @@ class CoordinatorHelper1:
     def _derive_refinement_actions(self) -> list:
         """
         Derive recommended refinement actions.
-        
+
         Returns:
             list: Recommended actions.
         """
@@ -70,14 +70,13 @@ class CoordinatorHelper1:
     async def perform_cognitive_reasoning(self) -> Dict[str, Any]:
         """Implement cognitive reasoning through proper agent pipeline"""
         reasoning_message = Message(
-            role=MessageRole.REASONING,
-            content="Analyzing task",
-            complexity_score=0.7
+            role=MessageRole.REASONING, content="Analyzing task", complexity_score=0.7
         )
         await self.agent_memory.store_reasoning_step_async(reasoning_message)
-        
+
         # Process through cognitive agent
         return await self.cognitive_agent.process({"message": reasoning_message})
+
     def process_feedback(self, feedback: str) -> Dict[str, Any]:
         """
         Process user or system feedback to refine reasoning.
@@ -114,6 +113,7 @@ class CoordinatorHelper1:
             "recommended_actions": self._derive_refinement_actions(),
         }
 
+
 class CoordinatorHelper2:
     def __init__(self, agent_memory: AgentMemory):
         self.agent_memory = agent_memory
@@ -128,17 +128,20 @@ class CoordinatorHelper2:
     def fan_out_tasks(self, tasks: list):
         """
         Distribute tasks across multiple reward layers.
-        
+
         Args:
             tasks (list): List of tasks to distribute.
         """
         for task in tasks:
             for layer in self.reward_layers:
-                self.agent_memory.store_reasoning_step(Message(
-                    role=MessageRole.REWARD_MEASUREMENT,
-                    content=f"Task {task} assigned to {layer}",
-                    complexity_score=0.5,
-                ))
+                self.agent_memory.store_reasoning_step(
+                    Message(
+                        role=MessageRole.REWARD_MEASUREMENT,
+                        content=f"Task {task} assigned to {layer}",
+                        complexity_score=0.5,
+                    )
+                )
+
 
 class CoordinatorHelper3:
     def __init__(self, agent_memory: AgentMemory):
@@ -147,7 +150,7 @@ class CoordinatorHelper3:
     def fork_join_handoffs(self, task):
         """
         Handle fork and join operations for a given task, with intelligent context handling.
-        
+
         Args:
             task (str): The task to process.
         """
@@ -155,21 +158,28 @@ class CoordinatorHelper3:
         sub_tasks = [f"{task}_sub1", f"{task}_sub2"]
         for sub_task in sub_tasks:
             # Agents perform mutations and context perfection
-            self.agent_memory.mutate_memory({'task': sub_task})
+            self.agent_memory.mutate_memory({"task": sub_task})
             self.agent_memory.perform_context_perfection()
-            self.agent_memory.store_reasoning_step(Message(
-                role=MessageRole.REWARD_MEASUREMENT,
-                content=f"Forked into {sub_task} with enhanced context",
-                complexity_score=0.6,
-            ))
+            self.agent_memory.store_reasoning_step(
+                Message(
+                    role=MessageRole.REWARD_MEASUREMENT,
+                    content=f"Forked into {sub_task} with enhanced context",
+                    complexity_score=0.6,
+                )
+            )
         # Join
         self.agent_memory.perform_context_perfection()
-        aggregated_result = f"Aggregated results of {', '.join(sub_tasks)} with improved context"
-        self.agent_memory.store_reasoning_step(Message(
-            role=MessageRole.REWARD_MEASUREMENT,
-            content=aggregated_result,
-            complexity_score=0.7,
-        ))
+        aggregated_result = (
+            f"Aggregated results of {', '.join(sub_tasks)} with improved context"
+        )
+        self.agent_memory.store_reasoning_step(
+            Message(
+                role=MessageRole.REWARD_MEASUREMENT,
+                content=aggregated_result,
+                complexity_score=0.7,
+            )
+        )
+
 
 class CoordinatorHelper4:
     def __init__(self, agent_memory: AgentMemory):
@@ -178,16 +188,19 @@ class CoordinatorHelper4:
     def evaluate_rewards(self, metrics: Dict[str, Any]):
         """
         Evaluate rewards based on multiple metrics.
-        
+
         Args:
             metrics (Dict[str, Any]): Metrics for evaluation.
         """
         for metric, value in metrics.items():
-            self.agent_memory.store_reasoning_step(Message(
-                role=MessageRole.REWARD_MEASUREMENT,
-                content=f"Evaluating {metric}: {value}",
-                complexity_score=0.4,
-            ))
+            self.agent_memory.store_reasoning_step(
+                Message(
+                    role=MessageRole.REWARD_MEASUREMENT,
+                    content=f"Evaluating {metric}: {value}",
+                    complexity_score=0.4,
+                )
+            )
+
 
 class CoordinatorHelper5:
     def __init__(self, agent_memory: AgentMemory):
@@ -198,11 +211,14 @@ class CoordinatorHelper5:
         Aggregate rewards from different layers.
         """
         aggregated = self.agent_memory.calculate_technical_debt()
-        self.agent_memory.store_reasoning_step(Message(
-            role=MessageRole.REWARD_MEASUREMENT,
-            content=f"Aggregated technical debt: {aggregated}",
-            complexity_score=0.8,
-        ))
+        self.agent_memory.store_reasoning_step(
+            Message(
+                role=MessageRole.REWARD_MEASUREMENT,
+                content=f"Aggregated technical debt: {aggregated}",
+                complexity_score=0.8,
+            )
+        )
+
 
 class CoordinatorHelper6:
     def __init__(self, agent_memory: AgentMemory):
@@ -213,11 +229,14 @@ class CoordinatorHelper6:
         Generate a report of all reward measurements.
         """
         report = self.agent_memory.generate_report()
-        self.agent_memory.store_reasoning_step(Message(
-            role=MessageRole.REWARD_MEASUREMENT,
-            content=f"Reward Report: {report}",
-            complexity_score=0.9,
-        ))
+        self.agent_memory.store_reasoning_step(
+            Message(
+                role=MessageRole.REWARD_MEASUREMENT,
+                content=f"Reward Report: {report}",
+                complexity_score=0.9,
+            )
+        )
+
 
 class CoordinatorHelper7:
     def __init__(self, agent_memory: AgentMemory):
@@ -227,55 +246,64 @@ class CoordinatorHelper7:
     def monitor_console_output(self, output: str):
         """
         Monitor console outputs for runaway listings and assign rewards.
-        
+
         Args:
             output (str): The console output to monitor.
         """
         if len(output) > 1000:  # Threshold for runaway listing
-            self.agent_memory.store_reasoning_step(Message(
-                role=MessageRole.REWARD_MEASUREMENT,
-                content="Runaway console listing detected.",
-                complexity_score=1.0,
-            ))
+            self.agent_memory.store_reasoning_step(
+                Message(
+                    role=MessageRole.REWARD_MEASUREMENT,
+                    content="Runaway console listing detected.",
+                    complexity_score=1.0,
+                )
+            )
             self.adjust_trust_level(up=False)
         else:
-            self.agent_memory.store_reasoning_step(Message(
-                role=MessageRole.REWARD_MEASUREMENT,
-                content="Console output within acceptable limits.",
-                complexity_score=0.5,
-            ))
+            self.agent_memory.store_reasoning_step(
+                Message(
+                    role=MessageRole.REWARD_MEASUREMENT,
+                    content="Console output within acceptable limits.",
+                    complexity_score=0.5,
+                )
+            )
             self.adjust_trust_level(up=True)
 
     def adjust_trust_level(self, up: bool):
         """
         Adjust trust level based on console output behavior.
-        
+
         Args:
             up (bool): True to increase trust, False to decrease.
         """
         if up:
             self.trust_level = min(self.trust_level + 1, 5)  # Max trust level
-            self.agent_memory.store_reasoning_step(Message(
-                role=MessageRole.REWARD_MEASUREMENT,
-                content=f"Trust level increased to {self.trust_level}.",
-                complexity_score=0.3,
-            ))
+            self.agent_memory.store_reasoning_step(
+                Message(
+                    role=MessageRole.REWARD_MEASUREMENT,
+                    content=f"Trust level increased to {self.trust_level}.",
+                    complexity_score=0.3,
+                )
+            )
         else:
             self.trust_level = max(self.trust_level - 1, 1)  # Min trust level
-            self.agent_memory.store_reasoning_step(Message(
-                role=MessageRole.REWARD_MEASUREMENT,
-                content=f"Trust level decreased to {self.trust_level}.",
-                complexity_score=0.3,
-            ))
+            self.agent_memory.store_reasoning_step(
+                Message(
+                    role=MessageRole.REWARD_MEASUREMENT,
+                    content=f"Trust level decreased to {self.trust_level}.",
+                    complexity_score=0.3,
+                )
+            )
 
     def get_token_cost(self) -> float:
         """
         Calculate token costs based on current trust level.
-        
+
         Returns:
             float: The token cost multiplier.
         """
         return 1.0 + (self.trust_level - 1) * 0.2  # Example scaling
+
 
 if __name__ == "__main__":
     logging.info("Starting coordinator_helpers module.")
@@ -284,14 +312,14 @@ if __name__ == "__main__":
         coordinator = CoordinatorHelper1(agent_memory)
         reasoning_output = coordinator.perform_cognitive_reasoning()
         print(reasoning_output)
-        
+
         models = query_openrouter()
         print(f"Available Models: {models}")
-        
+
         feedback = "Further context is needed on the implementation details."
         feedback_output = coordinator.process_feedback(feedback)
         print(feedback_output)
-        
+
         coordinator3 = CoordinatorHelper3(agent_memory)
         coordinator3.fork_join_handoffs("main_task")
 

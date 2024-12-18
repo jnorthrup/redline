@@ -1,2 +1,2 @@
 [console_scripts]
-llm-connector = llm_connector.gnarl.supervisor:main
+llm-connector = llm_connector.redline.supervisor:main

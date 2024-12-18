@@ -1,15 +1,17 @@
-import sys
 import logging
-from typing import Dict, Any
+import sys
+from typing import Any, Dict
 
-from gnarl.metrics_helper import MetricsHelper
-from gnarl.tools.toolkit import AgentToolkit
-from gnarl.supervisor import SupervisorAgent
+from redline.metrics_helper import MetricsHelper
+from redline.supervisor import SupervisorAgent
+from redline.tools.toolkit import AgentToolkit
+
 
 class SupervisorDemo:
     """
     Demo class for showcasing supervisor agent capabilities with proper instrumentation.
     """
+
     def __init__(self):
         self.supervisor = SupervisorAgent()
         self.toolkit = AgentToolkit()
@@ -93,7 +95,9 @@ class SupervisorDemo:
             if task.startswith("assess "):
                 code = task[7:]
                 assessment_result = await self.supervisor.assess_code_alignment(code)
-                self.print_formatted_output("Code Alignment Assessment", assessment_result)
+                self.print_formatted_output(
+                    "Code Alignment Assessment", assessment_result
+                )
                 continue
 
             print("\n--- Processing Task ---")
@@ -117,6 +121,7 @@ class SupervisorDemo:
                 feedback_result = await self.process_feedback(feedback)
                 self.print_formatted_output("Feedback Result", feedback_result)
 
+
 async def main():
     """Main entry point for the demo."""
     demo = SupervisorDemo()
@@ -126,7 +131,9 @@ async def main():
         print("\n\nDemo interrupted. Exiting.")
         sys.exit(0)
 
+
 if __name__ == "__main__":
     import asyncio
     import json
+
     asyncio.run(main())

@@ -48,3 +48,6 @@ env/
 
 # LLM generated unwanted files
 llm_output/
+build
+llm_connector/__pycache__
+__pycache__

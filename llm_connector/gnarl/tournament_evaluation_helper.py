@@ -4,15 +4,16 @@ TournamentEvaluationHelper for managing tournament evaluation.
 
 from .metrics_helper import MetricsHelper
 
+
 class TournamentEvaluationHelper:
     """
     Helper class for managing tournament evaluation.
     """
-    
+
     def __init__(self):
         # Initialize tournament settings
         self.metrics_helper = MetricsHelper()
-        # TODO 
+        # TODO
 
     async def manage_tournament_evaluation(self):
         """

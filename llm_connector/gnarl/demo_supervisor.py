@@ -2,16 +2,16 @@
 """
 Demonstration script for the GNARL Supervisor Agent.
 
-This script provides an interactive demo of the supervisor agent's 
+This script provides an interactive demo of the supervisor agent's
 reasoning and feedback loop capabilities.
 """
 import json
 import sys
 from typing import Any, Dict, Optional
 
-from gnarl.supervisor import SupervisorAgent
-from gnarl.metrics_helper import MetricsHelper
-from gnarl.tools.toolkit import AgentToolkit
+from redline.metrics_helper import MetricsHelper
+from redline.supervisor import SupervisorAgent
+from redline.tools.toolkit import AgentToolkit
 
 
 class SupervisorDemo:
@@ -72,18 +72,18 @@ class SupervisorDemo:
             self.metrics.record_metric("feedback_processing", 0.0)
             raise
 
-    def interactive_demo(self) -> None:
-    """
-    Interactively demonstrate the Supervisor Agent's feedback loop.
+    async def interactive_demo(self) -> None:
+        """
+        Interactively demonstrate the Supervisor Agent's feedback loop.
 
-    Allows users to:
-    - Enter tasks
-    - Provide feedback
-    - Observe reasoning process
-    - Complete or quit tasks
-    - Run shell commands
-    - Assess code alignment
-    """
+        Allows users to:
+        - Enter tasks
+        - Provide feedback
+        - Observe reasoning process
+        - Complete or quit tasks
+        - Run shell commands
+        - Assess code alignment
+        """
         print("GNARL Supervisor Agent Demo")
         print("-----------------------------------")
         print("Instructions:")
@@ -97,7 +97,6 @@ class SupervisorDemo:
 
             if task.lower() == "quit":
                 break
-
 
             print("\n--- Processing Task ---")
             task_analysis = await self.process_task(task)

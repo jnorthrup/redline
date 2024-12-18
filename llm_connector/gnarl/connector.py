@@ -5,11 +5,15 @@ This module provides base classes and interfaces for LLM (Large Language Model)
 connectors, response handling, and agent memory management.
 """
 
-from typing import List, Optional, Any, AsyncGenerator, Dict
+from typing import Any, AsyncGenerator, Dict, List, Optional
 
 from .interfaces import (
-    AgentMemory, LLMConnector, LLMResponse,
-    Message, ModelConfig, StreamingLLMResponse
+    AgentMemory,
+    LLMConnector,
+    LLMResponse,
+    Message,
+    ModelConfig,
+    StreamingLLMResponse,
 )
 
 
@@ -123,9 +127,7 @@ class SimpleAgentMemory(AgentMemory):
         self.reasoning_steps.append(message)
 
     def get_reasoning_history(
-        self, 
-        limit: Optional[int] = None, 
-        filter_fn: Optional[callable] = None
+        self, limit: Optional[int] = None, filter_fn: Optional[callable] = None
     ) -> List[Message]:
         """
         Retrieve reasoning history.
@@ -140,7 +142,7 @@ class SimpleAgentMemory(AgentMemory):
         steps = self.reasoning_steps
         if filter_fn:
             steps = [step for step in steps if filter_fn(step)]
-        
+
         if limit is not None:
             return steps[-limit:]
         return steps
@@ -159,9 +161,7 @@ class SimpleAgentMemory(AgentMemory):
         )
 
     def apply_bias_correction(
-        self, 
-        correction: str, 
-        context: Optional[Dict[str, Any]] = None
+        self, correction: str, context: Optional[Dict[str, Any]] = None
     ) -> None:
         """
         Apply bias correction.
@@ -183,7 +183,7 @@ class SimpleAgentMemory(AgentMemory):
         return {
             "total_steps": len(self.reasoning_steps),
             "bias_correction": self.bias is not None,
-            "avg_complexity": self.calculate_technical_debt()
+            "avg_complexity": self.calculate_technical_debt(),
         }
 
 
@@ -214,7 +214,7 @@ class BaseLLMResponse(LLMResponse):
         raw_response: Optional[Any] = None,
         complexity_score: Optional[float] = None,
         metadata: Optional[Dict[str, Any]] = None,
-        generation_params: Optional[Dict[str, Any]] = None
+        generation_params: Optional[Dict[str, Any]] = None,
     ):
         """
         Initialize a base LLM response.
@@ -248,7 +248,7 @@ class BaseLLMResponse(LLMResponse):
             "tokens_used": self.tokens_used,
             "complexity_score": self.complexity_score,
             "finish_reason": self.finish_reason,
-            **self.metadata
+            **self.metadata,
         }
 
     def is_complete_response(self) -> bool:
@@ -287,4 +287,6 @@ class BaseStreamingLLMResponse(StreamingLLMResponse):
         Raises:
             NotImplementedError: Must be implemented by subclasses.
         """
-        raise NotImplementedError("Subclasses must implement collect_full_response method")
+        raise NotImplementedError(
+            "Subclasses must implement collect_full_response method"
+        )

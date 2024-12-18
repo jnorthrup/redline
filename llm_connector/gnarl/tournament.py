@@ -1,19 +1,20 @@
 """
 Module for tournament-based LLM connector evaluation and comparison.
 
-This module provides classes and methods for running tournaments between 
-different Large Language Model (LLM) connectors, allowing for comparative 
+This module provides classes and methods for running tournaments between
+different Large Language Model (LLM) connectors, allowing for comparative
 analysis of their performance, cost, and response generation capabilities.
 """
 
 from typing import List, Optional
+
 from .interfaces import (
-    AgentMemory, 
-    Message, 
-    ModelConfig, 
-    LLMResponse, 
-    StreamingLLMResponse, 
-    LLMConnector
+    AgentMemory,
+    LLMConnector,
+    LLMResponse,
+    Message,
+    ModelConfig,
+    StreamingLLMResponse,
 )
 
 
@@ -46,7 +47,7 @@ class TournamentModel:
         """
         Runs a tournament by generating responses from each connector and returning them.
 
-        This method asynchronously generates responses from all connectors 
+        This method asynchronously generates responses from all connectors
         using the same input messages and optional configuration.
 
         Args:
@@ -67,7 +68,7 @@ class TournamentModel:
         """
         Calculate cost metrics based on technical debt and token usage.
 
-        This method provides a simple cost calculation that considers 
+        This method provides a simple cost calculation that considers
         technical debt and token consumption.
 
         Args:
@@ -84,7 +85,7 @@ class TournamentLLMConnector(LLMConnector):
     """
     Abstract base class for LLM connectors that participate in a tournament.
 
-    Provides a template for implementing LLM connectors with methods 
+    Provides a template for implementing LLM connectors with methods
     for generating responses and validating configurations.
     """
 
