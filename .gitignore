@@ -1,0 +1,42 @@
+# Build directories
+build/
+llm_connector/build/
+
+# Distribution directories
+dist/
+llm_connector/dist/
+
+# Python-specific files
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+llm_connector/llm_connector.egg-info/
+
+# Mypy cache files
+.mypy_cache/
+llm_connector/.mypy_cache/
+
+# IDE-specific files
+.vscode/
+.idea/
+
+# Other common files
+.DS_Store
+*.log
+*.swp
+
+# Node.js specific files
+node_modules/
+package-lock.json
+yarn.lock
+
+# Miscellaneous
+*.bak
+*.tmp
+
+# Aider-specific files and directories
+.aider/
+aider.json
+.aider*
+.env
