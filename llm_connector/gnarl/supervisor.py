@@ -256,7 +256,15 @@ class SupervisorAgent:
             Dict containing the command output and status
         """
         try:
-            result = subprocess.run(command, shell=True, check=True, capture_output=True, text=True)
+            result = subprocess.run(
+                command,
+                shell=True,
+                check=True,
+                capture_output=True,
+                text=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
             return {
                 "status": "success",
                 "output": result.stdout,
@@ -287,3 +295,15 @@ class SupervisorAgent:
             "alignment_issues": alignment_issues,
             "improvements": improvements,
         }
+
+def main():
+    """
+    Entry point for the llm-connector command.
+    """
+    supervisor = SupervisorAgent()
+    task = "Example task to process"
+    result = supervisor.process_task(task)
+    print(result)
+
+if __name__ == "__main__":
+    main()

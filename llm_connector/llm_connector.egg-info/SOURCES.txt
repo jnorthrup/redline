@@ -5,6 +5,7 @@ gnarl/agent_interaction.py
 gnarl/agent_interaction_helper.py
 gnarl/agent_memory.py
 gnarl/charter.py
+gnarl/config.py
 gnarl/connector.py
 gnarl/coordinator.py
 gnarl/coordinator_helpers.py

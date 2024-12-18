@@ -287,3 +287,15 @@ class SupervisorAgent:
             "alignment_issues": alignment_issues,
             "improvements": improvements,
         }
+
+def main():
+    """
+    Entry point for the llm-connector command.
+    """
+    supervisor = SupervisorAgent()
+    task = "Example task to process"
+    result = supervisor.process_task(task)
+    print(result)
+
+if __name__ == "__main__":
+    main()

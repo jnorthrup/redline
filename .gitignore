@@ -40,3 +40,11 @@ yarn.lock
 aider.json
 .aider*
 .env
+
+# Virtual environments
+venv/
+ENV/
+env/
+
+# LLM generated unwanted files
+llm_output/

@@ -4,7 +4,11 @@ import logging
 import openai
 from openai import OpenAI
 
-client = OpenAI(api_key=os.getenv("OPENROUTER_API_KEY"))
+# Set the API base URL to OpenRouter's endpoint
+openai.api_base = "https://openrouter.ai/api/v1"
+
+# Initialize the OpenAI client with the API key and base URL
+client = OpenAI(api_key=os.getenv("OPENROUTER_API_KEY"), base_url=openai.api_base)
 
 # Add the parent directory to Python path to resolve import issues
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -31,25 +35,14 @@ def query_qwen(prompt):
     Returns:
         str: The response from the model.
     """
-    # Set the API base URL to OpenRouter's endpoint
-    # TODO: The 'openai.api_base' option isn't read in the client API. You will need to pass it when you instantiate the client, e.g. 'OpenAI(base_url="https://openrouter.ai/api/v1")'
-    # openai.api_base = "https://openrouter.ai/api/v1"
-
-    # Retrieve the API key from the environment variable
-
-    # Optional headers for app tracking
-    headers = {
-        "HTTP-Referer": "https://gnarl.ai",
-        "X-Title": "Gnarl Supervisor Demo"
-    }
-
     try:
-        response = client.chat.completions.create(model="qwen/qwen-2.5-72b-instruct",
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": prompt}
-        ],
-        headers=headers)
+        response = client.chat.completions.create(
+            model="qwen/qwen-2.5-72b-instruct",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": prompt}
+            ]
+        )
         return response.choices[0].message.content
     except Exception as e:
         logging.error(f"Error querying Qwen model: {e}")
