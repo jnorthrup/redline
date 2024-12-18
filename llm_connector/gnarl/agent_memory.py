@@ -35,6 +35,7 @@ class DefaultAgentMemory:
         self.memory_capacity: int = memory_capacity
         self.memory_helper = MemoryManagementHelper()
         self.metrics_helper = MetricsHelper()  # Initialize MetricsHelper
+        self._current_handoff: Optional[Dict[str, Any]] = None
 
     @MetricsHelper.async_metrics_decorator
     async def store_reasoning_step_async(self, message: Message) -> None:
@@ -146,6 +147,51 @@ class DefaultAgentMemory:
         Returns:
             Dict with memory usage, complexity, and performance metrics
         """
+        stats = self._get_base_stats()
+        if self._current_handoff:
+            stats["current_handoff"] = self._current_handoff
+        return stats
+
+    def prepare_handoff(self, stage_result: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Prepare memory state for handoff between agents.
+
+        Args:
+            stage_result: Results from current processing stage
+
+        Returns:
+            Dict containing handoff data
+        """
+        handoff = {
+            "stage_result": stage_result,
+            "memory_state": self._get_base_stats(),
+            "technical_debt": self.calculate_technical_debt(),
+            "bias_corrections": self._bias_history[-1] if self._bias_history else None
+        }
+        self._current_handoff = handoff
+        return handoff
+
+    def receive_handoff(self, handoff_data: Dict[str, Any]) -> None:
+        """
+        Process received handoff data from previous stage.
+
+        Args:
+            handoff_data: Data from previous stage handoff
+        """
+        self._current_handoff = handoff_data
+        if handoff_data.get("bias_corrections"):
+            self.apply_bias_correction(
+                handoff_data["bias_corrections"]["correction"],
+                handoff_data["bias_corrections"].get("confidence", 0.5)
+            )
+
+    def _get_base_stats(self) -> Dict[str, Any]:
+        """
+        Get base memory statistics without handoff data.
+        
+        Returns:
+            Dict with base memory metrics
+        """
         role_distribution = {}
         for msg in self.memory_helper.get_all_messages():
             role_distribution[msg.role] = role_distribution.get(msg.role, 0) + 1
@@ -170,3 +216,23 @@ class DefaultAgentMemory:
             },
             "bias_corrections": len(self._bias_history),
         }
+
+    def prepare_handoff(self, stage_result: Dict[str, Any]) -> Dict[str, Any]:
+        """Prepare memory state for handoff between agents"""
+        handoff = {
+            "stage_result": stage_result,
+            "memory_state": self._get_base_stats(),
+            "technical_debt": self.calculate_technical_debt(),
+            "bias_corrections": self._bias_history[-1] if self._bias_history else None
+        }
+        self._current_handoff = handoff
+        return handoff
+
+    def receive_handoff(self, handoff_data: Dict[str, Any]) -> None:
+        """Process received handoff data from previous stage"""
+        self._current_handoff = handoff_data
+        if handoff_data.get("bias_corrections"):
+            self.apply_bias_correction(
+                handoff_data["bias_corrections"]["correction"],
+                handoff_data["bias_corrections"].get("confidence", 0.5)
+            )

@@ -20,40 +20,6 @@ class ReasoningStage(Enum):
     GAP_IDENTIFICATION = "Gap Identification"
     ITERATIVE_REFINEMENT = "Iterative Refinement"
 
-def query_qwen(prompt: str) -> str:
-    """
-    Implement actual API call to Qwen LLM.
-    
-    Args:
-        prompt (str): The query to send to Qwen.
-    
-    Returns:
-        str: Response from Qwen.
-    """
-    try:
-        # Replace with actual API call
-        response = actual_qwen_api_call(prompt)
-        logging.info(f"Qwen response: {response}")
-        return response
-    except Exception as e:
-        logging.error(f"Error querying Qwen: {e}")
-        return "Error querying Qwen."
-
-def query_openrouter() -> list:
-    """
-    Fetch the list of available models from OpenRouter.
-    
-    Returns:
-        list: List of available models.
-    """
-    try:
-        # Replace with actual API call
-        models = actual_openrouter_api_call()
-        logging.info(f"Available models: {models}")
-        return models
-    except Exception as e:
-        logging.error(f"Error fetching models from OpenRouter: {e}")
-        return []
 
 class CoordinatorHelper1:
     def __init__(self, agent_memory: AgentMemory):
@@ -101,44 +67,17 @@ class CoordinatorHelper1:
         """
         return ["Refine understanding", "Seek additional context"]
 
-    def perform_cognitive_reasoning(self) -> Dict[str, Any]:
-        """
-        Implement the cognitive reasoning layer from the charter.
-
-        Returns:
-            Dict with reasoning insights and potential gaps
-        """
-        try:
-            logging.info("Starting cognitive reasoning.")
-            # Generate explanations and identify knowledge gaps
-            reasoning_message = Message(
-                role=MessageRole.REASONING,
-                content="Analyzing task",
-                complexity_score=0.7,  # Higher complexity for reasoning
-            )
-            self.agent_memory.store_reasoning_step(reasoning_message)
-
-            # Transition to gap identification
-            self.current_stage = ReasoningStage.GAP_IDENTIFICATION
-
-            # Query Qwen for additional insights
-            qwen_insights = query_qwen("What are the potential gaps in this task?")
-            self.agent_memory.store_reasoning_step(Message(
-                role=MessageRole.REASONING,
-                content=qwen_insights,
-                complexity_score=0.8,
-            ))
-
-            logging.info("Cognitive reasoning completed.")
-            return {
-                "stage": self.current_stage.name,
-                "explanation": "Initial reasoning for task",
-                "gaps_identified": self._identify_reasoning_gaps(),
-                "preliminary_findings": self._derive_initial_findings(),
-            }
-        except Exception as e:
-            logging.error(f"Error in perform_cognitive_reasoning: {e}")
-            return {}
+    async def perform_cognitive_reasoning(self) -> Dict[str, Any]:
+        """Implement cognitive reasoning through proper agent pipeline"""
+        reasoning_message = Message(
+            role=MessageRole.REASONING,
+            content="Analyzing task",
+            complexity_score=0.7
+        )
+        self.agent_memory.store_reasoning_step(reasoning_message)
+        
+        # Process through cognitive agent
+        return await self.cognitive_agent.process({"message": reasoning_message})
 
     def process_feedback(self, feedback: str) -> Dict[str, Any]:
         """

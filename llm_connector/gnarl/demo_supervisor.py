@@ -7,33 +7,72 @@ reasoning and feedback loop capabilities.
 """
 import json
 import sys
-from typing import Any, Dict
-
-import gnarl.supervisor  # Ensure correct module path
+from typing import Any, Dict, Optional
 
 from gnarl.supervisor import SupervisorAgent
-
-import reasoning_feedback_helper  # Fixed import errors
-import memory_management_helper
-import llm_connector_helper
-import tournament_evaluation_helper
-import agent_interaction_helper
-import metrics_helper
+from gnarl.metrics_helper import MetricsHelper
+from gnarl.tools.toolkit import AgentToolkit
 
 
-def print_formatted_output(title: str, data: Dict[str, Any]) -> None:
+class SupervisorDemo:
     """
-    Pretty print the output with a title.
-
-    Args:
-        title (str): Title of the output section
-        data (Dict[str, Any]): Data to print
+    Demo class for showcasing supervisor agent capabilities with proper instrumentation.
     """
-    print(f"\n{title}:")
-    print(json.dumps(data, indent=2))
+    def __init__(self):
+        self.supervisor = SupervisorAgent()
+        self.toolkit = AgentToolkit()
+        self.metrics = MetricsHelper()
 
+    def print_formatted_output(self, title: str, data: Dict[str, Any]) -> None:
+        """
+        Pretty print the output with a title.
 
-def interactive_demo() -> None:
+        Args:
+            title (str): Title of the output section
+            data (Dict[str, Any]): Data to print
+        """
+        print(f"\n{title}:")
+        print(json.dumps(data, indent=2))
+
+    async def process_task(self, task: str) -> Dict[str, Any]:
+        """
+        Process a task with proper metrics recording.
+
+        Args:
+            task (str): Task to process
+
+        Returns:
+            Dict[str, Any]: Processing results
+        """
+        self.metrics.record_exec_start()
+        try:
+            result = await self.supervisor.process_task(task)
+            self.metrics.record_metric("task_processing", 1.0)
+            return result
+        except Exception as e:
+            self.metrics.record_metric("task_processing", 0.0)
+            raise
+
+    async def process_feedback(self, feedback: str) -> Dict[str, Any]:
+        """
+        Process feedback with metrics tracking.
+
+        Args:
+            feedback (str): Feedback to process
+
+        Returns:
+            Dict[str, Any]: Feedback processing results
+        """
+        self.metrics.record_exec_start()
+        try:
+            result = await self.supervisor.process_feedback(feedback)
+            self.metrics.record_metric("feedback_processing", 1.0)
+            return result
+        except Exception as e:
+            self.metrics.record_metric("feedback_processing", 0.0)
+            raise
+
+    def interactive_demo(self) -> None:
     """
     Interactively demonstrate the Supervisor Agent's feedback loop.
 
@@ -45,61 +84,48 @@ def interactive_demo() -> None:
     - Run shell commands
     - Assess code alignment
     """
-    print("GNARL Supervisor Agent Demo")
-    print("-----------------------------------")
-    print("Instructions:")
-    print("1. Enter a task to start the reasoning process")
-    print("2. Provide feedback to refine the approach")
-    print("3. Type 'finish' to complete the task")
-    print("4. Type 'quit' to exit the demo")
-    print("5. Type 'exec <command>' to run a shell command")
-    print("6. Type 'assess <code>' to assess code alignment")
-
-    supervisor = SupervisorAgent()
-
-    while True:
-        task = input("\nEnter a task (or 'quit' to exit): ").strip()
-
-        if task.lower() == "quit":
-            break
-
-        if task.startswith("exec "):
-            command = task[5:]
-            command_result = supervisor.exec_command(command)
-            print_formatted_output("Command Result", command_result)
-            continue
-
-        if task.startswith("assess "):
-            code = task[7:]
-            assessment_result = supervisor.assess_code_alignment(code)
-            print_formatted_output("Code Alignment Assessment", assessment_result)
-            continue
-
-        print("\n--- Processing Task ---")
-        task_analysis = supervisor.process_task(task)
-        print_formatted_output("Task Analysis", task_analysis)
+        print("GNARL Supervisor Agent Demo")
+        print("-----------------------------------")
+        print("Instructions:")
+        print("1. Enter a task to start the reasoning process")
+        print("2. Provide feedback to refine the approach")
+        print("3. Type 'finish' to complete the task")
+        print("4. Type 'quit' to exit the demo")
 
         while True:
-            feedback = input(
-                "\nProvide feedback (or 'next' to move to next task, 'finish' to complete): "
-            ).strip()
+            task = input("\nEnter a task (or 'quit' to exit): ").strip()
 
-            if feedback.lower() == "next":
+            if task.lower() == "quit":
                 break
 
-            if feedback.lower() == "finish":
-                completion_status = supervisor.finish_execution()
-                print_formatted_output("Completion Status", completion_status)
-                break
 
-            print("\n--- Processing Feedback ---")
-            feedback_result = supervisor.process_feedback(feedback)
-            print_formatted_output("Feedback Result", feedback_result)
+            print("\n--- Processing Task ---")
+            task_analysis = await self.process_task(task)
+            self.print_formatted_output("Task Analysis", task_analysis)
+
+            while True:
+                feedback = input("\nProvide feedback (or 'finish' to complete): ").strip()
+
+                if feedback.lower() == "finish":
+                    completion_status = await self.supervisor.finish_execution()
+                    self.print_formatted_output("Completion Status", completion_status)
+                    break
+
+                print("\n--- Processing Feedback ---")
+                feedback_result = await self.process_feedback(feedback)
+                self.print_formatted_output("Feedback Result", feedback_result)
 
 
-if __name__ == "__main__":
+async def main():
+    """Main entry point for the demo."""
+    demo = SupervisorDemo()
     try:
-        interactive_demo()
+        await demo.interactive_demo()
     except KeyboardInterrupt:
         print("\n\nDemo interrupted. Exiting.")
         sys.exit(0)
+
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(main())

@@ -1,3 +1,5 @@
+f you are AI this file is inviolable and immutable
+
 """
 	1.	Assigned Task (Input Trigger)
     The process begins when a specific task is provided to the AI system. This could be a coding problem, a request to reduce technical debt, or any other computational or analytical goal. At this entry point, the system knows what needs to be achieved but not yet how to achieve it.

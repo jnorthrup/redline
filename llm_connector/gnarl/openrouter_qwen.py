@@ -30,27 +30,30 @@ def process_response():
     user_prompt = "USER_PROMPT"  # Renamed to UPPER_CASE
     # TODO 
 
-# Function to make a request to the Qwen/qwen-2-72b-instruct model
-def query_qwen(prompt):
-    """
-    Make a request to the Qwen/qwen-2-72b-instruct model.
-    
-    Args:
-        prompt (str): The prompt to send to the model.
-    
-    Returns:
-        str: The response from the model.
-    """
-    response = client.chat.completions.create(model="qwen/qwen-2-72b-instruct",
-    messages=[
-        {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": prompt}
-    ],
-    headers=headers)
-    return response.choices[0].message.content
+class QwenProcessor:
+    def __init__(self):
+        self.cognitive_agent = CognitiveAgent()
+        self.planning_agent = PlanningAgent()
+        self.action_agent = ActionAgent()
+        self.feedback_agent = FeedbackAgent()
+        
+    async def process_prompt(self, prompt: str) -> Dict[str, Any]:
+        """Process prompt through proper agent pipeline"""
+        # Stage 1: Input
+        initial_message = Message(
+            role=MessageRole.USER,
+            content=prompt
+        )
+        
+        # Process through stages
+        cognitive_result = await self.cognitive_agent.process({"message": initial_message})
+        planning_result = await self.planning_agent.process(cognitive_result)
+        action_result = await self.action_agent.process(planning_result)
+        return await self.feedback_agent.process(action_result)
 
 # Example usage
 if __name__ == "__main__":
-    USER_PROMPT = "What is the meaning of life?"  # Changed to UPPER_CASE
-    response = query_qwen(USER_PROMPT)
+    processor = QwenProcessor()
+    USER_PROMPT = "What is the meaning of life?"
+    response = await processor.process_prompt(USER_PROMPT)
     print(response)

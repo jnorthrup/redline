@@ -6,11 +6,17 @@ import time
 import functools
 from collections import defaultdict
 import asyncio
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
+from .metrics.instruments import MetricReading
+from .tools.toolkit import AgentToolkit
 
 class MetricsHelper:
     def __init__(self):
-        # Initialize metrics storage
+        self.toolkit = AgentToolkit()
+        self.current_readings: Dict[str, List[MetricReading]] = {}
+        self.stage_metrics: Dict[str, List[Dict[str, Any]]] = {}
+        self.technical_debt_offset = 1.0
+        self.tokens_used = 0
         self.exec_metrics: Dict[str, Any] = {
             "execution_time": [],
             "success_count": 0,
@@ -68,8 +74,67 @@ class MetricsHelper:
         self.syslog_metrics["specific_messages"][message] += 1
 
     # Method to retrieve metrics
+    def calculate_token_cost(self, technical_debt: float, tokens_used: int) -> float:
+        """
+        Calculate cost metric based on charter specification.
+        
+        Args:
+            technical_debt (float): Technical debt score
+            tokens_used (int): Number of tokens consumed
+            
+        Returns:
+            float: Cost metric calculated as technical_debt / (tokens_used ** 3)
+        """
+        if tokens_used <= 0:
+            return float('inf')
+        return technical_debt / (tokens_used ** 3)
+
     def get_exec_metrics(self) -> Dict[str, Any]:
         return self.exec_metrics
+
+    def record_stage_metrics(self, stage: str, metrics: Dict[str, Any]):
+        """Record metrics for a specific charter stage"""
+        if stage not in self.stage_metrics:
+            self.stage_metrics[stage] = []
+        self.stage_metrics[stage].append(metrics)
+        
+    def calculate_stage_technical_debt(self, stage: str) -> float:
+        """Calculate technical debt for a specific stage"""
+        if stage not in self.stage_metrics:
+            return 0.0
+        # Calculate as per charter specification
+        return self.technical_debt_offset / (self.tokens_used ** 3)
+
+    def record_metric(self, name: str, value: float, confidence: float = 1.0):
+        """
+        Record a metric reading and update instruments.
+
+        Args:
+            name (str): Name of the metric
+            value (float): Metric value
+            confidence (float): Confidence score (0-1)
+        """
+        reading = MetricReading(value, time.time(), confidence)
+        if name not in self.current_readings:
+            self.current_readings[name] = []
+        self.current_readings[name].append(reading)
+        
+        # Update instruments
+        for instrument in self.toolkit.instruments.values():
+            instrument.add_reading(reading)
+
+    def get_analysis(self) -> Dict[str, Any]:
+        """
+        Get comprehensive analysis of metrics and instruments.
+
+        Returns:
+            Dict[str, Any]: Analysis results
+        """
+        return {
+            "instruments": self.toolkit.get_instrument_readings(),
+            "tool_metrics": self.toolkit.get_tool_metrics(),
+            "current_readings": self.current_readings
+        }
 
     def get_syslog_metrics(self) -> Dict[str, Any]:
         return self.syslog_metrics

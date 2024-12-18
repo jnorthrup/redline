@@ -7,11 +7,12 @@ adaptive, iterative agent-based reasoning.
 
 from enum import Enum, auto
 from typing import Any, Dict, List
-import subprocess
-from .openrouter_qwen import query_qwen  # Import the query_qwen function
-
 from .agent_memory import DefaultAgentMemory
 from .interfaces import AgentMemory, Message, MessageRole
+from .agents.cognitive_agent import CognitiveAgent
+from .agents.planning_agent import PlanningAgent
+from .agents.action_agent import ActionAgent
+from .agents.feedback_agent import FeedbackAgent
 
 class ReasoningStage(Enum):
     """
@@ -36,43 +37,41 @@ class SupervisorAgent:
 
     def __init__(self, memory_capacity: int = 100):
         """
-        Initialize the supervisor with memory management.
+        Initialize the supervisor with agent pipeline and memory management.
 
         Args:
             memory_capacity (int): Maximum memory capacity for tracking reasoning
         """
-        self.agent_memory: AgentMemory = DefaultAgentMemory(memory_capacity)
-        self.current_stage: ReasoningStage = ReasoningStage.INITIAL_TRIGGER
-        self.task_history: List[Dict[str, Any]] = []
-        self.technical_debt_metric: float = 0.0
+        self.cognitive_agent = CognitiveAgent()
+        self.planning_agent = PlanningAgent()
+        self.action_agent = ActionAgent()
+        self.feedback_agent = FeedbackAgent()
+        self.agent_memory = DefaultAgentMemory(memory_capacity)
+        self.current_stage = ReasoningStage.INITIAL_TRIGGER
 
-        self.agent_memory.store_reasoning_step = method  # Define the method or ensure it's imported
-
-    def process_task(self, task: str) -> Dict[str, Any]:
-        """
-        Process an incoming task through the reasoning stages.
-
-        Args:
-            task (str): The initial task or input trigger
-
-        Returns:
-            Dict containing task processing details and next steps
-        """
-        # Store initial task as a reasoning message
-        initial_message = Message(
-            role=MessageRole.USER,
-            content=task,
-            complexity_score=self._calculate_task_complexity(task),
-        )
-        self.agent_memory.store_reasoning_step(initial_message)
-
-        # Transition to cognitive reasoning stage
-        self.current_stage = ReasoningStage.COGNITIVE_REASONING
-
-        # Generate initial reasoning and analysis
-        reasoning_analysis = self._perform_cognitive_reasoning()
-
-        return reasoning_analysis
+    async def process_task(self, task: str) -> Dict[str, Any]:
+        """Process task through charter-defined stages using agent pipeline."""
+        
+        # Stage 1: Input Trigger
+        initial_result = self._process_initial_trigger(task)
+        
+        # Stage 2: Cognitive Agent
+        cognitive_result = await self.cognitive_agent.process(initial_result)
+        cognitive_handoff = self.agent_memory.prepare_handoff(cognitive_result)
+        
+        # Stage 3: Planning Agent
+        self.agent_memory.receive_handoff(cognitive_handoff)
+        planning_result = await self.planning_agent.process(cognitive_result)
+        planning_handoff = self.agent_memory.prepare_handoff(planning_result)
+        
+        # Stage 4: Action Agent
+        self.agent_memory.receive_handoff(planning_handoff)
+        action_result = await self.action_agent.process(planning_result)
+        action_handoff = self.agent_memory.prepare_handoff(action_result)
+        
+        # Stage 5: Feedback Agent
+        self.agent_memory.receive_handoff(action_handoff)
+        return await self.feedback_agent.process(action_result)
 
     def _perform_cognitive_reasoning(self) -> Dict[str, Any]:
         """
@@ -92,11 +91,11 @@ class SupervisorAgent:
         # Transition to gap identification
         self.current_stage = ReasoningStage.GAP_IDENTIFICATION
 
-        # Query Qwen for additional insights
-        qwen_insights = query_qwen("What are the potential gaps in this task?")
+        # Process through cognitive reasoning agent
+        reasoning_insights = self._process_cognitive_stage()
         self.agent_memory.store_reasoning_step(Message(
-            role=MessageRole.AI,
-            content=qwen_insights,
+            role=MessageRole.REASONING,
+            content=reasoning_insights,
             complexity_score=0.8,
         ))
 
@@ -245,56 +244,6 @@ class SupervisorAgent:
         # Similar to task complexity, but with different scaling
         return min(1.0, len(feedback.split()) / 50)
 
-    def exec_command(self, command: str) -> Dict[str, Any]:
-        """
-        Execute a shell command and return the output.
-
-        Args:
-            command (str): The command to execute
-
-        Returns:
-            Dict containing the command output and status
-        """
-        try:
-            result = subprocess.run(
-                command,
-                shell=True,
-                check=True,
-                capture_output=True,
-                text=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
-            )
-            return {
-                "status": "success",
-                "output": result.stdout,
-                "error": result.stderr,
-            }
-        except subprocess.CalledProcessError as e:
-            return {
-                "status": "error",
-                "output": e.stdout,
-                "error": e.stderr,
-            }
-
-    def assess_code_alignment(self, code: str) -> Dict[str, Any]:
-        """
-        Assess the code and ensure it aligns with the vision of the charter.
-
-        Args:
-            code (str): The code to assess
-
-        Returns:
-            Dict containing alignment assessment and suggested improvements.
-        """
-        # Placeholder for code alignment logic
-        alignment_issues = ["Inconsistent naming conventions", "Lack of comments"]
-        improvements = ["Standardize naming conventions", "Add comments for clarity"]
-
-        return {
-            "alignment_issues": alignment_issues,
-            "improvements": improvements,
-        }
 
 def main():
     """

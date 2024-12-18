@@ -131,33 +131,42 @@ class ConversationalAgentInteraction(AbstractAgentInteraction):
         context: Optional[Dict[str, Any]] = None
     ) -> LLMResponse:
         """
-        Initiate a new conversation with an initial prompt.
+        Initiate a new conversation through the agent pipeline.
 
         Args:
             initial_prompt (str): The starting message for the conversation.
             context (Optional[Dict[str, Any]], optional): Additional conversation context.
 
         Returns:
-            LLMResponse: Initial response from the LLM.
+            LLMResponse: Response after processing through all stages.
         """
         initial_message = Message(
             role="user", 
-            content=initial_prompt
+            content=initial_prompt,
+            context=context
         )
-        if context:
-            initial_message.context = context
-
         self.store_interaction(initial_message)
+        return await self.process_through_stages(initial_message)
 
-        response = await self.generate_response([initial_message])
-        response_message = Message(
-            role="assistant", 
-            content=response.text, 
-            complexity_score=response.complexity_score
-        )
-        self.store_interaction(response_message)
-
-        return response
+    async def process_through_stages(self, message: Message) -> LLMResponse:
+        """Process message through all charter-defined stages."""
+        # Stage 2: Cognitive
+        cognitive_result = await self.cognitive_agent.process(message)
+        cognitive_handoff = self.memory.prepare_handoff(cognitive_result)
+        
+        # Stage 3: Planning
+        self.memory.receive_handoff(cognitive_handoff)
+        planning_result = await self.planning_agent.process(cognitive_result)
+        planning_handoff = self.memory.prepare_handoff(planning_result)
+        
+        # Stage 4: Action
+        self.memory.receive_handoff(planning_handoff)
+        action_result = await self.action_agent.process(planning_result)
+        action_handoff = self.memory.prepare_handoff(action_result)
+        
+        # Stage 5: Feedback
+        self.memory.receive_handoff(action_handoff)
+        return await self.feedback_agent.process(action_result)
 
     @MetricsHelper.async_metrics_decorator
     async def continue_conversation(
