@@ -2,7 +2,7 @@ from typing import Any, Dict, Optional
 import requests
 import json
 from ..utils import DebouncedLogger
-from ..providers import LLMProvider
+from .base import LLMProvider
 
 class GenericProvider(LLMProvider):
     """Generic provider for LLM APIs."""

@@ -15,14 +15,16 @@ from redline.supervisor.MemoryManager import MemoryManager
 from redline.supervisor.providers.generic import GenericProvider
 from redline.supervisor.providers import LLMProvider
 from redline.supervisor.WebSearch import WebSearch
+from redline.supervisor.QwenProvider import QwenProvider
+from redline.controllers.status_line_controller import StatusLineController
+from redline.models.status_line_config import StatusLineConfig
 from redline.supervisor.ToolManager import ToolManager
 from redline.supervisor.ProviderManager import ProviderManager
 from redline.supervisor.SystemPromptHandler import SystemPromptHandler
 from redline.supervisor.utils import DebouncedLogger, setup_logging, format_bytes
 from agents.action_agent import ActionAgent
 from redline.supervisor.utils import format_bytes
-from redline.supervisor.tools import commands, available_tools
-from litellm import completion
+from openai import OpenAI
 
 # Set up logging with rotation
 setup_logging()
@@ -199,6 +201,9 @@ class Supervisor:
             self.logger.debug(f"Getting feedback for change: {change}")
             if not change:
                 raise ValueError("Empty change provided")
+        except Exception as e:
+            self.logger.error(f"Error getting feedback: {e}")
+            return f"Error generating feedback: {str(e)}"
                 
             # Try primary provider
             if self.provider_manager.current_provider:
@@ -331,7 +336,6 @@ class Supervisor:
             return None
     def get_system_prompt(self) -> str:
         """Get base system prompt"""
-        """Get base system prompt"""
         return """You are a System Administrator Supervisor Agent responsible for system operations, task completion, and technical oversight. Your primary role is to execute commands, manage system resources, and ensure efficient operation of all components.
 
 Core Responsibilities:
@@ -364,11 +368,30 @@ Operating Parameters:
 - Prioritize task completion and system stability
 - Maintain clear, professional communication
 - Focus on operational efficiency
-- Provide accurate system status updates"""
+- Provide accurate system status updates
+
+Available Tools:
+"""
+        for idx, tool in enumerate(available_tools, 1):
+            prompt += f"{idx}. {tool['name']}:\n"
+            for feature in tool['features']:
+                prompt += f"   - {feature}\n"
+        prompt += """
+
+Available Commands:
+"""
+        for cmd, info in commands.items():
+            prompt += f"- {cmd}: {info['description']} (bash template: {info['bash_template']})\n"
+        prompt += """
+"""
 if __name__ == "__main__":
     config = SupervisorConfig()
     supervisor = Supervisor(config)
     logger = supervisor.logger
+    
+    # Print the system prompt and exit
+    print(supervisor.get_system_prompt())
+    sys.exit(0)
     
     try:
         logger.debug(f"Initializing provider with config: api_base={config.api_base}, model={config.model_name}")
@@ -515,5 +538,5 @@ print(response)
 response_palm2 = completion(
     model="openrouter/google/palm-2-chat-bison",
     messages=[{"role": "user", "content": "Hello, how are you?"}],
-)
+);
 print(response_palm2)
