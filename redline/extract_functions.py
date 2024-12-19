@@ -1,9 +1,20 @@
+"""Module for extracting functions from Python source files."""
+
 import re
 import uuid
 
 
 def extract_function_line_numbers(file_path):
-    with open(file_path, "r") as file:
+    """
+    Extract function definitions from a Python file and their line numbers.
+    
+    Args:
+        file_path (str): Path to Python source file
+    
+    Returns:
+        list: List of tuples containing function names and their line numbers
+    """
+    with open(file_path, "r", encoding="utf-8") as file:
         lines = file.readlines()
 
     function_pattern = re.compile(r"^\s*def\s+(\w+)\s*\(")
@@ -22,7 +33,16 @@ def extract_function_line_numbers(file_path):
 
 
 def extract_function(file_path, function_name, start_line, end_line):
-    with open(file_path, "r") as file:
+    """
+    Extract a function from a Python file and write it to a new file with a token.
+    
+    Args:
+        file_path (str): Path to Python source file
+        function_name (str): Name of the function
+        start_line (int): Starting line number of the function
+        end_line (int): Ending line number of the function
+    """
+    with open(file_path, "r", encoding="utf-8") as file:
         lines = file.readlines()
 
     function_code = "".join(lines[start_line - 1 : end_line])
@@ -32,14 +52,25 @@ def extract_function(file_path, function_name, start_line, end_line):
     )
     print(function_code)
 
-    # Write the function with the token to a new file
-    with open(f"{function_name}_extracted.py", "w") as out_file:
-        out_file.write(f"# Token: {token}\n")
-        out_file.write(function_code)
+    write_function(f"{function_name}_extracted.py", function_name, function_code)
 
     # Write the token to the function_line_numbers file
-    with open("function_line_numbers.txt", "a") as line_numbers_file:
+    with open("function_line_numbers.txt", "a", encoding="utf-8") as line_numbers_file:
         line_numbers_file.write(f"{function_name}, {start_line}, {end_line}, {token}\n")
+
+
+def write_function(file_path, function_name, content):
+    """
+    Write extracted function to a new file.
+    
+    Args:
+        file_path (str): Output file path
+        function_name (str): Name of the function
+        content (str): Function code
+    """
+    with open(file_path, "w", encoding="utf-8") as file:
+        file.write(f"# Token: {uuid.uuid4().hex[:16]}\n")
+        file.write(content)
 
 
 if __name__ == "__main__":

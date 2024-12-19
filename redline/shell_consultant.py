@@ -1,3 +1,7 @@
+"""
+Module for shell consultant operations.
+"""
+
 import json
 import logging  # Added import
 import os
@@ -367,6 +371,22 @@ def get_user_input(prompt: str) -> str:
         return input(prompt).strip()
 
 
+class ShellConsultant:
+    """Class to handle shell consultant operations."""
+
+    def __init__(self):
+        pass
+
+    def some_method(self):
+        try:
+            pass
+        except Exception as e:
+            logging.error("An error occurred: %s", e)
+
+    def another_method(self):
+        pass
+
+
 def main():
     start_time = time.time()
     log_time("Starting Shell Command Consultant")
@@ -455,7 +475,7 @@ def main():
             print("\nGoodbye! 👋")
             sys.exit(0)
         except Exception as e:
-            log_time(f"Error: {e}")
+            log_time(f"Error: %s", e)
             if is_stdin_pipe():
                 break
 

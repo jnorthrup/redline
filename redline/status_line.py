@@ -1,3 +1,5 @@
+"""Module for handling status lines."""
+
 import logging
 import sys
 from dataclasses import dataclass
@@ -12,15 +14,15 @@ logging.basicConfig(
 @dataclass
 class StatusLineConfig:
     template: str = "{model:<20} | Sent: {sent_bytes:>8} | Recv: {recv_bytes:>8}"
-    #     refresh_rate: float = 1.0
     max_length: int = 120
 
 
 class StatusLine:
+    """Class to handle status line operations."""
+
     def __init__(self, config: StatusLineConfig):
         self.config = config
         self.data: Dict[str, Any] = {}
-        #         self._last_render: Optional[str] = None
         self._last_length: int = 0
         self._bytes_suffixes = ["B", "KB", "MB", "GB", "TB"]
 
@@ -48,14 +50,13 @@ class StatusLine:
             rendered = self.config.template.format(**self.data)
             if len(rendered) > self.config.max_length:
                 rendered = rendered[: self.config.max_length - 3] + "..."
-            #             self._last_render = rendered
             self._last_length = len(rendered)
             return rendered
         except KeyError as e:
-            logging.error(f"Error: Missing data field {e}")
+            logging.error("Error: Missing data field %s", e)
             return f"Error: Missing data field {e}"
         except Exception as e:
-            logging.error(f"Error: {e}")
+            logging.error("An error occurred: %s", e)
             return f"Error: {e}"
 
     def clear_line(self) -> None:
@@ -74,7 +75,7 @@ class StatusLine:
             sys.stdout.write("\r" + rendered)
         sys.stdout.flush()
 
-        #     def exit_cleanly(self, exit_message: str = "Exiting the feedback loop.") -> None:
+    def exit_cleanly(self, exit_message: str = "Exiting the feedback loop.") -> None:
         """Clear the status line and display exit message with preserved stats"""
         model = self.data.get("model", "Unknown")
         sent = self.data.get("sent_bytes", "0B")
@@ -88,6 +89,3 @@ class StatusLine:
     def clear(self) -> None:
         """Clear all status data"""
         self.data.clear()
-
-
-#         self._last_render = None

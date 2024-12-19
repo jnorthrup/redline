@@ -1,21 +1,40 @@
 from typing import Dict, Type
+import logging
 
 from .base import Agent
 from .cognitive import CognitiveAgent
 from .execution import ExecutionAgent
 from .feedback import FeedbackAgent
 from .planning import PlanningAgent
+from .memory import MemoryManager
+from .tools import ToolRegistry
+from .metrics import MetricsTracker
 
 
 class AgentFramework:
     """Framework for managing agent interactions"""
 
     def __init__(self):
+        # Initialize managers
+        self.memory = MemoryManager()
+        self.tools = ToolRegistry()
+        self.metrics = MetricsTracker()
+        
         # Initialize agents
         self.cognitive = CognitiveAgent()
         self.planning = PlanningAgent()
-        self.execution = ExecutionAgent()
+        self.execution = ExecutionAgent() 
         self.feedback = FeedbackAgent()
+        
+        # Assign agent IDs
+        for name, agent in [
+            ("cognitive", self.cognitive),
+            ("planning", self.planning),
+            ("execution", self.execution),
+            ("feedback", self.feedback)
+        ]:
+            agent.id = name
+            agent._memory = self.memory.get_store(name)
 
         # Connect agent pipeline
         self.cognitive._downstream_agent = self.planning
