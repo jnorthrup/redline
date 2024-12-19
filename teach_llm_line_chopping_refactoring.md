@@ -141,3 +141,83 @@ print("Line chopping refactoring completed successfully.")
 ## Conclusion
 
 By following these steps and considerations, an LLM can be effectively taught to perform line chopping refactoring. This process not only breaks down large functions into smaller, more manageable pieces but also ensures that the code remains functional, well-structured, and adheres to coding standards.
+
+## Example Unit Tests
+
+Here is an example Python file that includes unit tests to verify the functionality of the line chopping refactoring process:
+
+```python
+import unittest
+import os
+import re
+import uuid
+import subprocess
+
+class TestLineChoppingRefactoring(unittest.TestCase):
+
+    def setUp(self):
+        self.input_file = "test_supervisor.py"
+        self.output_dir = "test_agent_functions"
+        self.sample_code = """
+class Supervisor:
+    def __init__(self):
+        pass
+
+    def manage(self):
+        print("Managing")
+
+    def report(self):
+        print("Reporting")
+"""
+        with open(self.input_file, 'w') as f:
+            f.write(self.sample_code)
+        os.makedirs(self.output_dir, exist_ok=True)
+
+    def tearDown(self):
+        os.remove(self.input_file)
+        for file in os.listdir(self.output_dir):
+            os.remove(os.path.join(self.output_dir, file))
+        os.rmdir(self.output_dir)
+
+    def test_identify_function_boundaries(self):
+        with open(self.input_file, 'r') as file:
+            lines = file.readlines()
+        boundaries = [i for i, line in enumerate(lines) if re.match(r'(class|def) ', line)]
+        self.assertEqual(boundaries, [1, 4, 7])
+
+    def test_extract_and_write_functions(self):
+        with open(self.input_file, 'r') as file:
+            lines = file.readlines()
+        boundaries = [i for i, line in enumerate(lines) if re.match(r'(class|def) ', line)]
+        prev_line = 0
+        for start_line in boundaries:
+            end_line = prev_line - 1
+            function_code = lines[prev_line:start_line] if prev_line != 0 else lines[:start_line]
+            unique_id = str(uuid.uuid4())
+            function_name = re.search(r'(class|def) (\w+)', lines[start_line]).group(2)
+            output_file = os.path.join(self.output_dir, f"{function_name}.py")
+            with open(output_file, 'w') as f:
+                f.write(''.join(function_code))
+            with open(output_file, 'r+') as f:
+                content = f.read()
+                f.seek(0, 0)
+                f.write(f"# {unique_id}\n{content}")
+            lines.insert(start_line, f"# {unique_id}\n")
+            lines[start_line + 1] = re.sub(r'def (\w+)\(self\)', r'def \1(self, obj)', lines[start_line + 1])
+            prev_line = start_line + 1
+        self.assertTrue(os.path.exists(os.path.join(self.output_dir, "Supervisor.py")))
+        self.assertTrue(os.path.exists(os.path.join(self.output_dir, "manage.py")))
+        self.assertTrue(os.path.exists(os.path.join(self.output_dir, "report.py")))
+
+    def test_lint_files(self):
+        subprocess.run(['black', self.input_file])
+        lint_files = [self.input_file] + [os.path.join(self.output_dir, f) for f in os.listdir(self.output_dir) if f.endswith('.py')]
+        for file in lint_files:
+            result = subprocess.run(['black', '--check', file], capture_output=True)
+            self.assertEqual(result.returncode, 0)
+
+if __name__ == '__main__':
+    unittest.main()
+```
+
+This test suite includes tests for identifying function boundaries, extracting and writing functions, and linting the resulting files. It uses the `unittest` framework to ensure that the refactoring process works as expected.
