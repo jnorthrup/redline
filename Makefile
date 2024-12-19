@@ -1,6 +1,6 @@
 # Makefile for Redline project
 
-.PHONY: all clean lint
+.PHONY: all clean lint dce
 
 all: clean
 
@@ -9,3 +9,7 @@ clean:
 
 lint:
 	flake8 redline/*.py
+
+dce:
+	vulture redline/ tests/ status_line.py supervisor.py
+	ts-unused-exports redline/**/*.ts src/**/*.ts

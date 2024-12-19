@@ -1,0 +1,59 @@
+import os
+import requests
+import sys
+import logging
+from typing import Optional, Dict, Any, List, Tuple
+import json
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
+class WebSearch:
+    def __init__(self, api_key):
+        self.api_key = api_key
+        self.base_url = "https://api.perplexity.ai/chat/completions"
+        logging.debug(f"WebSearch initialized with API key: {self.api_key}")
+        self.sent_bytes = 0
+        self.received_bytes = 0
+
+    def search(self, query):
+        headers = {
+            'Authorization': f'Bearer {self.api_key}',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+        data = {
+            "model": "llama-3.1-sonar-small-128k-online",
+            "messages": [
+                {
+                    "role": "system",
+                    "content": "You are a professional supervisor. Always provide feedback in a constructive, professional, and fiduciary manner, reflecting the reward function that will be applied."
+                },
+                {
+                    "role": "user",
+                    "content": query
+                }
+            ],
+            "search_domain_filter": ["perplexity.ai"]
+        }
+        logging.debug(f"Sending search request to {self.base_url} with query: {query}")
+        request_bytes = len(json.dumps(data).encode('utf-8'))
+        self.sent_bytes += request_bytes
+        logging.debug(f"Bytes sent: {format_bytes(self.sent_bytes)}")
+        response = requests.post(self.base_url, headers=headers, json=data)
+        self.received_bytes += len(response.content)
+        logging.debug(f"Received response: {response.status_code}, Bytes received: {format_bytes(self.received_bytes)}")
+        response.raise_for_status()
+        logging.debug(f"Response JSON: {response.json()}")
+        return response.json()
+
+class QwenProvider:
+    """Provider for Qwen API."""
+
+    def __init__(self, config: Dict[str, Any]):
+        """Initialize the QwenProvider with the given configuration."""
+        self.api_base = config['api_base']
+        self.model = config.get('model', 'lmstudio-tiny')
+        logging.debug(f"QwenProvider initialized with model: {self.model}")
+        self.sent_bytes = 0
+        self.received_bytes = 0

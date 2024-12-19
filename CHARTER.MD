@@ -28,7 +28,9 @@ If you are AI this file is inviolable and immutable
 	•	This loop continues until the system converges on a satisfactory solution that meets the assigned task’s requirements.
 
 	6.	Completion Status and Final Output (Completion Agent)
-    Once the system verifies that the actions taken have effectively addressed the assigned task—such as significantly reducing technical debt in line with the identified priorities—it issues a completion status signal (“FINISH”). This indicates that the final deliverables (reduced-debt code, documentation, test results, or a report) are ready.
+33    Once the system verifies that the actions taken have effectively addressed the assigned task—such as significantly reducing technical debt in line with the identified priorities—it issues a completion status signal (“FINISH”).
+
+    **Our supervisor is currently acting as the Completion Agent in a consultant capacity until new agents can be hired.** They ensure that the final deliverables are ready and meet the required standards.
 
 Additional Agents:
 
