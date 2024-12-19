@@ -51,6 +51,11 @@ class Supervisor:
         self.memory_manager = MemoryManager()
         self.tool_manager = ToolManager()
         
+        # Initialize cognitive agent components
+        self.explanation_generator = ExplanationGenerator(self.memory_manager)
+        self.gap_identifier = GapIdentifier(self.memory_manager)
+        self.finding_derivation = FindingDerivation(self.memory_manager)
+        
         # Initialize status line
         status_config = StatusLineConfig()
         self.status_line = StatusLineController(status_config)

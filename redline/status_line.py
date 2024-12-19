@@ -5,23 +5,18 @@ import sys
 from dataclasses import dataclass
 from typing import Any, Dict, Optional
 
-# Configure logging
-logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
-)
-
-
 @dataclass
 class StatusLineConfig:
     template: str = "{model:<20} | Sent: {sent_bytes:>8} | Recv: {recv_bytes:>8}"
     max_length: int = 120
-
+    show_model: bool = True
+    show_bytes: bool = True
 
 class StatusLine:
     """Class to handle status line operations."""
 
-    def __init__(self, config: StatusLineConfig):
-        self.config = config
+    def __init__(self, config: StatusLineConfig = None):
+        self.config = config or StatusLineConfig()
         self.data: Dict[str, Any] = {}
         self._last_length: int = 0
         self._bytes_suffixes = ["B", "KB", "MB", "GB", "TB"]
