@@ -1,3 +1,4 @@
+import asyncio
 from typing import Dict, Type
 import logging
 
@@ -9,12 +10,16 @@ from .planning import PlanningAgent
 from .memory import MemoryManager
 from .tools import ToolRegistry
 from .metrics import MetricsTracker
+from .message_bus import MessageBus
 
 
 class AgentFramework:
     """Framework for managing agent interactions"""
 
     def __init__(self):
+        # Add message bus
+        self.message_bus = MessageBus()
+        
         # Initialize managers
         self.memory = MemoryManager()
         self.tools = ToolRegistry()
@@ -26,32 +31,48 @@ class AgentFramework:
         self.execution = ExecutionAgent() 
         self.feedback = FeedbackAgent()
         
-        # Assign agent IDs
-        for name, agent in [
-            ("cognitive", self.cognitive),
-            ("planning", self.planning),
-            ("execution", self.execution),
-            ("feedback", self.feedback)
-        ]:
-            agent.id = name
-            agent._memory = self.memory.get_store(name)
-
-        # Connect agent pipeline
-        self.cognitive._downstream_agent = self.planning
-        self.planning._upstream_agent = self.cognitive
-        self.planning._downstream_agent = self.execution
-        self.execution._upstream_agent = self.planning
-        self.execution._downstream_agent = self.feedback
-        self.feedback._upstream_agent = self.execution
+        # Set up message bus subscriptions
+        self._setup_message_subscriptions()
 
         # Initialize reward system
         self.rewards = {
             "technical_debt_reduction": lambda x: x / (x**3),  # Tokens needed cubed
         }
 
-    def process_task(self, task: Dict) -> None:
+    def _setup_message_subscriptions(self):
+        """Set up message bus subscriptions for all agents"""
+        agents = {
+            "cognitive": self.cognitive,
+            "planning": self.planning,
+            "execution": self.execution,
+            "feedback": self.feedback
+        }
+
+        for name, agent in agents.items():
+            agent.id = name
+            agent._memory = self.memory.get_store(name)
+            # Subscribe agent to its topic
+            self.message_bus.subscribe(
+                f"agent.{name}",
+                agent._message_queue
+            )
+
+    async def process_task(self, task: Dict) -> None:
         """Begin processing with cognitive agent"""
-        self.cognitive.process(task)
+        await self.message_bus.publish("agent.cognitive", {
+            "type": "task",
+            "content": task
+        })
+
+    async def run(self):
+        """Run all agents"""
+        agent_tasks = [
+            self.cognitive.run(),
+            self.planning.run(),
+            self.execution.run(),
+            self.feedback.run()
+        ]
+        await asyncio.gather(*agent_tasks)
 
     def get_agent_memory(self, agent_type: Type[Agent]) -> Dict:
         """Retrieve agent memory for analysis"""
