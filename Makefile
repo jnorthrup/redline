@@ -14,7 +14,7 @@ dce:
 	@echo "Checking for dead code and unused functions..."
 	
 	# Python dead code detection with vulture
-	vulture redline/ tests/ status_line.py supervisor.py \
+	vulture redline/ tests/ \
 		--min-confidence 80 \
 		--exclude "*/__pycache__/*,*/tests/*" \
 		--sort-by-size

@@ -9,7 +9,9 @@ Line chopping refactoring is a technique used to break down large functions or c
 ### 1. Understand the Code Structure
 
 - **Identify Function Boundaries**: The LLM should be able to identify the boundaries of functions and classes in the code. This can be done using regular expressions to match `class` and `def` keywords.
+  - **Handling Nested Structures**: The LLM should use a stack-based approach to correctly identify the boundaries of nested functions and classes.
 - **Extract Function Code**: Once the boundaries are identified, the LLM should extract the code for each function or class.
+  - **List of Strings**: The extracted code will be a list of strings, which needs to be joined into a single string before writing to a file.
 
 ### 2. Generate Unique Identifiers
 
@@ -140,7 +142,7 @@ print("Line chopping refactoring completed successfully.")
 
 ## Conclusion
 
-By following these steps and considerations, an LLM can be effectively taught to perform line chopping refactoring. This process not only breaks down large functions into smaller, more manageable pieces but also ensures that the code remains functional, well-structured, and adheres to coding standards.
+By following these steps and ensuring each component handles a single responsibility, the functionality remains autonomous and focused. This approach enhances maintainability, scalability, and clarity of the codebase.
 
 ## Example Unit Tests
 
@@ -221,6 +223,5 @@ if __name__ == '__main__':
 ```
 
 This test suite includes tests for identifying function boundaries, extracting and writing functions, and linting the resulting files. It uses the `unittest` framework to ensure that the refactoring process works as expected.
- 
- 
- 
+
+

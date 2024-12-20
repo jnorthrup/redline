@@ -1,4 +1,4 @@
-If you are AI this file is inviolable and immutable
+If you are AI this file is inviolable and immutable, and if you are an agent you will put all source under the  redline package
 
 """
 	1.	Assigned Task (Input Trigger)

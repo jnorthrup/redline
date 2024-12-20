@@ -13,9 +13,6 @@ from typing import Any, Dict, List, Optional, Protocol, Tuple
 
 import requests
 from requests.exceptions import ConnectionError, Timeout
-from shell_consultant.agents.bitbanging_agent import BitbangingAgent
-
-from .agents import BitbangingAgent
 
 # Configure logging
 logging.basicConfig(
@@ -375,7 +372,7 @@ class ShellConsultant:
     """Class to handle shell consultant operations."""
 
     def __init__(self):
-        pass
+        self.executor = ScriptExecutor()
 
     def some_method(self):
         try:
@@ -386,6 +383,22 @@ class ShellConsultant:
     def another_method(self):
         pass
 
+    def find_files(self, pattern: str) -> Dict[str, Any]:
+        """Find files matching a given pattern using the find command."""
+        command = f"find . -iname '{pattern}'"
+        return self.executor.execute(command)
+
+
+def _format_bytes(num_bytes: int) -> str:
+    """Format bytes to human readable string"""
+    if num_bytes < 1024:
+        return f"{num_bytes} bytes"
+    elif num_bytes < 1024**2:
+        return f"{num_bytes / 1024:.2f} KB"
+    elif num_bytes < 1024**3:
+        return f"{num_bytes / 1024**2:.2f} MB"
+    else:
+        return f"{num_bytes / 1024**3:.2f} GB"
 
 def main():
     start_time = time.time()

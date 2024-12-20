@@ -34,10 +34,35 @@ class ExplanationGenerator:
         
     def _analyze_code_changes(self, changes: List[Dict[str, Any]]) -> str:
         """Analyze code changes to explain their impact"""
-        # Implementation of code change analysis
-        return "Code change analysis explanation"
+        if not changes:
+            return "No code changes to analyze"
+            
+        impact_analysis = []
+        for change in changes:
+            change_type = change.get("type")
+            description = change.get("description", "No description")
+            
+            if change_type == "addition":
+                impact_analysis.append(f"Added new functionality: {description}")
+            elif change_type == "modification":
+                impact_analysis.append(f"Modified existing code: {description}")
+            elif change_type == "deletion":
+                impact_analysis.append(f"Removed code: {description}")
+        
+        return "\n".join(impact_analysis) if impact_analysis else "No code changes to analyze"
         
     def _analyze_decisions(self, decisions: List[Dict[str, Any]]) -> str:
         """Analyze technical decisions to explain rationale"""
-        # Implementation of decision analysis
-        return "Technical decision rationale"
+        decision_analysis = []
+        for decision in decisions:
+            rationale = []
+            if "reason" in decision:
+                rationale.append(f"Reasoning: {decision['reason']}")
+            if "impact" in decision:
+                rationale.append(f"Impact: {decision['impact']}")
+            if "alternatives" in decision:
+                rationale.append(f"Alternatives considered: {', '.join(decision['alternatives'])}")
+                
+            decision_analysis.append("\n".join(rationale))
+            
+        return "\n\n".join(decision_analysis) if decision_analysis else "No technical decisions to analyze"

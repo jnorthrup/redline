@@ -1,4 +1,4 @@
-# Implementation Plan for Gap Resolution
+# Updated Implementation Plan
 
 ## Core Infrastructure Improvements
 
@@ -188,6 +188,51 @@
 - Faster feature development
 - Reduced technical debt
 
+## Agentic Framework Implementation
+
+### 1. Agent Architecture Design
+
+- **Agent Base Class**
+  - Create an `Agent` base class with:
+    - Privately scoped tools and memories
+    - Methods for upstream and downstream handoff
+    - Mutable memory and corrective bias
+  - Agents include:
+    - `ReasoningAgent` (Initial Reasoning and Thinking)
+    - `PlanningAgent` (Planning Phase)
+    - `ActionAgent` (Action Execution)
+    - `FeedbackAgent` (Iterative Feedback Loop)
+    - `CompletionAgent` (Completion Status and Final Output), possibly created dynamically
+
+### 2. Agent Communication and Handoff
+
+- Implement communication protocols for agents:
+  - Upstream handoff (`handoff_upstream`)
+  - Downstream handoff (`handoff_downstream`)
+- Allow agents to request bias corrections from the `SupervisorAgent`
+- Agents can update their mutable memory during processing
+
+### 3. Reward System Implementation
+
+- Define a reward function:
+  - `reward = (technical_debt_offset) / (tokens_needed ** 3)`
+- Integrate the reward system into the agentic framework
+- Enable selection or limitation of agents based on rewards, tool bias, and model variations
+
+### 4. Model Cost Metrics
+
+- Develop methods to calculate:
+  - `technical_debt_offset`
+  - `tokens_needed`
+- Incorporate cost metrics into agent decision-making processes
+
+### 5. Codebase Updates
+
+- Implement agent classes in `redline/supervisor/agents/`
+- Update `Supervisor` to manage agent lifecycle and interactions
+- Ensure code changes are within the `redline` package only
+
 ---
-Last Updated: 2024-01-09
-Version: 1.0
+
+Last Updated: 2024-01-10  
+Version: 1.1
