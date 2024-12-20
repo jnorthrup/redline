@@ -1,0 +1,7 @@
+model_list:
+  - model_name: gpt-3.5-turbo
+    litellm_params:
+      model: openrouter/openai/gpt-3.5-turbo
+      api_base: https://your-openrouter-endpoint.com/
+      api_key: your-api-key  # Alternatively, use environment variables
+      rpm: 6  # Rate limit for this deployment: in requests per minute (rpm)

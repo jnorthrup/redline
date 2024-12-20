@@ -1,57 +1,55 @@
-# Line Chopping Refactoring Tool
-
-## Introduction
-
-The line chopping refactoring tool is designed to simplify the process of refactoring code by allowing users to select a range of lines and replace them with new code.
-
-## Approach
-
-The tool will show the line-numbered sources and ask the user to cite the first and last line of the range they wish to modify. This approach minimizes the risk of full reification with errors and allows the model to track a discrete range with less errors.
 # Teaching an LLM Line Chopping Refactoring
 
 ## Introduction
 
-Line chopping refactoring is a technique used to break down large functions or classes into smaller, more manageable pieces. This process involves extracting functions, adding unique identifiers, and ensuring that the code remains functional and well-structured. This document outlines the steps and considerations for teaching an LLM (Language Model) to perform line chopping refactoring.
+Line chopping refactoring is a powerful technique for improving code efficiency by breaking down large functions or classes into smaller, manageable pieces. This approach not only enhances readability but also aligns with the concept of managing **therbligs**—the basic units of work or effort in processes—to optimize performance and reduce unnecessary complexity.
 
-## Steps to Teach the LLM
+## The Importance of Therbligs in Code Refactoring
 
-### 1. Understand the Code Structure
+In industrial engineering, therbligs represent fundamental motions or actions required to complete a task. By minimizing these units, processes become more efficient. Similarly, in code refactoring, reducing redundant or excessive code segments leads to a leaner and more efficient codebase. Embracing therblig-centric principles encourages developers to focus on essential code functionalities, eliminating superfluous elements that can hinder performance.
 
-- **Identify Function Boundaries**: The LLM should be able to identify the boundaries of functions and classes in the code. This can be done using regular expressions to match `class` and `def` keywords.
-  - **Handling Nested Structures**: The LLM should use a stack-based approach to correctly identify the boundaries of nested functions and classes.
-- **Extract Function Code**: Once the boundaries are identified, the LLM should extract the code for each function or class.
-  - **List of Strings**: The extracted code will be a list of strings, which needs to be joined into a single string before writing to a file.
+## Leveraging the Line Chopping Tool
 
-### 2. Generate Unique Identifiers
+The line chopping tool serves as an instrumental asset in managing therbligs within a codebase. By allowing precise selection and modification of code ranges, it enables:
 
-- **Generate Unique IDs**: For each extracted function, the LLM should generate a unique identifier (e.g., a UUID) to ensure that each function can be uniquely identified.
-- **Add Comment Tokens**: The LLM should add a unique comment token at the beginning of each extracted function and in the original file to maintain a reference.
+- **Targeted Refactoring**: Developers can isolate and modify specific code sections without affecting the entire file.
+- **Enhanced Modularity**: Breaking code into discrete, well-defined units promotes reusability and easier maintenance.
+- **Reduced Cognitive Load**: Simplifying complex functions into smaller segments makes the code more approachable and understandable.
 
-### 3. Write Extracted Functions to New Files
+## Approach
 
-- **Create Output Directory**: The LLM should create an output directory to store the extracted functions.
-- **Write Functions**: The LLM should write each extracted function to a new file in the output directory, ensuring that the file names are meaningful (e.g., `function_name.py`).
+### 1. Contextual Line Selection
 
-### 4. Update Original File
+The tool emphasizes the selection of code ranges based on context lines, minimizing the risk of errors during refactoring. By specifying the start and end lines, developers can accurately target the code requiring modification.
 
-- **Insert Comment Tokens**: The LLM should insert the unique comment tokens at the appropriate locations in the original file to maintain a reference to the extracted functions.
-- **Update Function Signatures**: The LLM should update the function signatures in the original file to accept an additional parameter (e.g., `obj`) to pass the necessary context to the extracted functions.
+### 2. Minimizing Full Reification Errors
 
-### 5. Lint and Format the Code
+Full reification of code can introduce errors due to misinterpretation or misalignment of code structures. The line chopping tool mitigates this by allowing modifications within a controlled scope, preserving the integrity of the surrounding code.
 
-- **Lint the Files**: The LLM should use a code linter (e.g., `black` for Python) to ensure that the extracted functions and the original file are properly formatted and adhere to coding standards.
-- **Handle Linting Errors**: The LLM should handle any linting errors and ensure that the code is clean and well-structured.
+### 3. Managing Indentation Challenges
 
-### 6. Test the Refactored Code
+In languages like Python, proper indentation is crucial. The tool ensures that extracted code fragments maintain correct indentation levels, preventing syntax errors and maintaining code consistency.
 
-- **Run Tests**: The LLM should run the existing tests to ensure that the refactored code still functions as expected.
-- **Manual Verification**: The LLM should provide a manual verification step to ensure that the refactored code meets the requirements and does not introduce any bugs.
+## Best Practices for Using the Line Chopping Tool
 
-## Considerations
+- **Precise Line Identification**: Always verify line numbers for start and end points to ensure accurate code selection.
+- **Maintain Context**: Include relevant context lines to provide clarity and maintain the logical flow of the code.
+- **Validate After Refactoring**: Test the modified code to ensure functionality remains unaffected.
 
-- **Error Handling**: The LLM should handle any errors that occur during the refactoring process, such as syntax errors or linting issues.
-- **Code Quality**: The LLM should ensure that the refactored code maintains or improves the overall code quality.
-- **Documentation**: The LLM should update any relevant documentation to reflect the changes made during the refactoring process.
+## Minimizing Token Consumption
+
+Certain language models have strict token limits or experience difficulties with large blocks of code. By “chopping” your code into smaller sections and providing a concise, standardized prompt element, you can guide the model more efficiently. Consider including the following points in your prompt:
+
+• A simple overview of the line chopping objective (“We will break large code blocks into discrete segments.”).
+• The main problem it solves (avoiding token overflows and confusion in large transformations).
+• Instructions for how the model should handle boundary markers or context cues.
+
+Example prompt text:
+“Tool: A line-chopping utility that selectively extracts and replaces code. It reduces token overhead by fencing code regions, tracking them with unique markers, and limiting edits to vital sections only.”
+
+## Conclusion
+
+Incorporating therblig-centric methodologies in code refactoring leads to more efficient and maintainable codebases. The line chopping tool is an excellent resource for developers aiming to optimize their code by focusing on essential functionalities and reducing unnecessary complexities.
 
 ## Example Script
 
@@ -149,10 +147,6 @@ for file in lint_files:
 print("Line chopping refactoring completed successfully.")
 ```
 
-## Conclusion
-
-By following these steps and ensuring each component handles a single responsibility, the functionality remains autonomous and focused. This approach enhances maintainability, scalability, and clarity of the codebase.
-
 ## Example Unit Tests
 
 Here is an example Python file that includes unit tests to verify the functionality of the line chopping refactoring process:
@@ -233,15 +227,13 @@ if __name__ == '__main__':
 
 This test suite includes tests for identifying function boundaries, extracting and writing functions, and linting the resulting files. It uses the `unittest` framework to ensure that the refactoring process works as expected.
 
-
-
 ## Example
 
 Before:
 ```
 1 | def add(a, b):
 2 |     return a + b
-3 | 
+3 |
 4 | def subtract(a, b):
 5 |     return a - b
 ```
@@ -262,5 +254,40 @@ To implement this feature, we will need to update the line chopping tool to acce
 
 We will also need to update the tool to handle the new input format and generate the refactored code.
 
+## Verification and Filtering
 
- 
+When refactoring, you can enable verification metrics and apply filters by using command-line options like --verify and --min_functions:
+
+• --verify gathers metrics (e.g., total line count, function count) after chopping.
+• --min_functions checks that the refactored file includes at least a certain number of functions, warning if the threshold is not met.
+
+Example usage:
+```bash
+python line_chopping_refactor.py myfile.py --verify --min_functions=2
+```
+
+This ensures your line chopping process meets minimum expectations for function count and provides summary metrics for validation.
+
+## Mini DSL for Line Chopping
+
+To simplify specifying exact line ranges or function blocks, we introduce a small DSL. A typical instruction might look like:
+
+• CHOP lines 10..30 -> extract
+• CHOP def manage -> rename=administer
+• CHOP class Supervisor -> rename=Manager
+
+These instructions can be parsed and converted into concrete refactoring actions. A sample CLI call might look like:
+
+```bash
+python line_chopping_refactor.py myfile.py --dsl "CHOP lines 10..30 -> extract; CHOP def manage -> rename=administer"
+```
+
+## Code API Scanning
+
+You can leverage the same line-chopping infrastructure to perform a “scan-only” operation. Passing a flag such as `--scan_only` utilizes the function/class boundary detection logic without extracting or modifying the source code. This enables quick identification of available APIs in a file.
+
+Example usage:
+```bash
+python line_chopping_refactor.py myfile.py --scan_only
+```
+`````

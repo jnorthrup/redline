@@ -1,0 +1,442 @@
+[
+  {
+    "command": "ls -l",
+    "base_cmd": "ls",
+    "options": [
+      "-l"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T03:46:27.790205",
+    "_stored_at": "2024-12-19T03:46:27.790240"
+  },
+  {
+    "command": "ls -a",
+    "base_cmd": "ls",
+    "options": [
+      "-a"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T03:46:27.794360",
+    "_stored_at": "2024-12-19T03:46:27.794379"
+  },
+  {
+    "command": "ls -h",
+    "base_cmd": "ls",
+    "options": [
+      "-h"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T03:46:27.798129",
+    "_stored_at": "2024-12-19T03:46:27.798146"
+  },
+  {
+    "command": "ls -R",
+    "base_cmd": "ls",
+    "options": [
+      "-R"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T03:46:27.803257",
+    "_stored_at": "2024-12-19T03:46:27.803287"
+  },
+  {
+    "command": "ls -d */",
+    "base_cmd": "ls",
+    "options": [
+      "-d"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T03:46:27.807398",
+    "_stored_at": "2024-12-19T03:46:27.807415"
+  },
+  {
+    "command": "ls -t",
+    "base_cmd": "ls",
+    "options": [
+      "-t"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T03:46:27.810989",
+    "_stored_at": "2024-12-19T03:46:27.811003"
+  },
+  {
+    "command": "ls -S",
+    "base_cmd": "ls",
+    "options": [
+      "-S"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T03:46:27.814541",
+    "_stored_at": "2024-12-19T03:46:27.814563"
+  },
+  {
+    "command": "ls -r",
+    "base_cmd": "ls",
+    "options": [
+      "-r"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T03:46:27.818203",
+    "_stored_at": "2024-12-19T03:46:27.818217"
+  },
+  {
+    "command": "ls -lah",
+    "base_cmd": "ls",
+    "options": [
+      "-lah"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T03:46:27.823612",
+    "_stored_at": "2024-12-19T03:46:27.823632"
+  },
+  {
+    "command": "find . -type f",
+    "base_cmd": "find",
+    "options": [
+      "-type"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T03:46:27.863151",
+    "_stored_at": "2024-12-19T03:46:27.863188"
+  },
+  {
+    "command": "find . -type d",
+    "base_cmd": "find",
+    "options": [
+      "-type"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T03:46:27.889833",
+    "_stored_at": "2024-12-19T03:46:27.889859"
+  },
+  {
+    "command": "find . -name '*.py'",
+    "base_cmd": "find",
+    "options": [
+      "-name"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T03:46:27.921549",
+    "_stored_at": "2024-12-19T03:46:27.921582"
+  },
+  {
+    "command": "grep -r class .",
+    "base_cmd": "grep",
+    "options": [
+      "-r"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T03:46:29.053926",
+    "_stored_at": "2024-12-19T03:46:29.053969"
+  },
+  {
+    "command": "grep -l def *.py",
+    "base_cmd": "grep",
+    "options": [
+      "-l"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T03:46:29.068739",
+    "_stored_at": "2024-12-19T03:46:29.068770"
+  },
+  {
+    "command": "ls -l",
+    "base_cmd": "ls",
+    "options": [
+      "-l"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T03:46:29.074638",
+    "_stored_at": "2024-12-19T03:46:29.074663"
+  },
+  {
+    "command": "ls --invalid-option",
+    "base_cmd": "ls",
+    "options": [
+      "--invalid-option"
+    ],
+    "success": false,
+    "timestamp": "2024-12-19T03:46:29.078974",
+    "_stored_at": "2024-12-19T03:46:29.078995"
+  },
+  {
+    "command": "ls -l",
+    "base_cmd": "ls",
+    "options": [
+      "-l"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T04:01:34.605438",
+    "_stored_at": "2024-12-19T04:01:34.605479"
+  },
+  {
+    "command": "ls -a",
+    "base_cmd": "ls",
+    "options": [
+      "-a"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T04:01:34.610810",
+    "_stored_at": "2024-12-19T04:01:34.610842"
+  },
+  {
+    "command": "ls -h",
+    "base_cmd": "ls",
+    "options": [
+      "-h"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T04:01:34.615243",
+    "_stored_at": "2024-12-19T04:01:34.615266"
+  },
+  {
+    "command": "ls -R",
+    "base_cmd": "ls",
+    "options": [
+      "-R"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T04:01:34.620917",
+    "_stored_at": "2024-12-19T04:01:34.620941"
+  },
+  {
+    "command": "ls -d */",
+    "base_cmd": "ls",
+    "options": [
+      "-d"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T04:01:34.625285",
+    "_stored_at": "2024-12-19T04:01:34.625309"
+  },
+  {
+    "command": "ls -t",
+    "base_cmd": "ls",
+    "options": [
+      "-t"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T04:01:34.629844",
+    "_stored_at": "2024-12-19T04:01:34.629870"
+  },
+  {
+    "command": "ls -S",
+    "base_cmd": "ls",
+    "options": [
+      "-S"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T04:01:34.634191",
+    "_stored_at": "2024-12-19T04:01:34.634211"
+  },
+  {
+    "command": "ls -r",
+    "base_cmd": "ls",
+    "options": [
+      "-r"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T04:01:34.638424",
+    "_stored_at": "2024-12-19T04:01:34.638450"
+  },
+  {
+    "command": "ls -lah",
+    "base_cmd": "ls",
+    "options": [
+      "-lah"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T04:01:34.644412",
+    "_stored_at": "2024-12-19T04:01:34.644439"
+  },
+  {
+    "command": "find . -type f",
+    "base_cmd": "find",
+    "options": [
+      "-type"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T04:01:34.731799",
+    "_stored_at": "2024-12-19T04:01:34.731833"
+  },
+  {
+    "command": "find . -type d",
+    "base_cmd": "find",
+    "options": [
+      "-type"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T04:01:34.762463",
+    "_stored_at": "2024-12-19T04:01:34.762501"
+  },
+  {
+    "command": "find . -name '*.py'",
+    "base_cmd": "find",
+    "options": [
+      "-name"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T04:01:34.795038",
+    "_stored_at": "2024-12-19T04:01:34.795080"
+  },
+  {
+    "command": "grep -r class .",
+    "base_cmd": "grep",
+    "options": [
+      "-r"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T04:01:36.152757",
+    "_stored_at": "2024-12-19T04:01:36.152828"
+  },
+  {
+    "command": "grep -l def *.py",
+    "base_cmd": "grep",
+    "options": [
+      "-l"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T04:01:36.170610",
+    "_stored_at": "2024-12-19T04:01:36.170741"
+  },
+  {
+    "command": "ls -l",
+    "base_cmd": "ls",
+    "options": [
+      "-l"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T04:04:10.863620",
+    "_stored_at": "2024-12-19T04:04:10.863650"
+  },
+  {
+    "command": "ls -a",
+    "base_cmd": "ls",
+    "options": [
+      "-a"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T04:04:10.867969",
+    "_stored_at": "2024-12-19T04:04:10.867990"
+  },
+  {
+    "command": "ls -h",
+    "base_cmd": "ls",
+    "options": [
+      "-h"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T04:04:10.871887",
+    "_stored_at": "2024-12-19T04:04:10.871907"
+  },
+  {
+    "command": "ls -R",
+    "base_cmd": "ls",
+    "options": [
+      "-R"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T04:04:10.876618",
+    "_stored_at": "2024-12-19T04:04:10.876640"
+  },
+  {
+    "command": "ls -d */",
+    "base_cmd": "ls",
+    "options": [
+      "-d"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T04:04:10.880775",
+    "_stored_at": "2024-12-19T04:04:10.880792"
+  },
+  {
+    "command": "ls -t",
+    "base_cmd": "ls",
+    "options": [
+      "-t"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T04:04:10.884334",
+    "_stored_at": "2024-12-19T04:04:10.884352"
+  },
+  {
+    "command": "ls -S",
+    "base_cmd": "ls",
+    "options": [
+      "-S"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T04:04:10.887918",
+    "_stored_at": "2024-12-19T04:04:10.887934"
+  },
+  {
+    "command": "ls -r",
+    "base_cmd": "ls",
+    "options": [
+      "-r"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T04:04:10.891391",
+    "_stored_at": "2024-12-19T04:04:10.891409"
+  },
+  {
+    "command": "ls -lah",
+    "base_cmd": "ls",
+    "options": [
+      "-lah"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T04:04:10.896992",
+    "_stored_at": "2024-12-19T04:04:10.897016"
+  },
+  {
+    "command": "find . -type f",
+    "base_cmd": "find",
+    "options": [
+      "-type"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T04:04:10.937017",
+    "_stored_at": "2024-12-19T04:04:10.937052"
+  },
+  {
+    "command": "find . -type d",
+    "base_cmd": "find",
+    "options": [
+      "-type"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T04:04:10.966480",
+    "_stored_at": "2024-12-19T04:04:10.966519"
+  },
+  {
+    "command": "find . -name '*.py'",
+    "base_cmd": "find",
+    "options": [
+      "-name"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T04:04:10.997732",
+    "_stored_at": "2024-12-19T04:04:10.997771"
+  },
+  {
+    "command": "grep -r class .",
+    "base_cmd": "grep",
+    "options": [
+      "-r"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T04:04:12.025489",
+    "_stored_at": "2024-12-19T04:04:12.025609"
+  },
+  {
+    "command": "grep -l def *.py",
+    "base_cmd": "grep",
+    "options": [
+      "-l"
+    ],
+    "success": true,
+    "timestamp": "2024-12-19T04:04:12.040444",
+    "_stored_at": "2024-12-19T04:04:12.040491"
+  }
+]

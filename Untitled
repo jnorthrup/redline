@@ -1,0 +1,8 @@
+# Step 1: List recently added Git modules
+git log -n 1 --pretty=format: --name-only | grep 'path/to/git/modules'
+
+# Step 2: Find references to these modules
+grep -rl 'module_name' ./src
+
+# Step 3: Identify dangling references
+grep -rl 'module_name' ./src | xargs grep -L 'module_usage_pattern'
