@@ -3,7 +3,7 @@
 import logging
 import sys
 from dataclasses import dataclass
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 @dataclass
 class StatusLineConfig:
@@ -13,7 +13,7 @@ class StatusLineConfig:
     show_bytes: bool = True
 
 class StatusLine:
-    """Class to handle status line operations."""
+    """Class to represent the status line."""
 
     def __init__(self, config: StatusLineConfig = None):
         self.config = config or StatusLineConfig()
@@ -51,8 +51,8 @@ class StatusLine:
             logging.error("Error: Missing data field %s", e)
             return f"Error: Missing data field {e}"
         except Exception as e:
-            logging.error("An error occurred: %s", e)
-            return f"Error: {e}"
+            # Handle specific exceptions if possible
+            print(f"An error occurred: {e}")
 
     def clear_line(self) -> None:
         """Clear the current status line from the terminal"""

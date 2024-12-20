@@ -32,16 +32,8 @@ def extract_function_line_numbers(file_path):
     return function_line_numbers
 
 
-def extract_function(file_path, function_name, start_line, end_line):
-    """
-    Extract a function from a Python file and write it to a new file with a token.
-    
-    Args:
-        file_path (str): Path to Python source file
-        function_name (str): Name of the function
-        start_line (int): Starting line number of the function
-        end_line (int): Ending line number of the function
-    """
+def extract_function(file_path, function_name):
+    """Extract function from file."""
     with open(file_path, "r", encoding="utf-8") as file:
         lines = file.readlines()
 
@@ -73,10 +65,13 @@ def write_function(file_path, function_name, content):
         file.write(content)
 
 
-if __name__ == "__main__":
-    file_path = "redline/supervisor/supervisor.py"
+def extract_functions(file_path: str) -> None:
     function_line_numbers = extract_function_line_numbers(file_path)
-
     for function_name, line_number in function_line_numbers:
         if function_name == "generate":
             extract_function(file_path, function_name, line_number, line_number + 39)
+
+
+if __name__ == "__main__":
+    FILE_PATH = "redline/supervisor/supervisor.py"  # Conform to UPPER_CASE naming style
+    extract_functions(FILE_PATH)

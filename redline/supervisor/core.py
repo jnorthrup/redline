@@ -1,24 +1,32 @@
-from typing import Optional, Dict, Any
-from .providers import LLMProvider
-from .memory import MemoryManager
-from .tools import ToolManager
-from .message import MessageHandler
-from .system_prompt import SystemPromptHandler
+from redline.supervisor.MemoryManager import MemoryManager
+from redline.supervisor.agents.reasoning_agent import ReasoningAgent
+from redline.supervisor.agents.planning_agent import PlanningAgent
+from redline.supervisor.agents.action_agent import ActionAgent
+from redline.supervisor.agents.feedback_agent import FeedbackAgent
+from redline.supervisor.agents.completion_agent import CompletionAgent
 
 class Supervisor:
-    def __init__(self, config: Dict[str, Any] = None):
-        self.config = config or {}
-        self.message_handler = MessageHandler()
-        self.system_prompt_handler = SystemPromptHandler(self.message_handler)
+    def __init__(self, config=None):
         self.memory_manager = MemoryManager()
-        self.tool_manager = ToolManager()
-        self.current_provider: Optional[LLMProvider] = None
-        self.standby_provider: Optional[LLMProvider] = None
-        
-    def set_active_provider(self, provider: LLMProvider, model_name: str):
-        self.current_provider = provider
-        self.active_model = model_name
-        self.system_prompt_handler.update_system_prompt(self)
-        
-    def set_standby_provider(self, provider: LLMProvider):
-        self.standby_provider = provider
+        self.config = config
+        # Initialize agents
+        self.reasoning_agent = ReasoningAgent()
+        self.planning_agent = PlanningAgent()
+        self.action_agent = ActionAgent()
+        self.feedback_agent = FeedbackAgent()
+        self.completion_agent = CompletionAgent()
+
+    def process(self, data: Any) -> Any:
+        """Manage the agent lifecycle and interactions."""
+        # Reasoning phase
+        reasoning_result = self.reasoning_agent.process(data)
+        # Planning phase
+        plan = self.planning_agent.plan(reasoning_result)
+        # Action execution
+        action_result = self.action_agent.execute(plan)
+        # Feedback loop
+        feedback = self.feedback_agent.provide_feedback(action_result)
+        # ...handle feedback...
+        # Finalization
+        final_output = self.completion_agent.finalize(action_result)
+        return final_output

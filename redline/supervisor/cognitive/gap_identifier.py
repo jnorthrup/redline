@@ -25,7 +25,13 @@ class GapIdentifier:
     def _find_implementation_gaps(self, context: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Find gaps in implementation"""
         gaps = []
-        # Implementation gap analysis logic
+        if "evaluation" in context and "competence_gaps" in context["evaluation"]:
+            if context["evaluation"]["competence_gaps"]:
+                gaps.append({
+                    "type": "implementation_gap",
+                    "description": "Competence gaps identified in self-evaluation",
+                    "details": context["evaluation"]["competence_gaps"]
+                })
         return gaps
         
     def _find_knowledge_gaps(self, context: Dict[str, Any]) -> List[Dict[str, Any]]:

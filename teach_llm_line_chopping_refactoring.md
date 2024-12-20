@@ -1,3 +1,12 @@
+# Line Chopping Refactoring Tool
+
+## Introduction
+
+The line chopping refactoring tool is designed to simplify the process of refactoring code by allowing users to select a range of lines and replace them with new code.
+
+## Approach
+
+The tool will show the line-numbered sources and ask the user to cite the first and last line of the range they wish to modify. This approach minimizes the risk of full reification with errors and allows the model to track a discrete range with less errors.
 # Teaching an LLM Line Chopping Refactoring
 
 ## Introduction
@@ -225,3 +234,33 @@ if __name__ == '__main__':
 This test suite includes tests for identifying function boundaries, extracting and writing functions, and linting the resulting files. It uses the `unittest` framework to ensure that the refactoring process works as expected.
 
 
+
+## Example
+
+Before:
+```
+1 | def add(a, b):
+2 |     return a + b
+3 | 
+4 | def subtract(a, b):
+5 |     return a - b
+```
+
+After:
+```
+1 | # Context line: def add(a, b):
+2 | def multiply(a, b):
+3 |     return a * b
+4 | # Context line: def subtract(a, b):
+```
+
+In this example, the lines between the context lines have been replaced with new code.
+
+## Implementation
+
+To implement this feature, we will need to update the line chopping tool to accept a new input format. The input format will include the context lines and the new code to replace the existing lines.
+
+We will also need to update the tool to handle the new input format and generate the refactored code.
+
+
+ 
