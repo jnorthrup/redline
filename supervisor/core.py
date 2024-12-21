@@ -1,9 +1,12 @@
-from redline.supervisor.agents.action_agent import ActionAgent
-from redline.supervisor.agents.completion_agent import CompletionAgent
-from redline.supervisor.agents.feedback_agent import FeedbackAgent
-from redline.supervisor.agents.planning_agent import PlanningAgent
-from redline.supervisor.agents.reasoning_agent import ReasoningAgent
-from redline.supervisor.MemoryManager import MemoryManager
+from .agents.action_agent import ActionAgent
+from .agents.completion_agent import CompletionAgent
+from .agents.feedback_agent import FeedbackAgent
+from .agents.planning_agent import PlanningAgent
+from .agents.reasoning_agent import ReasoningAgent
+from .MemoryManager import MemoryManager
+from .cognitive.explanation_generator import ExplanationGenerator
+from .cognitive.finding_derivation import FindingDerivation
+from .cognitive.gap_identifier import GapIdentifier
 
 
 class Supervisor:
@@ -16,6 +19,9 @@ class Supervisor:
         self.action_agent = ActionAgent()
         self.feedback_agent = FeedbackAgent()
         self.completion_agent = CompletionAgent()
+        self.explanation_generator = ExplanationGenerator(self.memory_manager)
+        self.finding_derivation = FindingDerivation(self.memory_manager)
+        self.gap_identifier = GapIdentifier(self.memory_manager)
 
     def process(self, data: any) -> any:
         """Manage the agent lifecycle and interactions."""

@@ -24,7 +24,7 @@ def debounce(interval: float):
     return decorator
 
 
-def setup_logging(log_dir: str = "logs") -> None:
+def setup_logging(log_dir: str = "logs") -> logging.Logger:
     """Set up logging with rotation and proper formatting"""
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
@@ -58,6 +58,8 @@ def setup_logging(log_dir: str = "logs") -> None:
     # Add handlers
     logger.addHandler(file_handler)
     logger.addHandler(console_handler)
+    
+    return logger
 
 
 class DebouncedLogger:

@@ -1,6 +1,6 @@
 from typing import Any, Dict, List
 
-from ..MemoryManager import MemoryManager
+from supervisor.MemoryManager import MemoryManager
 
 
 class ExplanationGenerator:

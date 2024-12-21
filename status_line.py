@@ -15,11 +15,11 @@ class StatusLineConfig:
 
 
 class StatusLine:
-    """Class to represent the status line."""
+    """Class to represent the status line. """
 
     def __init__(self, config: StatusLineConfig = None):
         self.config = config or StatusLineConfig()
-        self.data: Dict[str, Any] = {}
+        self. Dict[str, Any] = {}
         self._last_length: int = 0
         self._bytes_suffixes = ["B", "KB", "MB", "GB", "TB"]
 

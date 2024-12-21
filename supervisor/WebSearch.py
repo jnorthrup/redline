@@ -1,76 +1,31 @@
-import os
-import subprocess
-import sys
+"""
+Module for web search functionality.
+"""
 
 import requests
-from openai import OpenAI
+from typing import Any, Dict, List, Optional
 
-from redline.supervisor.utils import DebouncedLogger
+from .utils import DebouncedLogger
 
 
 class WebSearch:
-    def __init__(self, api_key: str = None):
-        if api_key is None:
-            if len(sys.argv) > 1:
-                self.api_key = sys.argv[1]
-            else:
-                raise ValueError(
-                    "API key must be provided as a command line argument or passed to the constructor"
-                )
-        else:
-            self.api_key = api_key
-        self.base_url = "https://api.perplexity.ai"
+    def __init__(self, api_key: str):
+        self.api_key = api_key
         self.logger = DebouncedLogger(interval=5.0)
-        self.logger.debug(f"WebSearch initialized with API key: {self.api_key}")
-        self.sent_bytes = 0
-        self.received_bytes = 0
+        self.base_url = "https://api.duckduckgo.com"
 
-    def search(self, query: str) -> str:
-        messages = [
-            {
-                "role": "system",
-                "content": (
-                    "You are an artificial intelligence assistant and you need to "
-                    "engage in a helpful, detailed, polite conversation with a user."
-                ),
-            },
-            {
-                "role": "user",
-                "content": query,
-            },
-        ]
-
-        client = OpenAI(api_key=self.api_key, base_url=self.base_url)
-
-        # Chat completion without streaming
-        response = client.chat.completions.create(
-            model="llama-3.1-sonar-large-128k-online",
-            messages=messages,
-        )
-        print(response)
-
-        # Chat completion with streaming
-        response_stream = client.chat.completions.create(
-            model="llama-3.1-sonar-large-128k-online",
-            messages=messages,
-            stream=True,
-        )
-        for response in response_stream:
-            print(response)
-
-        return response
-
-
-import json
-
-if __name__ == "__main__":
-    import argparse
-
-    parser = argparse.ArgumentParser(description="Perform a web search.")
-    parser.add_argument("api_key", type=str, help="The API key for Perplexity AI.")
-    parser.add_argument("query", type=str, help="The search query.")
-
-    args = parser.parse_args()
-
-    ws = WebSearch(api_key=args.api_key)
-    ws.search(args.query)
+    def search(self, query: str) -> Optional[Dict[str, Any]]:
+        """Perform a web search and return the results."""
+        try:
+            params = {
+                "q": query,
+                "format": "json",
+                "pretty": 1
+            }
+            response = requests.get(self.base_url, params=params)
+            response.raise_for_status()
+            self.logger.debug(f"Web search results for query: {query}")
+            return response.json()
+        except requests.RequestException as e:
+            self.logger.error(f"Error during web search: {e}")
+            return None

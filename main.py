@@ -1,6 +1,6 @@
 """Main module for running the application."""
 
-from redline.status_line import StatusLine
+from status_line import StatusLine
 
 
 def main():

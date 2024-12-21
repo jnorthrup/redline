@@ -30,26 +30,214 @@ Full reification of code can introduce errors due to misinterpretation or misali
 
 In languages like Python, proper indentation is crucial. The tool ensures that extracted code fragments maintain correct indentation levels, preventing syntax errors and maintaining code consistency.
 
+### 4. Enhanced Tracing for Refactoring
+
+With the integration of detailed logging, all functions in `line_chopping_refactor.py` now perform tracing analysis through their execution flow. This involves:
+
+- **Entry and Exit Logs**: Each function logs when it is entered and exited, providing a clear trace of the execution sequence.
+- **Function Execution Flow**: By examining the logs, developers can understand the order in which functions are called and how data flows through the refactoring process.
+- **Debugging Assistance**: Enhanced tracing aids in identifying bottlenecks or unexpected behaviors within the refactoring tool, facilitating quicker debugging and optimization.
+
+```python
+import logging
+
+def some_function():
+    logging.debug("Entering some_function")
+    # ...existing code...
+    logging.debug("Exiting some_function")
+```
+
+This comprehensive logging setup ensures that the refactoring tool's operations are transparent and easily monitorable, thereby improving maintainability and reliability.
+
+## Scope Hierarchy and Refactoring Primitives
+
+### Scopes and Regex Parameters
+
+- **Function Scope**
+  - **Regex Pattern**: `r'def\s+(\w+)\s*\('`
+  - **Description**: Identifies function declarations.
+
+- **Class Scope**
+  - **Regex Pattern**: `r'class\s+(\w+)\s*\('`
+  - **Description**: Identifies class declarations.
+
+- **Variable Scope**
+  - **Regex Pattern**: `r'(\w+)\s*='`
+  - **Description**: Identifies variable assignments.
+
+### Refactoring Primitives
+
+- **CHOP lines L..R -> extract**
+  - **Description**: Extracts lines from L to R into a new function or class.
+
+- **CHOP def function_name -> rename=new_name**
+  - **Description**: Renames the specified function.
+
+- **CHOP class ClassName -> rename=NewName**
+  - **Description**: Renames the specified class.
+
+## Restructuring for DSL Integration
+
+To align the document with the DSL (Domain-Specific Language) framework, the following restructuring is implemented:
+
+### DSL Overview
+
+The DSL is designed to simplify and standardize refactoring commands, allowing developers to specify refactoring actions concisely. It integrates seamlessly with the line chopping tool, enabling automated and precise code modifications.
+
+### DSL Syntax and Semantics
+
+- **CHOP lines L..R -> extract**: Extracts lines from L to R into a new function or class.
+- **CHOP def function_name -> rename=new_name**: Renames the specified function.
+- **CHOP class ClassName -> rename=NewName**: Renames the specified class.
+- **CHOP lines L..R -> migrate_manual_steps**: Automates manual refactoring steps within the specified lines.
+- **CHOP def function_name -> integrate_custom_action**: Integrates custom refactoring actions for the specified function.
+
+**Examples:**
+
+```bash
+python line_chopping_refactor.py myfile.py --dsl "CHOP lines 10..30 -> extract; CHOP def manage -> rename=administer; CHOP class Supervisor -> rename=Manager"
+```
+
+### DSL Integration in Refactoring
+
+The DSL commands are parsed through "process_dsl_instructions" to handle all refactoring tasks in a unified manner.
+
+## Inventory of Non-DSL Code
+
+Identify sections and code snippets within the document and tool that are now represented by the DSL:
+
+- **Manual Refactoring Steps**: Previously described manual processes are now automated through DSL commands like `migrate_manual_steps`.
+- **Custom Refactoring Actions**: Specific actions such as integrating custom behaviors are now manageable via DSL commands like `integrate_custom_action`.
+- **Utility Functions in Tool**: Enhanced utility functions support DSL-driven operations, ensuring seamless execution of refactoring commands.
+
+## Gradient Analysis for DSL Migration
+
+Analyze the identified non-DSL elements to prioritize their migration into the DSL framework:
+
+1. **High Priority**
+   - **Manual Refactoring Steps**
+     - **Reason**: Automating these steps can significantly improve efficiency.
+     - **Action**: Define corresponding DSL commands to automate these processes.
+
+2. **Medium Priority**
+   - **Utility Functions in Tool**
+     - **Reason**: Enhancing tool capabilities through DSL can streamline operations.
+     - **Action**: Integrate these utilities as callable DSL actions.
+
+3. **Low Priority**
+   - **Custom Refactoring Actions**
+     - **Reason**: These actions are rarely used and have minimal impact.
+     - **Action**: Evaluate the necessity before DSL integration.
+
 ## Best Practices for Using the Line Chopping Tool
 
 - **Precise Line Identification**: Always verify line numbers for start and end points to ensure accurate code selection.
 - **Maintain Context**: Include relevant context lines to provide clarity and maintain the logical flow of the code.
 - **Validate After Refactoring**: Test the modified code to ensure functionality remains unaffected.
+- **Leverage Enhanced Tracing**: Utilize the detailed logging to monitor the refactoring process and diagnose issues effectively.
+- **Utilize DSL Commands**: Prefer using DSL commands for refactoring to maintain consistency and leverage automation benefits.
 
 ## Minimizing Token Consumption
 
 Certain language models have strict token limits or experience difficulties with large blocks of code. By “chopping” your code into smaller sections and providing a concise, standardized prompt element, you can guide the model more efficiently. Consider including the following points in your prompt:
 
 • A simple overview of the line chopping objective (“We will break large code blocks into discrete segments.”).
+
 • The main problem it solves (avoiding token overflows and confusion in large transformations).
+
 • Instructions for how the model should handle boundary markers or context cues.
 
 Example prompt text:
-“Tool: A line-chopping utility that selectively extracts and replaces code. It reduces token overhead by fencing code regions, tracking them with unique markers, and limiting edits to vital sections only.”
+“We will add detailed logging to trace the execution flow of the line chopping refactoring tool. This includes entry and exit logs for each function, along with key variable states.”
+
+## Common DSL Examples
+
+Here are some common DSL examples to illustrate how to use the line chopping tool effectively:
+
+### Extracting Lines into a New Function
+
+To extract lines 10 to 30 into a new function:
+
+```bash
+python line_chopping_refactor.py myfile.py --dsl "CHOP lines 10..30 -> extract"
+```
+
+### Renaming a Function
+
+To rename a function `manage` to `administer`:
+
+```bash
+python line_chopping_refactor.py myfile.py --dsl "CHOP def manage -> rename=administer"
+```
+
+### Renaming a Class
+
+To rename a class `Supervisor` to `Manager`:
+
+```bash
+python line_chopping_refactor.py myfile.py --dsl "CHOP class Supervisor -> rename=Manager"
+```
+
+### Migrating Manual Refactoring Steps
+
+To automate manual refactoring steps within lines 50 to 70:
+
+```bash
+python line_chopping_refactor.py myfile.py --dsl "CHOP lines 50..70 -> migrate_manual_steps"
+```
+
+### Integrating Custom Refactoring Actions
+
+To integrate custom refactoring actions for the function `process_data`:
+
+```bash
+python line_chopping_refactor.py myfile.py --dsl "CHOP def process_data -> integrate_custom_action"
+```
+
+## Editing Scenarios: Prepend, Append, and Concatenation
+
+### Prepend
+
+Prepending involves adding code at the beginning of a file or function. This can be useful for adding imports, comments, or initial setup code.
+
+Example:
+
+```python
+# Prepend logging setup to a Python file
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+
+# ...existing code...
+```
+
+### Append
+
+Appending involves adding code at the end of a file or function. This is often used for adding cleanup code, final comments, or closing statements.
+
+Example:
+
+```python
+# Append a closing statement to a Python function
+def some_function():
+    # ...existing code...
+    logging.debug("Exiting some_function")
+```
+
+### Concatenation
+
+Concatenation using `cat <() <() <()` allows combining multiple files or code snippets into a single output. This is useful for merging code from different sources or creating a composite script.
+
+Example:
+
+```bash
+# Concatenate three Python files into one
+cat <(echo "# Combined Script") <(cat file1.py) <(cat file2.py) <(cat file3.py) > combined.py
+```
 
 ## Conclusion
 
-Incorporating therblig-centric methodologies in code refactoring leads to more efficient and maintainable codebases. The line chopping tool is an excellent resource for developers aiming to optimize their code by focusing on essential functionalities and reducing unnecessary complexities.
+Incorporating therblig-centric methodologies in code refactoring leads to more efficient and maintainable codebases. The line chopping tool, now enhanced with detailed tracing capabilities, is an excellent resource for developers aiming to optimize their code by focusing on essential functionalities and reducing unnecessary complexities.
 
 ## Example Script
 
@@ -185,13 +373,13 @@ class Supervisor:
         os.rmdir(self.output_dir)
 
     def test_identify_function_boundaries(self):
-        with open(self.input_file, 'r') as file:
+        with open(self.input_file, 'r') as file):
             lines = file.readlines()
         boundaries = [i for i, line in enumerate(lines) if re.match(r'(class|def) ', line)]
         self.assertEqual(boundaries, [1, 4, 7])
 
     def test_extract_and_write_functions(self):
-        with open(self.input_file, 'r') as file:
+        with open(self.input_file, 'r') as file):
             lines = file.readlines()
         boundaries = [i for i, line in enumerate(lines) if re.match(r'(class|def) ', line)]
         prev_line = 0
@@ -259,6 +447,7 @@ We will also need to update the tool to handle the new input format and generate
 When refactoring, you can enable verification metrics and apply filters by using command-line options like --verify and --min_functions:
 
 • --verify gathers metrics (e.g., total line count, function count) after chopping.
+
 • --min_functions checks that the refactored file includes at least a certain number of functions, warning if the threshold is not met.
 
 Example usage:
@@ -273,7 +462,9 @@ This ensures your line chopping process meets minimum expectations for function 
 To simplify specifying exact line ranges or function blocks, we introduce a small DSL. A typical instruction might look like:
 
 • CHOP lines 10..30 -> extract
+
 • CHOP def manage -> rename=administer
+
 • CHOP class Supervisor -> rename=Manager
 
 These instructions can be parsed and converted into concrete refactoring actions. A sample CLI call might look like:
@@ -290,4 +481,74 @@ Example usage:
 ```bash
 python line_chopping_refactor.py myfile.py --scan_only
 ```
-`````
+
+## Including File Objects in UML Interactions
+
+The line chopping tool can visualize the interactions between file objects and their transformations using UML diagrams. This helps in understanding the 1-to-many conversion per the DSL commands.
+
+### Visualizing File Objects
+
+To include file objects in the UML interactions, the tool generates diagrams that show how a single file can be split into multiple smaller files. This is particularly useful for understanding the impact of refactoring on the codebase structure.
+
+### Example
+
+Here is an example of how a single file can be split into multiple files:
+
+```bash
+# Render the UML diagram showing file objects
+python line_chopping_refactor.py myfile.py --dsl "CHOP lines 10..30 -> extract; CHOP def manage -> rename=administer" --render_mermaid
+```
+
+This command applies the specified DSL commands and generates a UML diagram that includes the file objects and their transformations.
+
+## Propose Mode for DSL
+
+The "propose" mode allows running graphics visitors without applying mutation visitors. This is useful for visualizing the proposed changes without actually modifying the code.
+
+### Propose Mode Overview
+
+In propose mode, the tool processes the DSL commands and generates the corresponding UML diagrams without making any changes to the code. This helps in reviewing the proposed refactoring before committing to the changes.
+
+### Example
+
+Here is an example of using propose mode:
+
+```bash
+# Run in propose mode to visualize the proposed changes
+python line_chopping_refactor.py myfile.py --dsl "CHOP lines 10..30 -> extract; CHOP def manage -> rename=administer" --propose --render_mermaid
+```
+
+This command processes the DSL commands in propose mode and generates a UML diagram showing the proposed changes.
+
+### Benefits of Propose Mode
+
+- **Review Before Commit**: Allows developers to review the proposed changes before applying them.
+- **Visual Feedback**: Provides visual feedback on the impact of the refactoring.
+- **Safe Exploration**: Enables safe exploration of different refactoring options without modifying the code.
+
+By using propose mode, developers can ensure that the refactoring aligns with their goals and make informed decisions about the changes.
+
+## New Visitor Plugins
+
+Three new visitor plugins have been introduced to enhance the refactoring workflow:
+
+1. **BashToolsVisitor**: Handles external bash tools.
+2. **DSLVisualizationVisitor**: Renders before-and-after diagrams for DSL refactoring steps.
+3. **ReviewLatchVisitor**: Provides a review checkpoint to accept or reject proposed changes before finalizing.
+4. **MetricsLoggerVisitor**: Integrates pandas-based metrics logging to monitor and analyze refactoring performance on demand.
+
+These plugins are registered in sequence to allow the BashToolsVisitor to run first, followed by visualization, metrics logging, and then the final review latch.
+
+## Metrics Logging
+
+The **MetricsLoggerVisitor** utilizes pandas to collect and transform metrics related to the refactoring process. It can be triggered at any point to generate reports and analyze performance data.
+
+### Features
+
+- **Real-time Metrics Collection**: Gathers data during the refactoring process.
+- **On-Demand Reporting**: Generates detailed metrics reports when needed.
+- **Data Transformation**: Uses pandas for efficient data manipulation and analysis.
+
+### Usage
+
+To trigger metrics logging, ensure that the MetricsLoggerVisitor is registered and invoked appropriately within the refactoring workflow.

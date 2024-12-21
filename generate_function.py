@@ -10,7 +10,7 @@ from redline.supervisor.generic_api_request import generic_api_request
 from redline.supervisor.utils import format_bytes
 
 
-def generate(self, prompt: str, system_prompt: str) -> Optional[str]:
+def generate(self, prompt: str, system_prompt: str, **kwargs) -> Optional[str]:
     """Generate a response using a generic API."""
     try:
         logging.debug("Sending request to generic API")
@@ -24,6 +24,7 @@ def generate(self, prompt: str, system_prompt: str) -> Optional[str]:
             "temperature": 0.7,
             "max_tokens": -1,
             "stream": False,
+            **kwargs,
         }
         request_bytes = len(json.dumps(payload).encode("utf-8"))
         self.sent_bytes += request_bytes

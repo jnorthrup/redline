@@ -9,7 +9,7 @@ import time
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
-from redline.supervisor.utils import DebouncedLogger
+from .utils import DebouncedLogger
 
 
 class MemoryManager:

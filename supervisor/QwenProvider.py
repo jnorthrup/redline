@@ -1,15 +1,15 @@
-"""Module for QwenProvider."""
+"""Module for GenericProvider."""
 
 from datetime import datetime
 from typing import Any, Dict, Optional
 
 from openai import OpenAI
 
-from redline.supervisor.utils import DebouncedLogger
+from .utils import DebouncedLogger
 
 
-class QwenProvider:
-    """Class for QwenProvider."""
+class GenericProvider:
+    """Class for GenericProvider."""
 
     def __init__(self, config: Dict[str, Any]):
         try:
@@ -17,15 +17,15 @@ class QwenProvider:
             self.api_base = config.get("api_base")
             self.model = config.get("model")
             self.logger = DebouncedLogger(interval=5.0)
-            self.logger.debug(f"QwenProvider initialized with config: {self.config}")
+            self.logger.debug(f"GenericProvider initialized with config: {self.config}")
             self._sent_bytes = 0
             self._received_bytes = 0
             self.client = OpenAI(api_key="not-needed", base_url=self.api_base)
         except Exception as e:
-            self.logger.error(f"Error initializing QwenProvider: {e}")
+            self.logger.error(f"Error initializing GenericProvider: {e}")
             raise
 
-    def generate(self, prompt: str, system_prompt: str) -> Optional[str]:
+    async def generate(self, prompt: str, system_prompt: str) -> Optional[str]:
         """Generate text based on the given prompts."""
         try:
             messages = [

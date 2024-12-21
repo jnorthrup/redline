@@ -1,12 +1,12 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
-from redline.supervisor.tools import ToolA, ToolB, ToolC
+# from redline.supervisor.tools import ToolA, ToolB, ToolC
 
 
 class AgentOne:
     def __init__(
         self,
-        tools: List[ToolA, ToolB],
+        tools: List[Any],
         role: str,
         context_window: int,
         status_line: str,
@@ -30,7 +30,7 @@ class AgentOne:
 class AgentTwo:
     def __init__(
         self,
-        tools: List[ToolB, ToolC],
+        tools: List[Any],
         role: str,
         context_window: int,
         status_line: str,

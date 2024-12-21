@@ -1,5 +1,5 @@
 from .base import LLMProvider
 from .generic import GenericProvider
-from .qwen import QwenProvider
+from .qwen import GenericProvider
 
-__all__ = ["LLMProvider", "GenericProvider", "QwenProvider"]
+__all__ = ["LLMProvider", "GenericProvider", "GenericProvider"]

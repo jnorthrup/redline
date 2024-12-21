@@ -9,7 +9,7 @@ from ..utils import DebouncedLogger, format_bytes
 from .base import LLMProvider
 
 
-class QwenProvider(LLMProvider):
+class GenericProvider(LLMProvider):
     def __init__(self, config: Dict[str, Any]):
         self.api_base = config.get("api_base", "http://localhost:1234/v1")
         self.model = config.get("model", "qwen-7b")

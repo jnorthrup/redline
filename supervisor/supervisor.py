@@ -2,78 +2,101 @@
 Module for supervisor operations.
 """
 
+# Standard imports
 import asyncio
 import json
 import logging
 import os
 import subprocess
 import sys
-
-import pandas as pd
-
-# Add the parent directory to the system path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 import random
 import re
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
+# Third-party imports
+import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-from redline.controllers.status_line_controller import StatusLineController
-from redline.models.status_line_config import StatusLineConfig
-from redline.supervisor.cognitive.explanation_generator import \
-    ExplanationGenerator
-from redline.supervisor.cognitive.finding_derivation import FindingDerivation
-from redline.supervisor.cognitive.gap_identifier import GapIdentifier
-from redline.supervisor.config import SupervisorConfig
-from redline.supervisor.core import Supervisor
-from redline.supervisor.error_handler import ErrorHandler
-from redline.supervisor.MemoryManager import MemoryManager
-from redline.supervisor.MessageHandler import MessageHandler
-from redline.supervisor.MessageLoop import MessageLoop
-from redline.supervisor.ProviderManager import ProviderManager
-from redline.supervisor.providers import LLMProvider
-from redline.supervisor.providers.generic import GenericProvider
-from redline.supervisor.QwenProvider import QwenProvider
-from redline.supervisor.SystemPromptHandler import SystemPromptHandler
-from redline.supervisor.ToolManager import ToolManager
-from redline.supervisor.utils import (DebouncedLogger, format_bytes,
-                                      setup_logging)
-from redline.supervisor.WebSearch import WebSearch
+# First-party imports
+from prompts.status_line_controller import StatusLineController
+from models.status_line_config import StatusLineConfig
+from .config import SupervisorConfig
+from .core import Supervisor
+from .error_handler import ErrorHandler
+from .MemoryManager import MemoryManager
+from .MessageHandler import MessageHandler
+from .MessageLoop import MessageLoop
+from .ProviderManager import ProviderManager
+from .providers import LLMProvider
+from .providers.generic import GenericProvider
+from .SystemPromptHandler import SystemPromptHandler
+from .ToolManager import ToolManager
+from .utils import (DebouncedLogger, format_bytes,
+                                   setup_logging)
+from .WebSearch import WebSearch
+from .lms_launch_controller import LMSController, LMSConfig
+from .LMStudioManager import LMStudioManager
+
+
+class Supervisor:
+    def __init__(self, config: SupervisorConfig):
+        self.logger = logging.getLogger(__name__)
+        self.logger.debug("Initializing Supervisor")
+        self.config = config
+        self.lms = LMSController()
+        self.lmstudio = LMStudioManager()
+        # ...existing code...
+        self.logger.debug("Supervisor initialized")
+
+    async def initialize(self):
+        """Initialize supervisor components"""
+        self.logger.debug("Starting initialization")
+        # Start LMS
+        if not await self.lms.start():
+            self.logger.error("Failed to start LMS")
+            return False
+            
+        # Wait for LMStudio
+        if not await self.lmstudio.wait_for_service():
+            self.logger.error("Failed to detect LMStudio service")
+            return False
+            
+        # Continue initialization
+        # ...existing code...
+        self.logger.debug("Initialization complete")
+        return True
+
+    async def shutdown(self):
+        """Cleanup resources"""
+        self.logger.debug("Starting shutdown")
+        await self.lms.stop()
+        # ...existing code...
+        self.logger.debug("Shutdown complete")
 
 
 ## do not create messageloop inline
 async def main():
-    config = SupervisorConfig()
     logger = setup_logging()
+    logger.debug("Starting main function")
+    config = SupervisorConfig()
     error_handler = ErrorHandler(logger)
-
-    # Execute 'lms ls' command and capture the output
+    
+    supervisor = Supervisor(config=config)
+    
     try:
-        lms_output = subprocess.check_output(["lms", "ls", "--json"], text=True)
-        lms_data = json.loads(lms_output)
-        df_lms_items = pd.DataFrame(lms_data)
-        print("LMS Items DataFrame:")
-        print(df_lms_items)
-    except subprocess.CalledProcessError as e:
-        logger.error(f"Failed to execute 'lms ls' command: {e}")
-        df_lms_items = pd.DataFrame()
-
-    # Initialize LMS models like Ollama and LLaMA-chat
-    # Code to load and initialize the models using df_lms_items
-    # For example:
-    # for model_info in df_lms_items.itertuples():
-    #     initialize_model(model_info)
-
-    memory_manager = MemoryManager()
-    message_handler = MessageHandler(df_lms_items)
-    message_loop = MessageLoop(error_handler, df_lms_items)
-    await message_loop.start()
-
+        if not await supervisor.initialize():
+            logger.error("Supervisor initialization failed")
+            return
+        
+        message_loop = MessageLoop(error_handler)
+        await message_loop.start()
+        logger.debug("Main function complete")
+    finally:
+        await supervisor.shutdown()
 
 if __name__ == "__main__":
+    import asyncio
     asyncio.run(main())
