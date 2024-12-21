@@ -11,6 +11,7 @@ class MemoryBase:
     """
     Base class for managing observations and action outcomes.
     """
+
     def __init__(self):
         self.observations = []
         self.action_outcomes = []

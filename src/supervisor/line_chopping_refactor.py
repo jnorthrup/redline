@@ -3,6 +3,7 @@ This module provides functionality for refactoring code by line chopping,
 including identifying function boundaries, extracting functions,
 generating unique IDs, and applying DSL-based transformations.
 """
+
 import os
 import re
 import uuid
@@ -13,7 +14,9 @@ from typing import Any, Dict, List
 import logging
 
 # Configure logging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 __all__ = [
     "identify_function_boundaries",
@@ -23,18 +26,34 @@ __all__ = [
     "refactor_code",
     "get_file_flavor",
     "register_visitor_plugin",
-    "execute_visitor_plugins"
+    "execute_visitor_plugins",
+    "parse_arguments",
+    "verify_refactoring",
+    "parse_dsl",
+    "scan_code",
+    "migrate_manual_steps_to_dsl",
+    "integrate_custom_actions_into_dsl",
+    "extract_and_refactor_lines",
+    "rename_entity",
+    "indent_code",
+    "example_script",
+    "run_unit_tests",
+    "process_file",
+    "main",
+    "extract_lines",
+    "rename_entity_primitive",
+    "handle_dsl_command",
 ]
 
 # REGEX patterns in REGEX_GREP_MAP
 REGEX_GREP_MAP = {
     "python": {
         "function": r"def\s+(\w+)\s*\(",  # Identifies Python function declarations
-        "class": r"class\s+(\w+)\s*\(",    # Identifies Python class declarations
+        "class": r"class\s+(\w+)\s*\(",  # Identifies Python class declarations
     },
     "typescript": {
         "function": r"function\s+(\w+)\s*\(",  # Identifies TypeScript function declarations
-        "class": r"class\s+(\w+)\s*\{",        # Identifies TypeScript class declarations
+        "class": r"class\s+(\w+)\s*\{",  # Identifies TypeScript class declarations
     },
     # ...additional file flavors...
 }
@@ -69,7 +88,7 @@ def get_file_flavor(file_extension: str) -> str:
         ".json": "json",
         ".xml": "xml",
         ".yaml": "yaml",
-        ".yml": "yaml"
+        ".yml": "yaml",
     }
     result = file_flavors.get(file_extension, "unknown")
     logging.debug("Exiting get_file_flavor with result: %s", result)
@@ -91,9 +110,9 @@ def identify_function_boundaries(code: str, flavor: str) -> List[Dict[str, Any]]
     logging.debug("Entering identify_function_boundaries")
     boundaries = []
     for i, line in enumerate(code.splitlines()):
-        if flavor == "python" and re.match(r'(class|def) ', line):
+        if flavor == "python" and re.match(r"(class|def) ", line):
             boundaries.append({"line_number": i, "line": line})
-        elif flavor == "typescript" and re.match(r'(class|function) ', line):
+        elif flavor == "typescript" and re.match(r"(class|function) ", line):
             boundaries.append({"line_number": i, "line": line})
     logging.debug("Found boundaries: %s", boundaries)
     logging.debug("Exiting identify_function_boundaries")
@@ -203,13 +222,15 @@ def refactor_code(code: str, file_path: str, flavor: str) -> str:
             modified_lines.extend(lines[:start_line])
 
         unique_id = str(uuid.uuid4())
-        match = re.search(r'(class|def|function) (\w+)', lines[start_line])
+        match = re.search(r"(class|def|function) (\w+)", lines[start_line])
         function_name = match.group(2) if match else "unknown"
-        output_file = os.path.join(output_dir, f"{function_name}{os.path.splitext(file_path)[1]}")
-        with open(output_file, 'w', encoding='utf-8') as f:
-            f.write('\n'.join(function_code))
+        output_file = os.path.join(
+            output_dir, f"{function_name}{os.path.splitext(file_path)[1]}"
+        )
+        with open(output_file, "w", encoding="utf-8") as f:
+            f.write("\n".join(function_code))
 
-        with open(output_file, 'r+', encoding='utf-8') as f:
+        with open(output_file, "r+", encoding="utf-8") as f:
             content = f.read()
             f.seek(0, 0)
             f.write(f"# {unique_id}\n{content}")
@@ -218,7 +239,14 @@ def refactor_code(code: str, file_path: str, flavor: str) -> str:
         modified_lines.insert(start_line, lines[start_line])
         if flavor == "python":
             if start_line + 1 < len(lines):
-                modified_lines.insert(start_line + 2, re.sub(r'def (\w+)\(self\)', r'def \1(self, obj)', lines[start_line + 1]))
+                modified_lines.insert(
+                    start_line + 2,
+                    re.sub(
+                        r"def (\w+)\(self\)",
+                        r"def \1(self, obj)",
+                        lines[start_line + 1],
+                    ),
+                )
             else:
                 logging.warning("Skipping parameter renaming due to index out of range")
         prev_line = start_line + 1
@@ -226,13 +254,15 @@ def refactor_code(code: str, file_path: str, flavor: str) -> str:
     if prev_line != 0:
         function_code = lines[prev_line:]
         modified_lines.extend(lines[prev_line:])
-        match = re.search(r'(class|def|function) (\w+)', lines[prev_line])
+        match = re.search(r"(class|def|function) (\w+)", lines[prev_line])
         function_name = match.group(2) if match else "unknown"
-        output_file = os.path.join(output_dir, f"{function_name}{os.path.splitext(file_path)[1]}")
-        with open(output_file, 'w', encoding='utf-8') as f:
-            f.write('\n'.join(function_code))
+        output_file = os.path.join(
+            output_dir, f"{function_name}{os.path.splitext(file_path)[1]}"
+        )
+        with open(output_file, "w", encoding="utf-8") as f:
+            f.write("\n".join(function_code))
 
-        with open(output_file, 'r+', encoding='utf-8') as f:
+        with open(output_file, "r+", encoding="utf-8") as f:
             content = f.read()
             f.seek(0, 0)
             f.write(f"# {uuid.uuid4()}\n{content}")
@@ -241,16 +271,25 @@ def refactor_code(code: str, file_path: str, flavor: str) -> str:
         modified_lines.insert(prev_line + 1, lines[prev_line])
         if flavor == "python":
             if prev_line + 1 < len(lines):
-                modified_lines.insert(prev_line + 2, re.sub(r'def (\w+)\(self\)', r'def \1(self, obj)', lines[prev_line + 1]))
+                modified_lines.insert(
+                    prev_line + 2,
+                    re.sub(
+                        r"def (\w+)\(self\)", r"def \1(self, obj)", lines[prev_line + 1]
+                    ),
+                )
             else:
                 logging.warning("Skipping parameter renaming due to index out of range")
 
     modified_code = "\n".join(modified_lines)
 
-    lint_files = [file_path] + [os.path.join(output_dir, f) for f in os.listdir(output_dir) if f.endswith(os.path.splitext(file_path)[1])]
+    lint_files = [file_path] + [
+        os.path.join(output_dir, f)
+        for f in os.listdir(output_dir)
+        if f.endswith(os.path.splitext(file_path)[1])
+    ]
     for file in lint_files:
         try:
-            subprocess.run(['black', file], check=True)
+            subprocess.run(["black", file], check=True)
         except subprocess.CalledProcessError as e:
             logging.debug("Error linting file %s: %s", file, e)
 
@@ -270,19 +309,40 @@ def parse_arguments():
     logging.debug("Parsing arguments")
     parser = argparse.ArgumentParser(description="Line Chopping Refactoring Tool")
     parser.add_argument("file", help="Path to the input file")
-    parser.add_argument("--verify", action="store_true", help="Enable verification metrics")
-    parser.add_argument("--min_functions", type=int, default=1, help="Minimum number of functions required")
-    parser.add_argument("--scan_only", action="store_true", help="Perform scan-only operation")
+    parser.add_argument(
+        "--verify", action="store_true", help="Enable verification metrics"
+    )
+    parser.add_argument(
+        "--min_functions",
+        type=int,
+        default=1,
+        help="Minimum number of functions required",
+    )
+    parser.add_argument(
+        "--scan_only", action="store_true", help="Perform scan-only operation"
+    )
     parser.add_argument("--dsl", type=str, help="DSL instructions for line chopping")
-    parser.add_argument("--run_example", action="store_true", help="Run the example script")
+    parser.add_argument(
+        "--run_example", action="store_true", help="Run the example script"
+    )
     parser.add_argument("--run_tests", action="store_true", help="Run unit tests")
-    parser.add_argument("--render_mermaid", action="store_true", help="Render Mermaid diagram from scan results")
-    parser.add_argument("--propose", action="store_true", help="Propose refactoring changes without applying them")
+    parser.add_argument(
+        "--render_mermaid",
+        action="store_true",
+        help="Render Mermaid diagram from scan results",
+    )
+    parser.add_argument(
+        "--propose",
+        action="store_true",
+        help="Propose refactoring changes without applying them",
+    )
     logging.debug("Exiting parse_arguments")
     return parser.parse_args()
 
 
-def verify_refactoring(output_dir: str, original_function_count: int, new_function_count: int):
+def verify_refactoring(
+    output_dir: str, original_function_count: int, new_function_count: int
+):
     """
     Verify the refactoring process.
 
@@ -294,7 +354,9 @@ def verify_refactoring(output_dir: str, original_function_count: int, new_functi
     logging.debug("Entering verify_refactoring")
     logging.debug("Verifying refactoring")
     if new_function_count < original_function_count:
-        print(f"Warning: Expected at least {original_function_count} functions, found {new_function_count}")
+        print(
+            f"Warning: Expected at least {original_function_count} functions, found {new_function_count}"
+        )
     else:
         print("Verification passed: Function count meets the requirement.")
     logging.debug("Exiting verify_refactoring")
@@ -313,8 +375,8 @@ def parse_dsl(dsl_instructions: str) -> List[Dict[str, Any]]:
     logging.debug("Entering parse_dsl")
     logging.debug("Parsing DSL instructions")
     instructions = []
-    for instruction in dsl_instructions.split(';'):
-        parts = instruction.strip().split('->')
+    for instruction in dsl_instructions.split(";"):
+        parts = instruction.strip().split("->")
         if len(parts) == 2:
             action, params = parts[0].strip(), parts[1].strip()
             instructions.append({"action": action, "params": params})
@@ -338,12 +400,20 @@ def scan_code(code: str, flavor: str) -> List[Dict[str, Any]]:
     logging.debug("Entering scan_code")
     logging.debug("Scanning code for API")
     boundaries = identify_function_boundaries(code, flavor)
-    api_scan = [{"type": boundary["line"].split()[0], "name": re.search(r'(class|def|function) (\w+)', boundary["line"]).group(2)} for boundary in boundaries]
+    api_scan = [
+        {
+            "type": boundary["line"].split()[0],
+            "name": re.search(r"(class|def|function) (\w+)", boundary["line"]).group(2),
+        }
+        for boundary in boundaries
+    ]
     logging.debug("Exiting scan_code")
     return api_scan
 
 
-def migrate_manual_steps_to_dsl(instructions: List[Dict[str, Any]], code: str, flavor: str) -> str:
+def migrate_manual_steps_to_dsl(
+    instructions: List[Dict[str, Any]], code: str, flavor: str
+) -> str:
     """
     Migrate manual refactoring steps to DSL-driven commands.
 
@@ -362,7 +432,9 @@ def migrate_manual_steps_to_dsl(instructions: List[Dict[str, Any]], code: str, f
     return code
 
 
-def integrate_custom_actions_into_dsl(instructions: List[Dict[str, Any]], code: str, flavor: str) -> str:
+def integrate_custom_actions_into_dsl(
+    instructions: List[Dict[str, Any]], code: str, flavor: str
+) -> str:
     """
     Integrate custom refactoring actions into the DSL framework.
 
@@ -379,7 +451,9 @@ def integrate_custom_actions_into_dsl(instructions: List[Dict[str, Any]], code: 
         action = instruction.get("action")
         params = instruction.get("params")
         if action.startswith("CHOP def") or action.startswith("CHOP class"):
-            rename_match = re.search(r'rename=(\w+)', params)  # Matches rename parameters
+            rename_match = re.search(
+                r"rename=(\w+)", params
+            )  # Matches rename parameters
             if rename_match:
                 new_name = rename_match.group(1)
                 code = rename_entity(code, action, new_name, flavor)
@@ -404,13 +478,15 @@ def extract_and_refactor_lines(code: str, start: int, end: int, flavor: str) -> 
     """
     logging.debug("Entering extract_and_refactor_lines")
     lines = code.splitlines()
-    extracted_code = "\n".join(lines[start-1:end])
+    extracted_code = "\n".join(lines[start - 1 : end])
     unique_id = str(uuid.uuid4())
     new_function_name = f"extracted_function_{unique_id.replace('-', '')[:8]}"
-    refactored_code = f"# {unique_id}\n" \
-                      f"def {new_function_name}():\n" \
-                      f"{indent_code(extracted_code, 4)}\n"
-    lines[start-1:end] = [refactored_code]
+    refactored_code = (
+        f"# {unique_id}\n"
+        f"def {new_function_name}():\n"
+        f"{indent_code(extracted_code, 4)}\n"
+    )
+    lines[start - 1 : end] = [refactored_code]
     logging.debug("Extracted lines %s-%s into %s", start, end, new_function_name)
     logging.debug("Exiting extract_and_refactor_lines")
     return "\n".join(lines)
@@ -430,10 +506,14 @@ def rename_entity(code: str, action: str, new_name: str, flavor: str) -> str:
         str: The code with the renamed entity.
     """
     logging.debug("Entering rename_entity")
-    match = re.search(r'(def|class) (\w+)', action)  # Captures entity type and old name for renaming
+    match = re.search(
+        r"(def|class) (\w+)", action
+    )  # Captures entity type and old name for renaming
     if match:
         entity_type, old_name = match.groups()
-        code = re.sub(rf'\b{entity_type} {old_name}\b', f"{entity_type} {new_name}", code)  # Renames the entity
+        code = re.sub(
+            rf"\b{entity_type} {old_name}\b", f"{entity_type} {new_name}", code
+        )  # Renames the entity
         logging.debug("Renamed %s from %s to %s", entity_type, old_name, new_name)
     logging.debug("Exiting rename_entity")
     return code
@@ -450,8 +530,10 @@ def indent_code(code: str, spaces: int) -> str:
     Returns:
         str: Indented code.
     """
-    indentation = ' ' * spaces
-    return "\n".join(indentation + line if line.strip() != "" else line for line in code.splitlines())
+    indentation = " " * spaces
+    return "\n".join(
+        indentation + line if line.strip() != "" else line for line in code.splitlines()
+    )
 
 
 def example_script():
@@ -472,12 +554,12 @@ def example_script():
     os.makedirs(output_dir, exist_ok=True)
 
     # Step 1: Identify function boundaries and object features
-    with open(input_file, 'r', encoding='utf-8') as file:
+    with open(input_file, "r", encoding="utf-8") as file:
         lines = file.readlines()
 
     boundaries = []
     for i, line in enumerate(lines):
-        if re.match(r'(class|def) ', line):
+        if re.match(r"(class|def) ", line):
             boundaries.append(i)
 
     # Step 2: Extract and write functions
@@ -495,13 +577,13 @@ def example_script():
         unique_id = str(uuid.uuid4())
 
         # Write the function to a new file
-        function_name = re.search(r'(class|def) (\w+)', lines[start_line]).group(2)
+        function_name = re.search(r"(class|def) (\w+)", lines[start_line]).group(2)
         output_file = os.path.join(output_dir, f"{function_name}.py")
-        with open(output_file, 'w', encoding='utf-8') as f:
-            f.write(''.join(function_code))
+        with open(output_file, "w", encoding="utf-8") as f:
+            f.write("".join(function_code))
 
         # Add unique comment token
-        with open(output_file, 'r+', encoding='utf-8') as f:
+        with open(output_file, "r+", encoding="utf-8") as f:
             content = f.read()
             f.seek(0, 0)
             f.write(f"# {unique_id}\n{content}")
@@ -511,20 +593,22 @@ def example_script():
 
         # Update the original class to accept the object prototype
         if start_line + 1 < len(lines):
-            lines[start_line + 1] = re.sub(r'def (\w+)\(self\)', r'def \1(self, obj)', lines[start_line + 1])
+            lines[start_line + 1] = re.sub(
+                r"def (\w+)\(self\)", r"def \1(self, obj)", lines[start_line + 1]
+            )
 
         prev_line = start_line + 1
 
     # Handle the last function
     if prev_line != 0:
         function_code = lines[prev_line:]
-        function_name = re.search(r'(class|def) (\w+)', lines[prev_line]).group(2)
+        function_name = re.search(r"(class|def) (\w+)", lines[prev_line]).group(2)
         output_file = os.path.join(output_dir, f"{function_name}.py")
-        with open(output_file, 'w', encoding='utf-8') as f:
-            f.write(''.join(function_code))
+        with open(output_file, "w", encoding="utf-8") as f:
+            f.write("".join(function_code))
 
         # Add unique comment token
-        with open(output_file, 'r+', encoding='utf-8') as f:
+        with open(output_file, "r+", encoding="utf-8") as f:
             content = f.read()
             f.seek(0, 0)
             f.write(f"# {uuid.uuid4()}\n{content}")
@@ -534,20 +618,24 @@ def example_script():
 
         # Update the original class to accept the object prototype
         if prev_line + 1 < len(lines):
-            lines[prev_line + 1] = re.sub(r'def (\w+)\(self\)', r'def \1(self, obj)', lines[prev_line + 1])
+            lines[prev_line + 1] = re.sub(
+                r"def (\w+)\(self\)", r"def \1(self, obj)", lines[prev_line + 1]
+            )
 
     # Debug: Print the modified lines
     print("Modified lines:")
-    print(''.join(lines))
+    print("".join(lines))
 
     # Write the modified lines back to the original file
-    with open(input_file, 'w', encoding='utf-8') as file:
+    with open(input_file, "w", encoding="utf-8") as file:
         file.writelines(lines)
 
     # Step 3: Lint the resulting files
-    lint_files = [input_file] + [os.path.join(output_dir, f) for f in os.listdir(output_dir) if f.endswith('.py')]
+    lint_files = [input_file] + [
+        os.path.join(output_dir, f) for f in os.listdir(output_dir) if f.endswith(".py")
+    ]
     for file in lint_files:
-        subprocess.run(['black', file])
+        subprocess.run(["black", file])
 
     print("Line chopping refactoring completed successfully.")
     logging.debug("Exiting example_script")
@@ -580,7 +668,7 @@ class Supervisor:
     def report(self):
         print("Reporting")
 """
-            with open(self.input_file, 'w', encoding='utf-8') as f:
+            with open(self.input_file, "w", encoding="utf-8") as f:
                 f.write(self.sample_code)
             os.makedirs(self.output_dir, exist_ok=True)
 
@@ -591,21 +679,21 @@ class Supervisor:
             os.rmdir(self.output_dir)
 
         def test_identify_function_boundaries(self):
-            with open(self.input_file, 'r', encoding='utf-8') as file:
+            with open(self.input_file, "r", encoding="utf-8") as file:
                 code = file.read()
             boundaries = identify_function_boundaries(code, "python")
             expected = [
                 {"line_number": 1, "line": "class Supervisor:\\n"},
                 {"line_number": 4, "line": "    def manage(self):\\n"},
-                {"line_number": 7, "line": "    def report(self):\\n"}
+                {"line_number": 7, "line": "    def report(self):\\n"},
             ]
             self.assertEqual(boundaries, expected)
 
         def test_generate_unique_ids(self):
-            with open(self.input_file, 'r', encoding='utf-8') as file:
+            with open(self.input_file, "r", encoding="utf-8") as file:
                 code = file.read()
             refactored_code = generate_unique_ids(code, "python")
-            unique_ids = re.findall(r'# ([a-f0-9\-]{36})', refactored_code)
+            unique_ids = re.findall(r"# ([a-f0-9\-]{36})", refactored_code)
             self.assertEqual(len(unique_ids), 3)
 
     suite = unittest.TestLoader().loadTestsFromTestCase(TestLineChoppingRefactoring)
@@ -620,7 +708,7 @@ def process_file(file_path: str, args: argparse.Namespace):
     logging.debug("Entering process_file")
     flavor = get_file_flavor(os.path.splitext(file_path)[1])
 
-    with open(file_path, 'r', encoding='utf-8') as file:
+    with open(file_path, "r", encoding="utf-8") as file:
         code = file.read()
 
     if args.scan_only:
@@ -649,20 +737,26 @@ def process_file(file_path: str, args: argparse.Namespace):
 
     refactored_code = refactor_code(code, file_path, flavor)
 
-    execute_visitor_plugins(refactored_code, flavor)  # Execute visitors after refactoring
+    execute_visitor_plugins(
+        refactored_code, flavor
+    )  # Execute visitors after refactoring
 
     if args.verify:
         original_function_count = len(identify_function_boundaries(code, flavor))
         new_function_count = len(identify_function_boundaries(refactored_code, flavor))
-        verify_refactoring("agent_functions", original_function_count, new_function_count)
+        verify_refactoring(
+            "agent_functions", original_function_count, new_function_count
+        )
 
     if args.min_functions:
         new_function_count = len(identify_function_boundaries(refactored_code, flavor))
         if new_function_count < args.min_functions:
-            print(f"Error: Refactored code has fewer than {args.min_functions} functions.")
+            print(
+                f"Error: Refactored code has fewer than {args.min_functions} functions."
+            )
             sys.exit(1)
 
-    with open(file_path, 'w', encoding='utf-8') as file:
+    with open(file_path, "w", encoding="utf-8") as file:
         file.write(refactored_code)
 
     if args.render_mermaid:
@@ -766,7 +860,9 @@ def extract_lines(code: str, start: int, end: int, flavor: str) -> str:
     return result
 
 
-def rename_entity_primitive(code: str, entity_type: str, old_name: str, new_name: str, flavor: str) -> str:
+def rename_entity_primitive(
+    code: str, entity_type: str, old_name: str, new_name: str, flavor: str
+) -> str:
     """
     Rename a function or class based on the provided entity type and names.
 
@@ -803,7 +899,7 @@ def handle_dsl_command(command: Dict[str, Any], code: str, flavor: str) -> str:
     params = command.get("params")
 
     if action.startswith("CHOP lines"):
-        lines_range = re.findall(r'\d+', action)
+        lines_range = re.findall(r"\d+", action)
         if len(lines_range) == 2:
             start, end = map(int, lines_range)
             code = extract_lines(code, start, end, flavor)
@@ -813,13 +909,17 @@ def handle_dsl_command(command: Dict[str, Any], code: str, flavor: str) -> str:
         match = re.match(r"CHOP def (\w+)", action)
         if match:
             function_name = match.group(1)
-            new_name = params.split('=')[1] if '=' in params else function_name
+            new_name = params.split("=")[1] if "=" in params else function_name
             code = rename_entity_primitive(code, "def", function_name, new_name, flavor)
-            logging.debug("Executed rename_entity_primitive for function %s to %s", function_name, new_name)
+            logging.debug(
+                "Executed rename_entity_primitive for function %s to %s",
+                function_name,
+                new_name,
+            )
 
     elif action.startswith("CHOP class"):
         match = re.match(r"CHOP class (\w+)", action)
         if match:
             class_name = match.group(1)
-            new_name = params.split('=')[1] if '=' in params else class_name
+            new_name = params.split("=")[1] if "=" in params else class_name
             code

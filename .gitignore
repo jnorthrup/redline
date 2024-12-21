@@ -45,6 +45,8 @@ aider.json
 venv/
 ENV/
 env/
+# Virtual environment
+/tmp/redline_env/
 
 # LLM generated unwanted files
 llm_output/

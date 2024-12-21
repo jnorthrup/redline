@@ -1,26 +1,28 @@
 import asyncio
 import logging
-from  .lms_launch_controller import LMSController, LMSConfig
-from src.supervisor.status_line_factory import StatusLineFactory
-from  .agents import FeedbackAgent, CompletionAgent, SupervisorAgent
-from  .memory.manager import MemoryManager
-from  .tools import Tool
-from  .reward_system import RewardSystem
-from  .handoff import Handoff
-from  .prompt_sandwich import PromptSandwich
+from supervisor.lms_launch_controller import LMSController, LMSConfig
+from supervisor.status_line_factory import StatusLineFactory
+from supervisor.agents import FeedbackAgent, CompletionAgent, SupervisorAgent
+from supervisor.memory.manager import MemoryManager
+from supervisor.tools import Tool
+from supervisor.reward_system import RewardSystem
+from supervisor.handoff import Handoff
+from supervisor.prompt_sandwich import PromptSandwich
 from uplink import Uplink  # New import for uplink
-from .element_registry import ElementRegistry
-from .uplink_manager import UplinkManager
-from .trace_collector import TraceCollector
-from .uplink import Uplink, UplinkMessage
+from supervisor.element_registry import ElementRegistry
+from supervisor.uplink_manager import UplinkManager
+from supervisor.trace_collector import TraceCollector
+from supervisor.uplink import Uplink, UplinkMessage
 from src.uplink.handlers import Uplink, UplinkHandlers
-from .uplink import Uplink
-from .handlers import *
+from supervisor.uplink import Uplink
+from supervisor.handlers import *
+
 
 class Supervisor:
     def __init__(self):
         self.uplink = Uplink()
         self.handlers = UplinkHandlers(self.uplink)
+
 
 def setup_agents():
     memory_feedback = MemoryManager()
@@ -32,7 +34,9 @@ def setup_agents():
     tools_supervisor = [Tool("monitor"), Tool("report")]
 
     feedback_agent = FeedbackAgent("FeedbackLoop", memory_feedback, tools_feedback)
-    completion_agent = CompletionAgent("Completion", memory_completion, tools_completion)
+    completion_agent = CompletionAgent(
+        "Completion", memory_completion, tools_completion
+    )
     supervisor = SupervisorAgent("Supervisor", memory_supervisor, tools_supervisor)
 
     # Set up handoffs
@@ -53,50 +57,70 @@ def setup_agents():
 
     return supervisor, feedback_agent, completion_agent
 
+
 def find_unused_elements():
     # Logic to identify unused elements
     pass
 
+
 unused_elements = find_unused_elements()
+
 
 def setup_uplink(elements, target):
     # Logic to arrange uplink to the target
     pass
 
+
 setup_uplink(unused_elements, target="prompt_sandwich")
+
 
 def initialize_tracing():
     registry = ElementRegistry()
     uplink = UplinkManager(registry)
     collector = TraceCollector(registry)
-    
+
     # Register unused elements
     registry.register("handoff_completion_to_supervisor", "main.py")
     registry.register("elements", "main.py")
     registry.register("target", "main.py")
-    
+
     collector.collect_traces()
     return registry, uplink
+
 
 def handoff_completion_to_supervisor(completion):
     # Logic to handle completion and pass it to supervisor
     # ...existing code...
-    uplink.send(UplinkMessage(source="completion", target="supervisor", payload=completion))
+    uplink.send(
+        UplinkMessage(source="completion", target="supervisor", payload=completion)
+    )
+
 
 def process_elements(elements, target):
     # Logic to process elements and target
     # ...existing code...
-    uplink.send(UplinkMessage(source="processor", target="uplink", payload={"elements": elements, "target": target}))
+    uplink.send(
+        UplinkMessage(
+            source="processor",
+            target="uplink",
+            payload={"elements": elements, "target": target},
+        )
+    )
+
 
 def feedback_to_completion(feedback):
     # Logic to handle feedback and pass it to completion
     # ...existing code...
     uplink.send(UplinkMessage(source="feedback", target="completion", payload=feedback))
 
+
 def completion_to_supervisor(completion):
     # Logic to handle completion and pass it to supervisor
     # ...existing code...
-    uplink.send(UplinkMessage(source="completion", target="supervisor", payload=completion))
+    uplink.send(
+        UplinkMessage(source="completion", target="supervisor", payload=completion)
+    )
+
 
 def setup_uplink():
     uplink = Uplink()
@@ -106,21 +130,29 @@ def setup_uplink():
     uplink.register("supervisor", completion_to_supervisor)
     return uplink
 
+
 from uplink import Uplink
-from handlers import handoff_completion_to_supervisor, feedback_to_completion, completion_to_supervisor, process_elements
+from handlers import (
+    handoff_completion_to_supervisor,
+    feedback_to_completion,
+    completion_to_supervisor,
+    process_elements,
+)
+
 
 def initialize_uplink(supervisor, completion, target):
     uplink = Uplink()
-    
+
     # Connect handlers in sequence per CHARTER.MD
     handoff_completion_to_supervisor(uplink, supervisor)
-    feedback_to_completion(uplink, completion) 
+    feedback_to_completion(uplink, completion)
     completion_to_supervisor(uplink, supervisor)
     process_elements(uplink, target)
-    
+
     # Messages will flow:
     # completion -> supervisor -> feedback -> prompt_sandwich
     return uplink
+
 
 def main():
     registry, uplink = initialize_tracing()
@@ -134,9 +166,13 @@ def main():
     # Initialize and manage agents
     # ...
 
+
 def backtrace_conversation_dialogue(status_line: str):
     # Minimal placeholder logic to illustrate backtracing flow
-    print(f"Backtrace from status line: {status_line} to mainloop stdio conversation dialogue")
+    print(
+        f"Backtrace from status line: {status_line} to mainloop stdio conversation dialogue"
+    )
+
 
 async def main_async():
     # Initialize logging
@@ -150,7 +186,7 @@ async def main_async():
     # Start LMSController
     if await controller.start():
         logger.info("LMS server started successfully.")
-        
+
         # List available models
         models = await controller.list_models()
         logger.info(f"Available models: {models}")
@@ -176,8 +212,17 @@ async def main_async():
         prompt_sandwich.connect()
 
         # Announce available tools
-        tool_names = ", ".join([tool.name for tool in feedback_agent.tools + completion_agent.tools + supervisor.tools])
-        status_line = StatusLineFactory.create_status_line(f"Available tools: {tool_names}")
+        tool_names = ", ".join(
+            [
+                tool.name
+                for tool in feedback_agent.tools
+                + completion_agent.tools
+                + supervisor.tools
+            ]
+        )
+        status_line = StatusLineFactory.create_status_line(
+            f"Available tools: {tool_names}"
+        )
         logger.info(status_line)
         backtrace_conversation_dialogue(status_line)
 
@@ -190,30 +235,31 @@ async def main_async():
 
         # Initialize reward system
         reward_system = RewardSystem()
-        
+
         # Example workflow
         action = "Run linting"
         feedback_agent.perform_action(action)
         observations, outcome = feedback_agent.memory.get_latest()
         feedback_agent.evaluate_observations(observations)
-        
+
         completion_agent.verify_completion()
         supervisor.revise_handoff(feedback_agent)
-        
+
         # Calculate reward
         reward = reward_system.calculate_reward(technical_debt=5, tokens_needed=2)
         logger.info(f"Reward: {reward}")
 
     else:
         logger.error("Failed to start LMS server.")
-        
+
     # Stop LMSController on exit
     await controller.stop()
+
 
 if __name__ == "__main__":
     supervisor = Supervisor()
     completion = Completion()
     target = Target()
-    
+
     uplink = initialize_uplink(supervisor, completion, target)
     asyncio.run(main_async())

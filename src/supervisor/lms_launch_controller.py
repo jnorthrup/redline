@@ -24,19 +24,21 @@ graph LR
 ```
 """
 
-import asyncio 
+import asyncio
 import logging
 import subprocess
 from typing import Optional, Dict
 from dataclasses import dataclass
 import aiohttp
 
-@dataclass 
+
+@dataclass
 class LMSConfig:
     host: str = "localhost"
     port: int = 1234
     health_check_interval: int = 5
     startup_timeout: int = 60
+
 
 class LMSController:
     def __init__(self, config: Optional[LMSConfig] = None):
@@ -46,13 +48,15 @@ class LMSController:
         self._ready = False
         self._health_task = None
         self.logger.debug("LMSController initialized")
-        
+
     async def start(self) -> bool:
         """Initialize LMS connection and start health monitoring"""
         self.logger.debug("Starting LMSController")
         try:
             # Add more debug statements to trace the execution
-            self.logger.debug(f"Connecting to LMS at {self.config.host}:{self.config.port}")
+            self.logger.debug(
+                f"Connecting to LMS at {self.config.host}:{self.config.port}"
+            )
             if await self._wait_for_service():
                 self._health_task = asyncio.create_task(self._monitor_health())
                 self.logger.debug("LMSController started successfully")
@@ -62,7 +66,7 @@ class LMSController:
         except Exception as e:
             self.logger.error(f"Failed to start LMSController: {e}")
             return False
-            
+
     async def stop(self):
         """Cleanup resources"""
         self.logger.debug("Stopping LMSController")
@@ -73,7 +77,7 @@ class LMSController:
             except asyncio.CancelledError:
                 pass
         self.logger.debug("LMSController stopped")
-                
+
     async def _wait_for_service(self) -> bool:
         """Wait for LMS to become available"""
         self.logger.debug("Waiting for LMS service")
@@ -81,8 +85,12 @@ class LMSController:
         while (asyncio.get_event_loop().time() - start) < self.config.startup_timeout:
             try:
                 async with aiohttp.ClientSession() as session:
-                    self.logger.debug(f"Attempting to connect to LMS at http://{self.config.host}:{self.config.port}/api/v0/models")
-                    async with session.get(f"http://{self.config.host}:{self.config.port}/api/v0/models") as resp:
+                    self.logger.debug(
+                        f"Attempting to connect to LMS at http://{self.config.host}:{self.config.port}/api/v0/models"
+                    )
+                    async with session.get(
+                        f"http://{self.config.host}:{self.config.port}/api/v0/models"
+                    ) as resp:
                         self.logger.debug(f"Response status: {resp.status}")
                         if resp.status == 200:
                             self._ready = True
@@ -100,7 +108,9 @@ class LMSController:
         while True:
             try:
                 async with aiohttp.ClientSession() as session:
-                    async with session.get(f"http://{self.config.host}:{self.config.port}/api/v0/models") as resp:
+                    async with session.get(
+                        f"http://{self.config.host}:{self.config.port}/api/v0/models"
+                    ) as resp:
                         self._ready = resp.status == 200
             except:
                 self._ready = False
@@ -120,7 +130,9 @@ class LMSController:
         """List available models"""
         self.logger.debug("Listing models")
         async with aiohttp.ClientSession() as session:
-            async with session.get(f"http://{self.config.host}:{self.config.port}/api/v0/models") as resp:
+            async with session.get(
+                f"http://{self.config.host}:{self.config.port}/api/v0/models"
+            ) as resp:
                 result = await resp.json()
         self.logger.debug("Models listed")
         return result
@@ -129,38 +141,61 @@ class LMSController:
         """Get info about a specific model"""
         self.logger.debug(f"Getting info for model: {model}")
         async with aiohttp.ClientSession() as session:
-            async with session.get(f"http://{self.config.host}:{self.config.port}/api/v0/models/{model}") as resp:
+            async with session.get(
+                f"http://{self.config.host}:{self.config.port}/api/v0/models/{model}"
+            ) as resp:
                 result = await resp.json()
         self.logger.debug(f"Info for model {model} retrieved")
         return result
 
-    async def chat_completion(self, model: str, messages: list, temperature: float = 0.7, max_tokens: int = -1, stream: bool = False):
+    async def chat_completion(
+        self,
+        model: str,
+        messages: list,
+        temperature: float = 0.7,
+        max_tokens: int = -1,
+        stream: bool = False,
+    ):
         """Chat Completions API"""
         self.logger.debug(f"Starting chat completion for model: {model}")
         async with aiohttp.ClientSession() as session:
-            async with session.post(f"http://{self.config.host}:{self.config.port}/api/v0/chat/completions", json={
-                "model": model,
-                "messages": messages,
-                "temperature": temperature,
-                "max_tokens": max_tokens,
-                "stream": stream
-            }) as resp:
+            async with session.post(
+                f"http://{self.config.host}:{self.config.port}/api/v0/chat/completions",
+                json={
+                    "model": model,
+                    "messages": messages,
+                    "temperature": temperature,
+                    "max_tokens": max_tokens,
+                    "stream": stream,
+                },
+            ) as resp:
                 result = await resp.json()
         self.logger.debug(f"Chat completion for model {model} complete")
         return result
 
-    async def text_completion(self, model: str, prompt: str, temperature: float = 0.7, max_tokens: int = 10, stream: bool = False, stop: str = "\n"):
+    async def text_completion(
+        self,
+        model: str,
+        prompt: str,
+        temperature: float = 0.7,
+        max_tokens: int = 10,
+        stream: bool = False,
+        stop: str = "\n",
+    ):
         """Text Completions API"""
         self.logger.debug(f"Starting text completion for model: {model}")
         async with aiohttp.ClientSession() as session:
-            async with session.post(f"http://{self.config.host}:{self.config.port}/api/v0/completions", json={
-                "model": model,
-                "prompt": prompt,
-                "temperature": temperature,
-                "max_tokens": max_tokens,
-                "stream": stream,
-                "stop": stop
-            }) as resp:
+            async with session.post(
+                f"http://{self.config.host}:{self.config.port}/api/v0/completions",
+                json={
+                    "model": model,
+                    "prompt": prompt,
+                    "temperature": temperature,
+                    "max_tokens": max_tokens,
+                    "stream": stream,
+                    "stop": stop,
+                },
+            ) as resp:
                 result = await resp.json()
         self.logger.debug(f"Text completion for model {model} complete")
         return result
@@ -169,10 +204,10 @@ class LMSController:
         """Text Embeddings API"""
         self.logger.debug(f"Starting text embedding for model: {model}")
         async with aiohttp.ClientSession() as session:
-            async with session.post(f"http://{self.config.host}:{self.config.port}/api/v0/embeddings", json={
-                "model": model,
-                "input": input_text
-            }) as resp:
+            async with session.post(
+                f"http://{self.config.host}:{self.config.port}/api/v0/embeddings",
+                json={"model": model, "input": input_text},
+            ) as resp:
                 result = await resp.json()
         self.logger.debug(f"Text embedding for model {model} complete")
         return result
@@ -187,9 +222,10 @@ class LMSController:
         self.logger.debug(f"Sending greeting message: {message}")
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.post(f"http://{self.config.host}:{self.config.port}/api/v0/greeting", json={
-                    "message": message
-                }) as resp:
+                async with session.post(
+                    f"http://{self.config.host}:{self.config.port}/api/v0/greeting",
+                    json={"message": message},
+                ) as resp:
                     if resp.status == 200:
                         result = await resp.json()
                         self.logger.debug(f"Greeting response received: {result}")

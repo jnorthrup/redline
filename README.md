@@ -35,6 +35,16 @@ cd agentic-framework
 pip install -r requirements.txt
 ```
 
+## Setup Virtual Environment
+
+To create and activate the virtual environment, run:
+
+```bash
+bash setup_env.sh
+```
+
+This will set up the environment in `/tmp/redline_env` and install the necessary dependencies.
+
 ## Usage
 
 To run the framework, execute the main application:

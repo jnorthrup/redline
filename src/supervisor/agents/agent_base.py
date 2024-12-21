@@ -1,5 +1,6 @@
 from typing import Any, List, Dict
 
+
 class Agent:
     """Base class for agents."""
 
@@ -16,13 +17,13 @@ class Agent:
     def set_uplink(self, uplink: Any):
         self.uplink = uplink
 
-    def handoff_upstream(self,  Any) -> None:
+    def handoff_upstream(self, Any) -> None:
         """Method for upstream handoff."""
         if self.upstream:
             self.upstream.receive(data)
             self._corrective_bias += 0.1
 
-    def handoff_downstream(self,  Any) -> None:
+    def handoff_downstream(self, Any) -> None:
         """Method for downstream handoff."""
         if self.downstream:
             self.downstream.receive(data)

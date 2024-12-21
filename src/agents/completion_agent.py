@@ -1,5 +1,6 @@
 from agent_base import Agent
 
+
 class CompletionAgent(Agent):
     def __init__(self, name, memory, tools):
         super().__init__(name, memory, tools)
@@ -7,7 +8,9 @@ class CompletionAgent(Agent):
     def verify_completion(self):
         technical_debt = self.memory.calculate_technical_debt()
         tokens_needed = self.memory.calculate_tokens_needed()
-        reward = self.memory.reward_system.calculate_reward(technical_debt, tokens_needed)
+        reward = self.memory.reward_system.calculate_reward(
+            technical_debt, tokens_needed
+        )
         threshold = 10  # Example threshold
         if reward < threshold:
             return False
