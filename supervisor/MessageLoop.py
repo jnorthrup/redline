@@ -67,7 +67,7 @@ class MessageLoop:
         self.error_handler = error_handler
         self.message_handler = MessageHandler()
         provider_config = {
-            "api_base": "http://localhost:1234/v0",
+            "api_base": "http://localhost:1234/v1",
             "model": "default-model"
         }
         self.provider = GenericProvider(provider_config)
@@ -135,7 +135,7 @@ class MessageLoop:
         try:
             self.status_line_controller.update_status(f"Sending test request to {model_name}")
             system_prompt = self.message_handler.get_system_prompt()
-            response = self.provider.generate("hello", system_prompt)
+            response = await self.provider.generate("hello", system_prompt)
             if response:
                 self.status_line_controller.update_status(f"Test response from {model_name}: {response}")
             else:
@@ -160,7 +160,7 @@ class MessageLoop:
                     prompt = self.create_prompt_context(message["content"])
                     full_prompt = prompt.build_prompt()
                     system_prompt = self.message_handler.get_system_prompt()
-                    response = self.provider.generate(full_prompt, system_prompt)
+                    response = await self.provider.generate(full_prompt, system_prompt)
                     if response:
                         self.message_handler.add_message("assistant", response)
                         self.status_line_controller.update_status(f"Response: {response}")

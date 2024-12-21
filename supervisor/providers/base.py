@@ -6,7 +6,7 @@ class LLMProvider(ABC):
     """Abstract base class for LLM providers"""
 
     @abstractmethod
-    def generate(self, prompt: str, system_prompt: str) -> Optional[str]:
+    async def generate(self, prompt: str, system_prompt: str) -> Optional[str]:
         """Generate a response from the LLM"""
         pass
 

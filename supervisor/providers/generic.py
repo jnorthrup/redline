@@ -1,7 +1,7 @@
 import json
 from typing import Any, Dict, Optional
 
-import requests
+import aiohttp
 
 from ..utils import DebouncedLogger
 from .base import LLMProvider
@@ -17,7 +17,7 @@ class GenericProvider(LLMProvider):
         self._sent_bytes = 0
         self._received_bytes = 0
 
-    def generate(self, prompt: str, system_prompt: str) -> Optional[str]:
+    async def generate(self, prompt: str, system_prompt: str) -> Optional[str]:
         try:
             headers = {"Content-Type": "application/json"}
             payload = {
@@ -33,16 +33,16 @@ class GenericProvider(LLMProvider):
             request_bytes = len(json.dumps(payload).encode("utf-8"))
             self._sent_bytes += request_bytes
 
-            response = requests.post(
-                f"{self.api_base}/chat/completions",
-                headers=headers,
-                json=payload,
-                timeout=30,
-            )
-
-            self._received_bytes += len(response.content)
-            response.raise_for_status()
-            result = response.json()
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    f"{self.api_base}/chat/completions",
+                    headers=headers,
+                    json=payload,
+                    timeout=30,
+                ) as response:
+                    self._received_bytes += len(await response.read())
+                    response.raise_for_status()
+                    result = await response.json()
 
             if "choices" in result and result["choices"]:
                 return result["choices"][0]["message"]["content"]
