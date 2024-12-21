@@ -29,6 +29,7 @@ import logging
 import subprocess
 from typing import Optional, Dict
 from dataclasses import dataclass
+import aiohttp
 
 @dataclass 
 class LMSConfig:

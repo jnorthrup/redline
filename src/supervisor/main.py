@@ -1,7 +1,7 @@
 import asyncio
 import logging
 from  .lms_launch_controller import LMSController, LMSConfig
-from  .status_line_factory import StatusLineFactory
+from src.supervisor.status_line_factory import StatusLineFactory
 from  .agents import FeedbackAgent, CompletionAgent, SupervisorAgent
 from  .memory.manager import MemoryManager
 from  .tools import Tool
