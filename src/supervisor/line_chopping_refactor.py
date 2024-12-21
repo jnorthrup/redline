@@ -45,6 +45,16 @@ __all__ = [
     "handle_dsl_command",
 ]
 
+# Constants for DSL commands and patterns
+DSL_COMMANDS = {
+    "SCAN": {
+        "classes": lambda code, flavor, params: scan_classes(code, flavor, params),
+    },
+    "FIND": {
+        "duplicates": lambda results, params: find_duplicates(results, params)
+    }
+}
+
 # REGEX patterns in REGEX_GREP_MAP
 REGEX_GREP_MAP = {
     "python": {
@@ -54,6 +64,10 @@ REGEX_GREP_MAP = {
     "typescript": {
         "function": r"function\s+(\w+)\s*\(",  # Identifies TypeScript function declarations
         "class": r"class\s+(\w+)\s*\{",  # Identifies TypeScript class declarations
+    },
+    "javascript": {
+        "function": r"function\s+(\w+)\s*\(",  # Identifies JavaScript function declarations
+        "class": r"class\s+(\w+)\s*\{",  # Identifies JavaScript class declarations
     },
     # ...additional file flavors...
 }
@@ -299,43 +313,67 @@ def refactor_code(code: str, file_path: str, flavor: str) -> str:
 
 
 def parse_arguments():
-    """
-    Parse command line arguments.
-
-    Returns:
-        argparse.Namespace: Parsed arguments.
-    """
+    """Parse command line arguments."""
     logging.debug("Entering parse_arguments")
     logging.debug("Parsing arguments")
-    parser = argparse.ArgumentParser(description="Line Chopping Refactoring Tool")
-    parser.add_argument("file", help="Path to the input file")
-    parser.add_argument(
-        "--verify", action="store_true", help="Enable verification metrics"
-    )
-    parser.add_argument(
-        "--min_functions",
-        type=int,
-        default=1,
-        help="Minimum number of functions required",
-    )
-    parser.add_argument(
-        "--scan_only", action="store_true", help="Perform scan-only operation"
-    )
-    parser.add_argument("--dsl", type=str, help="DSL instructions for line chopping")
-    parser.add_argument(
-        "--run_example", action="store_true", help="Run the example script"
-    )
-    parser.add_argument("--run_tests", action="store_true", help="Run unit tests")
-    parser.add_argument(
-        "--render_mermaid",
-        action="store_true",
-        help="Render Mermaid diagram from scan results",
-    )
-    parser.add_argument(
-        "--propose",
-        action="store_true",
-        help="Propose refactoring changes without applying them",
-    )
+    parser = argparse.ArgumentParser(
+        description="Line Chopping Refactoring Tool - Analyzes and refactors code with support for class scanning and duplicate detection",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  Scan for duplicate classes:
+    %(prog)s src --scan_only --dsl "SCAN classes -> case=insensitive; FIND duplicates -> report"
+  
+  Verify refactoring:
+    %(prog)s src/file.py --verify --min_functions 5
+  
+  Generate diagram:
+    %(prog)s src/file.py --render_mermaid
+
+DSL Commands:
+  SCAN classes -> case=sensitive|insensitive
+  FIND duplicates -> report
+  CHOP lines 10-20
+  CHOP def function_name rename=new_name
+  CHOP class ClassName rename=NewName
+""")
+
+    parser.add_argument("path", 
+                       help="Path to input file or directory to analyze/refactor")
+    
+    parser.add_argument("--verify", 
+                       action="store_true",
+                       help="Enable verification metrics for refactoring results")
+    
+    parser.add_argument("--min_functions", 
+                       type=int, 
+                       default=1,
+                       help="Specify minimum number of functions required after refactoring")
+    
+    parser.add_argument("--scan_only", 
+                       action="store_true",
+                       help="Perform analysis without modifying files (used with --dsl)")
+    
+    parser.add_argument("--dsl", 
+                       type=str,
+                       help="DSL instructions for scanning/refactoring (see Examples section)")
+    
+    parser.add_argument("--run_example", 
+                       action="store_true",
+                       help="Run example script demonstrating tool usage")
+    
+    parser.add_argument("--run_tests", 
+                       action="store_true",
+                       help="Run unit tests to verify tool functionality")
+    
+    parser.add_argument("--render_mermaid", 
+                       action="store_true",
+                       help="Generate Mermaid diagram visualization of code structure")
+    
+    parser.add_argument("--propose", 
+                       action="store_true",
+                       help="Show proposed refactoring changes without applying them")
+
     logging.debug("Exiting parse_arguments")
     return parser.parse_args()
 
@@ -363,26 +401,31 @@ def verify_refactoring(
 
 
 def parse_dsl(dsl_instructions: str) -> List[Dict[str, Any]]:
-    """
-    Parse DSL instructions.
-
-    Args:
-        dsl_instructions (str): The DSL instructions.
-
-    Returns:
-        List[Dict[str, Any]]: List of parsed instructions.
-    """
-    logging.debug("Entering parse_dsl")
-    logging.debug("Parsing DSL instructions")
+    """Parse DSL instructions with enhanced class scanning support."""
+    logging.debug("Parsing DSL instructions: %s", dsl_instructions)
+    
     instructions = []
     for instruction in dsl_instructions.split(";"):
-        parts = instruction.strip().split("->")
-        if len(parts) == 2:
-            action, params = parts[0].strip(), parts[1].strip()
-            instructions.append({"action": action, "params": params})
-        else:
+        instruction = instruction.strip()
+        if not instruction:
+            continue
+            
+        parts = instruction.split("->")
+        if len(parts) != 2:
             logging.warning("Invalid DSL instruction: %s", instruction)
-    logging.debug("Exiting parse_dsl")
+            continue
+            
+        command_parts = parts[0].strip().split()
+        action = command_parts[0].upper()
+        target = command_parts[1] if len(command_parts) > 1 else ""
+        params = parts[1].strip()
+        
+        instructions.append({
+            "action": action,
+            "target": target,
+            "params": params
+        })
+    
     return instructions
 
 
@@ -565,8 +608,6 @@ def example_script():
     # Step 2: Extract and write functions
     prev_line = 0
     for start_line in boundaries:
-        end_line = prev_line - 1
-
         # Extract the function
         if prev_line != 0:
             function_code = lines[prev_line:start_line]
@@ -696,106 +737,17 @@ class Supervisor:
             unique_ids = re.findall(r"# ([a-f0-9\-]{36})", refactored_code)
             self.assertEqual(len(unique_ids), 3)
 
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestLineChoppingRefactoring)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    # Create and run test suite with all test methods
+    loader = unittest.TestLoader()
+    suite = loader.loadTestsFromTestCase(TestLineChoppingRefactoring)
+    runner = unittest.TextTestRunner(verbosity=2)
+    result = runner.run(suite)
+    if not result.wasSuccessful():
+        sys.exit(1)
     logging.debug("Exiting run_unit_tests")
 
 
-def process_file(file_path: str, args: argparse.Namespace):
-    """
-    Process the file based on the provided arguments.
-    """
-    logging.debug("Entering process_file")
-    flavor = get_file_flavor(os.path.splitext(file_path)[1])
 
-    with open(file_path, "r", encoding="utf-8") as file:
-        code = file.read()
-
-    if args.scan_only:
-        api_scan = scan_code(code, flavor)
-        print("API Scan Results:")
-        for api in api_scan:
-            print(f"{api['type']}: {api['name']}")
-        if args.render_mermaid:
-            mermaid_diagram = render_mermaid_diagram(api_scan)
-            print("Mermaid Diagram:")
-            print(mermaid_diagram)
-        return
-
-    if args.dsl:
-        instructions = parse_dsl(args.dsl)
-        if args.propose:
-            proposed_code = process_dsl_instructions(instructions, code, flavor)
-            api_scan = scan_code(proposed_code, flavor)
-            mermaid_diagram = render_mermaid_diagram(api_scan)
-            print("Proposed Mermaid Diagram:")
-            print(mermaid_diagram)
-            return
-        code = process_dsl_instructions(instructions, code, flavor)
-
-    execute_visitor_plugins(code, flavor)  # Execute visitors before refactoring
-
-    refactored_code = refactor_code(code, file_path, flavor)
-
-    execute_visitor_plugins(
-        refactored_code, flavor
-    )  # Execute visitors after refactoring
-
-    if args.verify:
-        original_function_count = len(identify_function_boundaries(code, flavor))
-        new_function_count = len(identify_function_boundaries(refactored_code, flavor))
-        verify_refactoring(
-            "agent_functions", original_function_count, new_function_count
-        )
-
-    if args.min_functions:
-        new_function_count = len(identify_function_boundaries(refactored_code, flavor))
-        if new_function_count < args.min_functions:
-            print(
-                f"Error: Refactored code has fewer than {args.min_functions} functions."
-            )
-            sys.exit(1)
-
-    with open(file_path, "w", encoding="utf-8") as file:
-        file.write(refactored_code)
-
-    if args.render_mermaid:
-        api_scan = scan_code(refactored_code, flavor)
-        mermaid_diagram = render_mermaid_diagram(api_scan)
-        print("Mermaid Diagram:")
-        print(mermaid_diagram)
-
-    execute_visitor_plugins(refactored_code, flavor)
-
-    logging.debug("Exiting process_file")
-
-
-def main():
-    """
-    Main function of the script.
-    """
-    logging.debug("Entering main")
-    logging.debug("Starting main")
-    args = parse_arguments()
-
-    if args.run_example:
-        example_script()
-        return
-
-    if args.run_tests:
-        run_unit_tests()
-        return
-
-    process_file(args.file, args)
-
-    logging.debug("Exiting main")
-    logging.debug("Main completed")
-
-
-if __name__ == "__main__":
-    logging.debug("Starting execution of line_chopping_refactor.py")
-    main()
-    logging.debug("Finished execution of line_chopping_refactor.py")
 
 # Visitor Plugin Framework
 
@@ -882,44 +834,226 @@ def rename_entity_primitive(
     return result
 
 
-def handle_dsl_command(command: Dict[str, Any], code: str, flavor: str) -> str:
-    """
-    Handle a single DSL command by invoking the appropriate primitive function.
-
-    Args:
-        command (Dict[str, Any]): A dictionary containing the DSL action and parameters.
-        code (str): The original code.
-        flavor (str): The file flavor.
-
-    Returns:
-        str: The refactored code after applying the DSL command.
-    """
-    logging.debug("Entering handle_dsl_command")
-    action = command.get("action")
-    params = command.get("params")
-
-    if action.startswith("CHOP lines"):
-        lines_range = re.findall(r"\d+", action)
-        if len(lines_range) == 2:
-            start, end = map(int, lines_range)
-            code = extract_lines(code, start, end, flavor)
-            logging.debug("Executed extract_lines for lines %s-%s", start, end)
-
-    elif action.startswith("CHOP def"):
-        match = re.match(r"CHOP def (\w+)", action)
-        if match:
-            function_name = match.group(1)
-            new_name = params.split("=")[1] if "=" in params else function_name
-            code = rename_entity_primitive(code, "def", function_name, new_name, flavor)
-            logging.debug(
-                "Executed rename_entity_primitive for function %s to %s",
-                function_name,
-                new_name,
-            )
-
-    elif action.startswith("CHOP class"):
-        match = re.match(r"CHOP class (\w+)", action)
+def scan_classes(code: str, flavor: str, params: str, file_path: str = "") -> List[Dict[str, Any]]:
+    """Scan code specifically for class definitions."""
+    logging.debug("Scanning for classes in %s with params: %s", file_path, params)
+    
+    case_sensitive = "case=insensitive" not in params
+    pattern = REGEX_GREP_MAP[flavor]["class"]
+    
+    classes = []
+    for i, line in enumerate(code.splitlines()):
+        match = re.search(pattern, line)
         if match:
             class_name = match.group(1)
-            new_name = params.split("=")[1] if "=" in params else class_name
-            code
+            classes.append({
+                "type": "class",
+                "name": class_name,
+                "line": i + 1,
+                "file": file_path,
+                "original_case": class_name,
+                "compare_case": class_name if case_sensitive else class_name.lower()
+            })
+    
+    return classes
+
+def find_duplicates(scan_results: List[Dict[str, Any]], params: str) -> List[Dict[str, Any]]:
+    """Find duplicate classes in scan results."""
+    logging.debug("Finding duplicates in %d scanned classes", len(scan_results))
+    
+    from collections import defaultdict
+    class_map = defaultdict(list)
+    
+    # Group by case-insensitive name
+    for result in scan_results:
+        class_map[result["compare_case"]].append(result)
+    
+    # Filter and format duplicates
+    duplicates = []
+    for name, instances in class_map.items():
+        if len(instances) > 1:
+            duplicates.append({
+                "name": name,
+                "count": len(instances),
+                "instances": [{
+                    "file": inst["file"],
+                    "line": inst["line"],
+                    "original_name": inst["original_case"]
+                } for inst in instances]
+            })
+    
+    return duplicates
+
+def handle_dsl_command(command: Dict[str, Any], code: str, flavor: str) -> Any:
+    """Handle DSL commands including class scanning."""
+    logging.debug("Handling DSL command: %s", command)
+    
+    action = command["action"]
+    target = command["target"]
+    params = command["params"]
+    
+    if action == "SCAN":
+        if target in DSL_COMMANDS["SCAN"]:
+            return DSL_COMMANDS["SCAN"][target](code, flavor, params)
+            
+    elif action == "FIND":
+        if target in DSL_COMMANDS["FIND"]:
+            return DSL_COMMANDS["FIND"][target](code, params)
+    elif action.startswith("CHOP"):
+        if "lines" in target:
+            lines_range = re.findall(r"\d+", target)
+            if len(lines_range) == 2:
+                start, end = map(int, lines_range)
+                return extract_lines(code, start, end, flavor)
+        elif target.startswith("def ") or target.startswith("class "):
+            entity_type, name = target.split()
+            new_name = params.split("=")[1] if "=" in params else name
+            return rename_entity_primitive(code, entity_type, name, new_name, flavor)
+    
+    logging.warning("Unknown command: %s %s", action, target)
+    return None
+
+def process_file(file_path: str, args: argparse.Namespace) -> List[Dict[str, Any]]:
+    """Process the file based on the provided arguments."""
+    logging.debug("Processing file: %s", file_path)
+    
+    flavor = get_file_flavor(os.path.splitext(file_path)[1])
+    
+    try:
+        with open(file_path, "r", encoding="utf-8") as file:
+            code = file.read()
+    except (UnicodeDecodeError, IOError) as e:
+        logging.warning(f"Skipping {file_path}: {str(e)}")
+        return []
+
+    if args.scan_only:
+        if args.dsl:
+            instructions = parse_dsl(args.dsl)
+            results = None
+            for instruction in instructions:
+                if instruction["action"] == "SCAN" and instruction["target"] == "classes":
+                    # Pass file path to scan_classes for better reporting
+                    results = scan_classes(code, flavor, instruction["params"], file_path)
+                elif results is not None:
+                    results = handle_dsl_command(instruction, results, flavor)
+            return results or []
+        else:
+            api_scan = scan_code(code, flavor)
+            if args.render_mermaid:
+                mermaid_diagram = render_mermaid_diagram(api_scan)
+                print("Mermaid Diagram:")
+                print(mermaid_diagram)
+            return api_scan
+
+    if args.dsl:
+        instructions = parse_dsl(args.dsl)
+        results = None
+        
+        for instruction in instructions:
+            if results is None:
+                results = handle_dsl_command(instruction, code, flavor)
+            else:
+                results = handle_dsl_command(instruction, results, flavor)
+        
+        if results and isinstance(results, list):
+            if any(isinstance(r, dict) and "duplicates" in r for r in results):
+                print("\nDuplicate Classes Found:")
+                for r in results:
+                    if "duplicates" in r:
+                        for dup in r["duplicates"]:
+                            print(f"\nClass name: {dup['name']}")
+                            for inst in dup["instances"]:
+                                print(f"  Found in {file_path}:{inst['line']}")
+            return
+        elif results:
+            code = results
+
+    execute_visitor_plugins(code, flavor)  # Execute visitors before refactoring
+
+    refactored_code = refactor_code(code, file_path, flavor)
+
+    execute_visitor_plugins(
+        refactored_code, flavor
+    )  # Execute visitors after refactoring
+
+    if args.verify:
+        original_function_count = len(identify_function_boundaries(code, flavor))
+        new_function_count = len(identify_function_boundaries(refactored_code, flavor))
+        verify_refactoring(
+            "agent_functions", original_function_count, new_function_count
+        )
+
+    if args.min_functions:
+        new_function_count = len(identify_function_boundaries(refactored_code, flavor))
+        if new_function_count < args.min_functions:
+            print(
+                f"Error: Refactored code has fewer than {args.min_functions} functions."
+            )
+            sys.exit(1)
+
+    with open(file_path, "w", encoding="utf-8") as file:
+        file.write(refactored_code)
+
+    if args.render_mermaid:
+        api_scan = scan_code(refactored_code, flavor)
+        mermaid_diagram = render_mermaid_diagram(api_scan)
+        print("Mermaid Diagram:")
+        print(mermaid_diagram)
+
+    execute_visitor_plugins(refactored_code, flavor)
+
+    logging.debug("Exiting process_file")
+
+
+def main():
+    """Main function of the script."""
+    logging.debug("Starting main")
+    args = parse_arguments()
+
+    if args.run_example:
+        example_script()
+        return
+
+    if args.run_tests:
+        run_unit_tests()
+        return
+
+    path = args.path
+    all_results = []
+    
+    if os.path.isdir(path):
+        for root, _, files in os.walk(path):
+            for file in files:
+                if file.endswith(('.py', '.ts', '.js', '.java', '.cpp', '.c', '.cs', '.rb', '.go', '.rs')):
+                    file_path = os.path.join(root, file)
+                    results = process_file(file_path, args)
+                    if results:
+                        all_results.extend(results)
+    else:
+        results = process_file(path, args)
+        if results:
+            all_results.extend(results)
+
+    if args.dsl and "FIND duplicates" in args.dsl:
+        duplicates = handle_dsl_command(
+            {"action": "FIND", "target": "duplicates", "params": ""}, 
+            all_results, 
+            ""
+        )
+        if duplicates:
+            print("\nDuplicate Classes Found:")
+            for dup in duplicates:
+                print(f"\nClass '{dup['name']}' appears {dup['count']} times:")
+                for inst in dup['instances']:
+                    print(f"  {inst['file']}:{inst['line']} as '{inst['original_name']}'")
+        else:
+            print("\nNo duplicate classes found.")
+
+    logging.debug("Main completed")
+
+ 
+if __name__ == "__main__":
+    logging.debug("Starting execution of line_chopping_refactor.py")
+    main()
+    logging.debug("Finished execution of line_chopping_refactor.py")
+

@@ -96,19 +96,4 @@ def initialize_subsumption_architecture():
     logging.info("Initializing subsumption architecture")
     # ...existing code...
     logging.info("Subsumption architecture initialized")
-
-
-def main():
-    memory = Memory()
-    tools = [Tool("lint"), Tool("test")]
-
-    feedback_agent = FeedbackLoopAgent("FeedbackLoop", memory, tools)
-    completion_agent = CompletionAgent("Completion", memory, tools)
-    supervisor = SupervisorAgent("Supervisor", memory, tools)
-
-    # Initialize and manage agents
-    # ...
-
-
-if __name__ == "__main__":
-    main()
+ 

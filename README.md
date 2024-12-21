@@ -45,6 +45,14 @@ bash setup_env.sh
 
 This will set up the environment in `/tmp/redline_env` and install the necessary dependencies.
 
+## Ensure `__init__.py` Files
+
+To ensure that all `supervisor` directories are recognized as packages, run:
+
+```bash
+bash setup_init_files.sh
+```
+
 ## Usage
 
 To run the framework, execute the main application:
