@@ -19,6 +19,16 @@ commands = {
     "quit": {"description": "Exit the program", "bash_template": "quit_program"},
 }
 
+
+class Tool:
+    def __init__(self, name: str):
+        self.name = name
+
+    def execute(self, command: str):
+        # Execute tool-specific command
+        pass
+
+
 available_tools = [
     {
         "name": "Code Analysis",

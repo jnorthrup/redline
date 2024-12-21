@@ -1,10 +1,11 @@
 from typing import Any, Dict
 from .base_agent import BaseAgent
 
+
 class CompletionAgent(BaseAgent):
     """Handles completion status and final output."""
 
-    def __init__(self, memory_manager: 'MemoryManager'):
+    def __init__(self, memory_manager: "MemoryManager"):
         super().__init__(memory_manager)
 
     def perform_action(self, context: Dict[str, Any]) -> None:

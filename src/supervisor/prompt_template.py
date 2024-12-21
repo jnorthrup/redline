@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Dict, Any
 
+
 @dataclass
 class AgentContext:
     role: str
@@ -9,13 +10,14 @@ class AgentContext:
     token_limit: int
     reward_context: Dict[str, Any]
 
+
 @dataclass
 class PromptTemplate:
     system_context: str
     agent_context: AgentContext
     status_line: str
     context_window: str
-    
+
     def build_prompt(self) -> str:
         return f"""
 # System Context

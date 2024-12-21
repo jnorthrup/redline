@@ -1,12 +1,13 @@
 from typing import Any, Dict
 from .base_agent import BaseAgent
 
+
 class PerformanceCounterAgent(BaseAgent):
     """Monitors system performance metrics."""
 
-    def __init__(self, memory_manager: 'MemoryManager'):
+    def __init__(self, memory_manager: "MemoryManager"):
         super().__init__(memory_manager)
-        self.tools['counter'] = self.initialize_counter()
+        self.tools["counter"] = self.initialize_counter()
 
     def initialize_counter(self):
         # Initialize performance counters

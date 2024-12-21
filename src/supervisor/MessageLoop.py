@@ -1,4 +1,5 @@
 """Module for handling message processing loop."""
+
 import asyncio
 import sys
 from typing import Any, Dict, Optional
@@ -54,12 +55,12 @@ class MessageHandler:
 
 class MessageLoop:
     """Handles asynchronous message processing.
-     
-    Our statusline service gives us and the prompt: 
+
+    Our statusline service gives us and the prompt:
     [localtime][<20 chars> model tag] s:<sent>|r:<r> [agentname,office]
-    
+
     """
-    
+
     def __init__(self, error_handler, lms_df: pd.DataFrame = None):
         self.message_queue = asyncio.Queue()
         self.logger = DebouncedLogger(interval=5.0)
@@ -68,7 +69,7 @@ class MessageLoop:
         self.message_handler = MessageHandler()
         provider_config = {
             "api_base": "http://localhost:1234/v1",
-            "model": "default-model"
+            "model": "default-model",
         }
         self.provider = GenericProvider(provider_config)
         status_line_config = StatusLineConfig()
@@ -108,7 +109,9 @@ class MessageLoop:
 
         except Exception as e:
             if str(e):
-                self.error_handler.handle_error("MessageProcessingError", f"Error processing message: {e}")
+                self.error_handler.handle_error(
+                    "MessageProcessingError", f"Error processing message: {e}"
+                )
 
     def create_prompt_context(self, message: str) -> PromptTemplate:
         agent_context = AgentContext(
@@ -119,30 +122,37 @@ class MessageLoop:
             reward_context={
                 "tokens_used": 0,
                 "credits_available": 100,
-                "performance_score": 0
-            }
+                "performance_score": 0,
+            },
         )
-        
+
         return PromptTemplate(
             system_context="You are a helpful AI assistant",
             agent_context=agent_context,
             status_line=self.status_line_controller.render(),
-            context_window=message
+            context_window=message,
         )
 
     async def send_test_request(self, model_name: str):
         """Send a test request to the specified model."""
         try:
-            self.status_line_controller.update_status(f"Sending test request to {model_name}")
+            self.status_line_controller.update_status(
+                f"Sending test request to {model_name}"
+            )
             system_prompt = self.message_handler.get_system_prompt()
             response = await self.provider.generate("hello", system_prompt)
             if response:
-                self.status_line_controller.update_status(f"Test response from {model_name}: {response}")
+                self.status_line_controller.update_status(
+                    f"Test response from {model_name}: {response}"
+                )
             else:
-                self.status_line_controller.update_status(f"Error generating test response from {model_name}")
+                self.status_line_controller.update_status(
+                    f"Error generating test response from {model_name}"
+                )
         except Exception as e:
-            self.error_handler.handle_error("TestRequestError", f"Error sending test request to {model_name}: {e}")
-
+            self.error_handler.handle_error(
+                "TestRequestError", f"Error sending test request to {model_name}: {e}"
+            )
 
     async def start(self):
         self.status_line_controller.update_status("Starting supervisor...")
@@ -163,7 +173,9 @@ class MessageLoop:
                     response = await self.provider.generate(full_prompt, system_prompt)
                     if response:
                         self.message_handler.add_message("assistant", response)
-                        self.status_line_controller.update_status(f"Response: {response}")
+                        self.status_line_controller.update_status(
+                            f"Response: {response}"
+                        )
                     else:
                         self.status_line_controller.update(model="supervisor")
             await asyncio.sleep(0.1)

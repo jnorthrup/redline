@@ -1,12 +1,13 @@
 from typing import Any, Dict
 from .base_agent import BaseAgent
 
+
 class AutoencoderAgent(BaseAgent):
     """Compresses and encodes information for efficient processing."""
 
-    def __init__(self, memory_manager: 'MemoryManager'):
+    def __init__(self, memory_manager: "MemoryManager"):
         super().__init__(memory_manager)
-        self.tools['encoder'] = self.initialize_encoder()
+        self.tools["encoder"] = self.initialize_encoder()
 
     def initialize_encoder(self):
         # Initialize autoencoder

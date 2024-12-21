@@ -2,6 +2,7 @@ import logging
 import pandas as pd
 import os
 
+
 def metrics_logger_visitor(code: str, flavor: str):
     """
     Collects and logs metrics using pandas.
@@ -10,7 +11,7 @@ def metrics_logger_visitor(code: str, flavor: str):
     metrics = {
         "timestamp": pd.Timestamp.now(),
         "refactored_lines": len(code.splitlines()),
-        "file_flavor": flavor
+        "file_flavor": flavor,
     }
     metrics_df = pd.DataFrame([metrics])
     metrics_file = "refactoring_metrics.csv"
@@ -19,7 +20,7 @@ def metrics_logger_visitor(code: str, flavor: str):
             metrics_df.to_csv(metrics_file, index=False)
             logging.debug(f"Metrics file created: {metrics_file}")
         else:
-            metrics_df.to_csv(metrics_file, mode='a', header=False, index=False)
+            metrics_df.to_csv(metrics_file, mode="a", header=False, index=False)
             logging.debug(f"Metrics appended to: {metrics_file}")
     except Exception as e:
         logging.error(f"Failed to log metrics: {e}")

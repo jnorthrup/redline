@@ -1,3 +1,6 @@
+from .base_agent import Agent
+
+
 class FeedbackLoopAgent(Agent):
     def __init__(self, name, memory, tools):
         super().__init__(name, memory, tools)
@@ -22,6 +25,8 @@ class FeedbackLoopAgent(Agent):
         # Logic to refine the agent's understanding based on observations
         pass
 
-    def iterate_feedback_loop(self, observations, goals):
-        self.evaluate_observations(observations, goals)
-        # Additional logic for the iterative feedback loop can be added here
+    def iterate_feedback_loop(self):
+        # Iterate the feedback loop according to CHARTER.md
+        latest_obs, outcome = self.memory.get_latest()
+        action = self.evaluate_observations(latest_obs)
+        self.perform_action(action)

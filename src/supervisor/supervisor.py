@@ -42,7 +42,7 @@ class FiduciaryService:
             "role4": "agent4",
             "role5": "agent5",
             "role6": "agent6",
-            "replacement": "new_fiduciary"
+            "replacement": "new_fiduciary",
         }
         self.logger.debug(f"Agents established: {agents}")
         return agents
@@ -54,12 +54,12 @@ class FiduciaryService:
         if not await self.lms.start():
             self.logger.error("Failed to start LMS")
             return False
-            
+
         # Wait for LMStudio
         if not await self.lmstudio.wait_for_service():
             self.logger.error("Failed to detect LMStudio service")
             return False
-            
+
         self.logger.debug("Initialization complete")
         return True
 
@@ -78,22 +78,20 @@ async def main():
     # Create configuration
     config = SupervisorConfig()
     error_handler = ErrorHandler(logger)
-    
+
     fiduciary = FiduciaryService(config=config)
-    
+
     try:
         if not await fiduciary.initialize():
             logger.error("Fiduciary initialization failed")
             return
-        
+
         # Create message loop with LMStudio configuration
         message_loop = MessageLoop(
             error_handler=error_handler,
-            lms_df=pd.DataFrame([{
-                'type': 'llm',
-                'path': config.lmstudio_url,
-                'model': 'default-model'
-            }])
+            lms_df=pd.DataFrame(
+                [{"type": "llm", "path": config.lmstudio_url, "model": "default-model"}]
+            ),
         )
         logger.info("Starting message loop...")
         await message_loop.start()
@@ -103,6 +101,7 @@ async def main():
         raise
     finally:
         await fiduciary.shutdown()
+
 
 if __name__ == "__main__":
     try:

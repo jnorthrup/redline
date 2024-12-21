@@ -2,7 +2,9 @@
 
 from models.status_line_config import StatusLineConfig
 from supervisor.cognitive.MemoryManager import MemoryManager
-from supervisor.cognitive.agents.performance_counter_agent import PerformanceCounterAgent
+from supervisor.cognitive.agents.performance_counter_agent import (
+    PerformanceCounterAgent,
+)
 from supervisor.cognitive.agents.autoencoder_agent import AutoencoderAgent
 from supervisor.cognitive.agents.completion_agent import CompletionAgent
 

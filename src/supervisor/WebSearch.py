@@ -17,11 +17,7 @@ class WebSearch:
     def search(self, query: str) -> Optional[Dict[str, Any]]:
         """Perform a web search and return the results."""
         try:
-            params = {
-                "q": query,
-                "format": "json",
-                "pretty": 1
-            }
+            params = {"q": query, "format": "json", "pretty": 1}
             response = requests.get(self.base_url, params=params)
             response.raise_for_status()
             self.logger.debug(f"Web search results for query: {query}")

@@ -24,8 +24,7 @@ graph LR
 ```
 """
 
-import asyncio
-import aiohttp
+import asyncio 
 import logging
 import subprocess
 from typing import Optional, Dict
@@ -81,12 +80,15 @@ class LMSController:
         while (asyncio.get_event_loop().time() - start) < self.config.startup_timeout:
             try:
                 async with aiohttp.ClientSession() as session:
+                    self.logger.debug(f"Attempting to connect to LMS at http://{self.config.host}:{self.config.port}/api/v0/models")
                     async with session.get(f"http://{self.config.host}:{self.config.port}/api/v0/models") as resp:
+                        self.logger.debug(f"Response status: {resp.status}")
                         if resp.status == 200:
                             self._ready = True
                             self.logger.debug("LMS service is ready")
                             return True
-            except:
+            except Exception as e:
+                self.logger.debug(f"LMS service not ready: {e}")
                 await asyncio.sleep(1)
         self.logger.debug("LMS service wait timeout")
         return False
@@ -179,11 +181,21 @@ class LMSController:
         self.logger.debug("Checking if LMS is ready")
         return self._ready
 
-async def mutual_greeting():
-    logging.debug("Starting mutual greeting")
-    try:
-        await asyncio.sleep(1)  # Simulate mutual greeting logic
-        logging.info("Mutual greeting successful.")
-    except Exception as e:
-        logging.error(f"Mutual greeting failed: {e}")
-    logging.debug("Mutual greeting complete")
+    async def send_greeting(self, message: str):
+        """Send a greeting message to the server and return the response."""
+        self.logger.debug(f"Sending greeting message: {message}")
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(f"http://{self.config.host}:{self.config.port}/api/v0/greeting", json={
+                    "message": message
+                }) as resp:
+                    if resp.status == 200:
+                        result = await resp.json()
+                        self.logger.debug(f"Greeting response received: {result}")
+                        return result
+                    else:
+                        self.logger.error(f"Greeting failed with status: {resp.status}")
+                        return {"error": f"Greeting failed with status: {resp.status}"}
+        except Exception as e:
+            self.logger.error(f"Error during greeting: {e}")
+            return {"error": str(e)}

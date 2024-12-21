@@ -5,6 +5,7 @@ from typing import Optional
 @dataclass
 class SupervisorConfig:
     """Configuration for the supervisor service."""
+
     lmstudio_host: str = "localhost"
     lmstudio_port: int = 1234
     log_level: str = "INFO"

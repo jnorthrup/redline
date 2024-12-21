@@ -1,17 +1,17 @@
 from typing import Any, Dict
 import logging
 
-from supervisor.agents.agent_base import Agent
-from supervisor.agents.reasoning_agent import ReasoningAgent
-from supervisor.agents.planning_agent import PlanningAgent
-from supervisor.agents.action_agent import ActionAgent
-from supervisor.agents.feedback_agent import FeedbackAgent
-from supervisor.agents.completion_agent import CompletionAgent
+from ..agents.agent_base import Agent
+from ..agents.reasoning_agent import ReasoningAgent
+from ..agents.planning_agent import PlanningAgent
+from ..agents.action_agent import ActionAgent
+from ..agents.feedback_agent import FeedbackAgent
+from ..agents.completion_agent import CompletionAgent
 
-from supervisor.memory.manager import MemoryManager
-from supervisor.providers import LLMProvider
-from supervisor.providers.generic import GenericProvider
-from supervisor.config import SupervisorConfig
+from ..memory.manager import MemoryManager
+from ..providers import LLMProvider
+from ..providers.generic import GenericProvider
+from ..config import SupervisorConfig
 
 
 class AgentConnector:
@@ -44,14 +44,14 @@ class AgentConnector:
         # Example: A default LLM provider with “generic” or “qwen”
         provider_config = {
             "api_base": "http://localhost:1234/v1",
-            "model": "generic-model"
+            "model": "generic-model",
         }
         self.default_provider: LLMProvider = GenericProvider(config=provider_config)
 
         # Example: partial reward context
         self.reward_context = {
             "technical_debt_offset": 0.0,  # from config or updated in real usage
-            "tokens_needed": 1            # from config or updated in real usage
+            "tokens_needed": 1,  # from config or updated in real usage
         }
 
     def run_all_agents(self, data: Any) -> Any:

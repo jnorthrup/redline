@@ -1,4 +1,9 @@
+"""
+Memory Manager module.
+"""
+
 from typing import Any, Dict
+
 
 class MemoryManager:
     """Manages memory storage for agents."""

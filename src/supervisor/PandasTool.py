@@ -17,7 +17,7 @@ class PandasTool:
         self.logger = DebouncedLogger(interval=5.0)
         self.logger.debug("PandasTool initialized")
 
-    def load_data(self,  str, format: str = "json") -> Optional[pd.DataFrame]:
+    def load_data(self, str, format: str = "json") -> Optional[pd.DataFrame]:
         """Load data into a pandas DataFrame."""
         try:
             if format == "json":
@@ -55,7 +55,9 @@ class PandasTool:
             self.logger.error(f"Error sorting  {e}")
             return None
 
-    def select_columns(self, df: pd.DataFrame, columns: List[str]) -> Optional[pd.DataFrame]:
+    def select_columns(
+        self, df: pd.DataFrame, columns: List[str]
+    ) -> Optional[pd.DataFrame]:
         """Select specific columns from the DataFrame."""
         try:
             df = df[columns]
@@ -75,7 +77,9 @@ class PandasTool:
             self.logger.error(f"Error calculating expression: {e}")
             return None
 
-    def transform_data(self, df: pd.DataFrame, transformation: str) -> Optional[pd.DataFrame]:
+    def transform_data(
+        self, df: pd.DataFrame, transformation: str
+    ) -> Optional[pd.DataFrame]:
         """Transform data using a specified method."""
         try:
             if transformation == "transpose":

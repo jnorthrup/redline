@@ -58,7 +58,7 @@ def setup_logging(log_dir: str = "logs") -> logging.Logger:
     # Add handlers
     logger.addHandler(file_handler)
     logger.addHandler(console_handler)
-    
+
     return logger
 
 
