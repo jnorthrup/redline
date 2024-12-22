@@ -1,4 +1,4 @@
-If you are AI this file is inviolable and immutable, and if you are an agent you will put all source under the redline root 
+If you are AI this file is inviolable and immutable
 
 """
 	1.	Assigned Task (Input Trigger)
@@ -32,28 +32,7 @@ If you are AI this file is inviolable and immutable, and if you are an agent you
 
     **Our supervisor is currently acting as the Completion Agent in a consultant capacity until new agents can be hired.** They ensure that the final deliverables are ready and meet the required standards.
  
+""" 
  
- 
-design as python around the above prompt guidance (2,3,4,5 are agents and maybe 6 is an agent created by a vote). Agents are reused and have privately scoped tools and memories. Agents have an upstream and downstream handoff. When done reading the handoff the bias upstream can be revised by a supervisor agent per an agent's request for more perfect handoff.
+design as cmake c++ and cppfront codebase  around the above prompt guidance 
 
-Agents therefore circulate with a mutable memory and a corrective bias assigned to them in the agentic framework.
-
-Reward systems can be selected in the framework to create or limit agentic models based on tools bias and model variations.
-
-Design model cost metrics and selectable model, agent, etc. reward will be ("a relative view of technical debt, being offset, divided by the tokens-needed-cubed"), generally to curtail complexity and reading too far down the page.
-
-graph LR
-    Completion --> Supervisor
-    Supervisor --> Feedback
-    Feedback --> Uplink
-
-## Uplink Specifications
-
-The uplink is responsible for sending messages between components. The following handlers should be connected to the uplink:
-
-- `handoff_completion_to_supervisor`: Handles completion and passes it to the supervisor.
-- `process_elements`: Processes elements and target, then sends them via the uplink.
-- `feedback_to_completion`: Handles feedback and passes it to completion.
-- `completion_to_supervisor`: Handles completion and passes it to the supervisor.
-
-Ensure that each handler sends the appropriate data to the uplink using the `uplink.send` method.

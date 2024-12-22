@@ -1,2 +1,0 @@
-# Dependencies are managed through setup.py
-# Run: pip install -e .
