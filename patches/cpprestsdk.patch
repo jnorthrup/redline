@@ -1,0 +1,15 @@
+diff --git a/Release/CMakeLists.txt b/Release/CMakeLists.txt
+--- a/Release/CMakeLists.txt
++++ b/Release/CMakeLists.txt
+@@ -2,6 +2,12 @@ cmake_minimum_required(VERSION 3.1)
+ 
+ project(cpprest)
+ 
++if(APPLE)
++  set(OPENSSL_ROOT_DIR "/opt/homebrew/opt/openssl@3")
++  set(OPENSSL_LIBRARIES "/opt/homebrew/opt/openssl@3/lib")
++  set(OPENSSL_INCLUDE_DIR "/opt/homebrew/opt/openssl@3/include")
++endif()
++
+ find_package(Boost REQUIRED COMPONENTS system filesystem)
+ find_package(OpenSSL REQUIRED)

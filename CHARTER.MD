@@ -34,5 +34,15 @@ If you are AI this file is inviolable and immutable
  
 """ 
  
-design as cmake c++ and cppfront codebase  around the above prompt guidance 
+design and run and iterate on the above as an implementation methodlogy to develope a tooling of cmake based hierarchical and idempotent facilities to reason out progress as the charter's intent 
 
+implemntationwise this charter converges on a bash environment agent model for tool groupings by role, and the scripts load available functions and document those in the llm prompt.  3-4 words of context purpose. 
+
+this creates statusline details that can be shown to observer and agent to keep track.  
+
+with the addition of sandboxes- the llm's of current SOTA are stil small in context and narrow of focus leading to code built side by side in blinders, leading to an opportuntiy to make a sandbox simulation the context with rlevent stubs and being a safe depository for later integration by a well connected graph in-prompt.  
+
+the redline cache in ~/.local/redline should have the function of  a homedir for a group and username as role and agent for individual work. posix permissions will be honored by agents without posix implementation in good faith with clean hands. 
+
+so agents produce code and the organization should be adapted by another agent, tbd open for comments.
+ 

@@ -1,0 +1,2 @@
+/Library/Developer/CommandLineTools/usr/bin/ar qc ../lib/libcore.a CMakeFiles/core.dir/core/StateManager.cpp.o CMakeFiles/core.dir/core/LMStudioClient.cpp.o CMakeFiles/core.dir/core/greet.cpp.o
+/Library/Developer/CommandLineTools/usr/bin/ranlib ../lib/libcore.a

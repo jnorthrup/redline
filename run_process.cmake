@@ -1,0 +1,12 @@
+include(/Users/jim/work/redline/methodology/cognitive.cmake)
+include(/Users/jim/work/redline/methodology/planning.cmake)
+include(/Users/jim/work/redline/methodology/action_execution.cmake)
+include(/Users/jim/work/redline/methodology/feedback_loop.cmake)
+include(/Users/jim/work/redline/methodology/completion.cmake)
+
+execute_cognitive_phase()
+execute_planning_phase()
+execute_action_phase()
+execute_feedback_phase()
+execute_completion_phase()
+verify_process_complete()

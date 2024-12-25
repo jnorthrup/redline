@@ -1,0 +1,2 @@
+/Library/Developer/CommandLineTools/usr/bin/ar qc ../lib/liblmstudio_client.a CMakeFiles/lmstudio_client.dir/__/src/lmstudio_client/LMStudioClient.cpp.o
+/Library/Developer/CommandLineTools/usr/bin/ranlib ../lib/liblmstudio_client.a
