@@ -54,3 +54,7 @@ build
 llm_connector/__pycache__
 __pycache__
 aider.*
+
+# Redline local directories
+~/.local/redline/*/
+!~/.local/redline/README.md

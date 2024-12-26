@@ -1,0 +1,2 @@
+/Users/jim/work/redline/CMakeFiles/edit_cache.dir
+/Users/jim/work/redline/CMakeFiles/rebuild_cache.dir

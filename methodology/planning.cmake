@@ -5,12 +5,6 @@ function(execute_planning_phase)
         return()
     endif()
     
-    # Check if cognitive agent has completed
-    if(NOT EXISTS "${REDLINE_CACHE_DIR}/work_queue/cognitive_agent/complete")
-        message(STATUS "Waiting for cognitive agent to complete...")
-        return()
-    endif()
-    
     message(STATUS "Running planning phase...")
     
     # Execute planning agent
@@ -22,7 +16,5 @@ function(execute_planning_phase)
     if(planning_result EQUAL 0)
         file(WRITE "${REDLINE_CACHE_DIR}/work_queue/planning/complete" "")
         message(STATUS "Planning phase complete")
-    else()
-        message(FATAL_ERROR "Planning agent failed with error ${planning_result}")
     endif()
 endfunction()

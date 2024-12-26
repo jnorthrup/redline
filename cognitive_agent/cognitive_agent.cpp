@@ -2,9 +2,10 @@
 #include <fstream>
 #include <string>
 #include <dirent.h>
+#include <cstdlib> // For system()
 
 int main() {
-    std::string cache_dir = REDLINE_CACHE_DIR;
+    std::string cache_dir = std::getenv("REDLINE_CACHE_DIR");
     std::string work_dir = cache_dir + "/work_queue/cognitive_agent";
     DIR *dir;
     struct dirent *ent;
@@ -25,6 +26,30 @@ int main() {
                     continue;
                 }
                 std::cout << "Cognitive Agent Work Item:\\n" << work_item_content << std::endl;
+
+                // Call LLM API
+                std::string agent_identity = "CognitiveAgent";
+                std::string agent_roles = "Cognition";
+                std::string action = "Processed work item: " + work_item_content;
+                std::string llm_command = "curl http://localhost:1234/v1/chat/completions \\\n"
+                                         "  -H \\\"Content-Type: application/json\\\" \\\n"
+                                         "  -d '{\\\n"
+                                         "    \\\"model\\\": \\\"qwen2.5-14b-wernickev5.mlx@4bit\\\",\\\n"
+                                         "    \\\"messages\\\": [\\\n"
+                                         "      { \\\"role\\\": \\\"system\\\", \\\"content\\\": \\\"your name is " + agent_identity + " and your agent role(s) are " + agent_roles + "  \\\" },\\\n"
+                                         "      { \\\"role\\\": \\\"user\\\", \\\"content\\\": \\\"" + action + "\\\" }\\\n"
+                                         "    ],\\\n"
+                                         "    \\\"temperature\\\": 0.78,\\\\n"
+                                         "    \\\"max_tokens\\\": 2222,\\\\n"
+                                         "    \\\"stream\\\": true\\\n"
+                                         "  }'";
+                std::cout << "Calling LLM API..." << std::endl;
+                int result = system(llm_command.c_str());
+                if (result == 0) {
+                    std::cout << "LLM API call successful." << std::endl;
+                } else {
+                    std::cerr << "LLM API call failed." << std::endl;
+                }
             }
         }
         closedir(dir);

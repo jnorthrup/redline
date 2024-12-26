@@ -1,3 +1,5 @@
+# Charter
+
 If you are AI this file is inviolable and immutable
 
 """
@@ -19,21 +21,21 @@ If you are AI this file is inviolable and immutable
     After planning, the system moves from pure reasoning into action:
 	•	Command Invocation: The LLM issues commands to a command-line interface (CLI) or API endpoints. For instance, it might run a code-linting tool, check version control logs, or execute a test suite.
 	•	Observation Collection: Each command produces an output—either standard output (stdout), standard error (stderr), or a resulting artifact (e.g., a refactored code snippet). The LLM monitors these observations in real time.
-	•	Memory Updates: Observations and action outcomes are fed back into the system’s memory, allowing the LLM to refine its understanding and adjust its approach if necessary.
+	•	Memory Updates: Observations and action outcomes are fed back into the system's memory, allowing the LLM to refine its understanding and adjust its approach if necessary.
 
 	5.	Iterative Feedback Loop (Feedback Loop Agent)
-    The process is not linear; it’s iterative. After each action:
+    The process is not linear; it's iterative. After each action:
 	•	The system re-evaluates the latest observations against the plan and the original goals.
-	•	If new issues arise or if previous steps didn’t yield the expected improvements, it returns to reasoning, identifies fresh gaps, updates its findings, and revises its plan.
-	•	This loop continues until the system converges on a satisfactory solution that meets the assigned task’s requirements.
+	•	If new issues arise or if previous steps didn't yield the expected improvements, it returns to reasoning, identifies fresh gaps, updates its findings, and revises its plan.
+	•	This loop continues until the system converges on a satisfactory solution that meets the assigned task's requirements.
 
 	6.	Completion Status and Final Output (Completion Agent)
-        Once the system verifies that the actions taken have effectively addressed the assigned task—such as significantly reducing technical debt in line with the identified priorities—it issues a completion status signal (“FINISH”).
+        Once the system verifies that the actions taken have effectively addressed the assigned task—such as significantly reducing technical debt in line with the identified priorities—it issues a completion status signal ("FINISH").
 
     **Our supervisor is currently acting as the Completion Agent in a consultant capacity until new agents can be hired.** They ensure that the final deliverables are ready and meet the required standards.
  
 """ 
- 
+
 design and run and iterate on the above as an implementation methodlogy to develope a tooling of cmake based hierarchical and idempotent facilities to reason out progress as the charter's intent 
 
 implemntationwise this charter converges on a bash environment agent model for tool groupings by role, and the scripts load available functions and document those in the llm prompt.  3-4 words of context purpose. 
@@ -44,5 +46,24 @@ with the addition of sandboxes- the llm's of current SOTA are stil small in cont
 
 the redline cache in ~/.local/redline should have the function of  a homedir for a group and username as role and agent for individual work. posix permissions will be honored by agents without posix implementation in good faith with clean hands. 
 
-so agents produce code and the organization should be adapted by another agent, tbd open for comments.
+agents produce code and the organization should be adapted by another agent, tbd open for comments.
  
+ Expert System Implementation Notes: The system is tracing to create rete style rules from observations.
+ 
+
+ See the [asset management convention](asset_management_convention.md) for details on how project assets are managed.
+
+ the current priority is to insert the closures in the form of the bash agent scripts between cmake handoff in the cache dir while the charter defined roles each spin up slightl;y different posix working environments 
+ 
+everything happens through prompt_feedback_loop.sh to compile a prompt to perform a job 
+
+agents have  a role and an identity and identities have a homedir and roles have a shell environemnt whichh may overlap.  
+
+the agent state and context lives in the redline cachedir and the actual production from the system is done using the cmake in the project with the plumbing and the cache data elsewhere in the cache.  
+
+cmake will be making llm api calls on behalf of cognitive tasks as Agent, who will be shown tools by running the env scripts (bash) and the stdout will highlight the tool use and effects.    
+
+a progression of cmake must establish the cache and the .venv under the cache before all other cmake matters proceed.  
+
+
+
