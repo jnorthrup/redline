@@ -1,0 +1,3 @@
+/Users/jim/work/redline/src/CMakeFiles/llm_api_call.dir
+/Users/jim/work/redline/src/CMakeFiles/edit_cache.dir
+/Users/jim/work/redline/src/CMakeFiles/rebuild_cache.dir

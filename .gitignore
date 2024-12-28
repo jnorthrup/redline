@@ -56,5 +56,5 @@ __pycache__
 aider.*
 
 # Redline local directories
-~/.local/redline/*/
-!~/.local/redline/README.md
+~/.local/cache/redline/*/
+!~/.local/cache/redline/README.md

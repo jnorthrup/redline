@@ -40,7 +40,7 @@ std::string executeLLM(const std::string& prompt, const std::string& llmApiUrl, 
 
     CURLcode res = curl_easy_perform(curl);
     if (res != CURLE_OK) {
-        std::cerr << "Curl error: " << curl_easy_strerror(res) << std::endl;
+        std::cerr << "Curl error: " << curl_easy_strerror(res) << " - Response: " << response << std::endl;
     }
 
     curl_easy_cleanup(curl);
@@ -49,14 +49,17 @@ std::string executeLLM(const std::string& prompt, const std::string& llmApiUrl, 
 }
 
 int main(int argc, char* argv[]) {
+    std::cout << "Starting llm_api_call" << std::endl;
     if (argc != 2) {
         std::cerr << "Usage: " << argv[0] << " \"action\"" << std::endl;
         return 1;
     }
 
     std::string action = argv[1];
-    std::string llmApiUrl = "http://localhost:1234/v1/chat/completions";
-    std::string modelName = "qwen2.5-14b-wernickev5.mlx@4bit";
+    const char* perplexityApi = std::getenv("PERPLEXITY_API");
+    const char* groqApiKey = std::getenv("GROQ_API_KEY");
+    std::string llmApiUrl = perplexityApi ? "https://api.perplexity.ai/chat/completions" : "https://api.groq.com/openai/v1/chat/completions";
+    std::string modelName = perplexityApi ? "pplx-7b-online" : "mixtral-8x7b-32768";
     const char* agentIdentity = std::getenv("AgenteIIdentity");
     const char* agentRoles = std::getenv("AgentRoles");
     std::string systemPrompt = "your name is " + std::string(agentIdentity ? agentIdentity : "") + " and your agent role(s) are " + std::string(agentRoles ? agentRoles : "") + "  ";

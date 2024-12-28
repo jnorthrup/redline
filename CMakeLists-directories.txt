@@ -1,0 +1,37 @@
+# Environment setup
+# Removed configuration for other_env.sh
+
+# Create required directories
+file(MAKE_DIRECTORY ${AGENTS_ROOT})
+file(MAKE_DIRECTORY ${WORK_ROOT})
+file(MAKE_DIRECTORY ${STATE_DIR})
+file(MAKE_DIRECTORY ${QUEUE_DIR})
+
+# Create agent directories
+foreach(agent ${AGENT_TYPES})
+    file(MAKE_DIRECTORY ${AGENTS_ROOT}/${agent})
+endforeach()
+
+# Create work directory
+file(MAKE_DIRECTORY ${WORK_ROOT})
+
+# Create base directory
+execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory "$ENV{HOME}/.local/cache/redline")
+
+# Create role-based directories
+set(ROLES
+    "action_execution_agent"
+    "cognitive_agent"
+    "completion_agent"
+    "feedback_loop_agent"
+    "planning_agent"
+)
+
+foreach(role IN LISTS ROLES)
+    execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory "$ENV{HOME}/.local/cache/redline/${role}")
+    execute_process(COMMAND chmod 750 "$ENV{HOME}/.local/cache/redline/${role}")
+endforeach()
+
+# Create CMake cache directory
+execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory "$ENV{HOME}/.local/cache/redline/cmake_cache")
+execute_process(COMMAND chmod 770 "$ENV{HOME}/.local/cache/redline/cmake_cache")

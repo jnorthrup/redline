@@ -31,9 +31,6 @@ default_target: all
 
 .SUFFIXES: .hpux_make_needs_suffix_list
 
-# Produce verbose output by default.
-VERBOSE = 1
-
 # Command-line flag to silence nested $(MAKE).
 $(VERBOSE)MAKESILENT = -s
 
@@ -88,51 +85,6 @@ rebuild_cache:
 rebuild_cache/fast: rebuild_cache
 .PHONY : rebuild_cache/fast
 
-# Special rule for the target list_install_components
-list_install_components:
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Available install components are: \"Unspecified\" \"gmock\" \"gtest\""
-.PHONY : list_install_components
-
-# Special rule for the target list_install_components
-list_install_components/fast: list_install_components
-.PHONY : list_install_components/fast
-
-# Special rule for the target install
-install: preinstall
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Install the project..."
-	/opt/homebrew/bin/cmake -P cmake_install.cmake
-.PHONY : install
-
-# Special rule for the target install
-install/fast: preinstall/fast
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Install the project..."
-	/opt/homebrew/bin/cmake -P cmake_install.cmake
-.PHONY : install/fast
-
-# Special rule for the target install/local
-install/local: preinstall
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing only the local directory..."
-	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
-.PHONY : install/local
-
-# Special rule for the target install/local
-install/local/fast: preinstall/fast
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing only the local directory..."
-	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
-.PHONY : install/local/fast
-
-# Special rule for the target install/strip
-install/strip: preinstall
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing the project stripped..."
-	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
-.PHONY : install/strip
-
-# Special rule for the target install/strip
-install/strip/fast: preinstall/fast
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing the project stripped..."
-	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
-.PHONY : install/strip/fast
-
 # The main all target
 all: cmake_check_build_system
 	cd /Users/jim/work/redline && $(CMAKE_COMMAND) -E cmake_progress_start /Users/jim/work/redline/CMakeFiles /Users/jim/work/redline/test//CMakeFiles/progress.marks
@@ -165,42 +117,66 @@ depend:
 .PHONY : depend
 
 # Convenience name for target.
-test/CMakeFiles/CognitiveAgentsTests.dir/rule:
-	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test/CMakeFiles/CognitiveAgentsTests.dir/rule
-.PHONY : test/CMakeFiles/CognitiveAgentsTests.dir/rule
+test/CMakeFiles/test_coordinate_editor.dir/rule:
+	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test/CMakeFiles/test_coordinate_editor.dir/rule
+.PHONY : test/CMakeFiles/test_coordinate_editor.dir/rule
 
 # Convenience name for target.
-CognitiveAgentsTests: test/CMakeFiles/CognitiveAgentsTests.dir/rule
-.PHONY : CognitiveAgentsTests
+test_coordinate_editor: test/CMakeFiles/test_coordinate_editor.dir/rule
+.PHONY : test_coordinate_editor
 
 # fast build rule for target.
-CognitiveAgentsTests/fast:
-	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/CognitiveAgentsTests.dir/build.make test/CMakeFiles/CognitiveAgentsTests.dir/build
-.PHONY : CognitiveAgentsTests/fast
+test_coordinate_editor/fast:
+	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/test_coordinate_editor.dir/build.make test/CMakeFiles/test_coordinate_editor.dir/build
+.PHONY : test_coordinate_editor/fast
 
-StateManagerTest.o: StateManagerTest.cpp.o
-.PHONY : StateManagerTest.o
+__/src/coordinate_editor.o: __/src/coordinate_editor.cpp.o
+.PHONY : __/src/coordinate_editor.o
 
 # target to build an object file
-StateManagerTest.cpp.o:
-	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/CognitiveAgentsTests.dir/build.make test/CMakeFiles/CognitiveAgentsTests.dir/StateManagerTest.cpp.o
-.PHONY : StateManagerTest.cpp.o
+__/src/coordinate_editor.cpp.o:
+	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/test_coordinate_editor.dir/build.make test/CMakeFiles/test_coordinate_editor.dir/__/src/coordinate_editor.cpp.o
+.PHONY : __/src/coordinate_editor.cpp.o
 
-StateManagerTest.i: StateManagerTest.cpp.i
-.PHONY : StateManagerTest.i
+__/src/coordinate_editor.i: __/src/coordinate_editor.cpp.i
+.PHONY : __/src/coordinate_editor.i
 
 # target to preprocess a source file
-StateManagerTest.cpp.i:
-	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/CognitiveAgentsTests.dir/build.make test/CMakeFiles/CognitiveAgentsTests.dir/StateManagerTest.cpp.i
-.PHONY : StateManagerTest.cpp.i
+__/src/coordinate_editor.cpp.i:
+	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/test_coordinate_editor.dir/build.make test/CMakeFiles/test_coordinate_editor.dir/__/src/coordinate_editor.cpp.i
+.PHONY : __/src/coordinate_editor.cpp.i
 
-StateManagerTest.s: StateManagerTest.cpp.s
-.PHONY : StateManagerTest.s
+__/src/coordinate_editor.s: __/src/coordinate_editor.cpp.s
+.PHONY : __/src/coordinate_editor.s
 
 # target to generate assembly for a file
-StateManagerTest.cpp.s:
-	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/CognitiveAgentsTests.dir/build.make test/CMakeFiles/CognitiveAgentsTests.dir/StateManagerTest.cpp.s
-.PHONY : StateManagerTest.cpp.s
+__/src/coordinate_editor.cpp.s:
+	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/test_coordinate_editor.dir/build.make test/CMakeFiles/test_coordinate_editor.dir/__/src/coordinate_editor.cpp.s
+.PHONY : __/src/coordinate_editor.cpp.s
+
+test_coordinate_editor.o: test_coordinate_editor.cpp.o
+.PHONY : test_coordinate_editor.o
+
+# target to build an object file
+test_coordinate_editor.cpp.o:
+	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/test_coordinate_editor.dir/build.make test/CMakeFiles/test_coordinate_editor.dir/test_coordinate_editor.cpp.o
+.PHONY : test_coordinate_editor.cpp.o
+
+test_coordinate_editor.i: test_coordinate_editor.cpp.i
+.PHONY : test_coordinate_editor.i
+
+# target to preprocess a source file
+test_coordinate_editor.cpp.i:
+	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/test_coordinate_editor.dir/build.make test/CMakeFiles/test_coordinate_editor.dir/test_coordinate_editor.cpp.i
+.PHONY : test_coordinate_editor.cpp.i
+
+test_coordinate_editor.s: test_coordinate_editor.cpp.s
+.PHONY : test_coordinate_editor.s
+
+# target to generate assembly for a file
+test_coordinate_editor.cpp.s:
+	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/test_coordinate_editor.dir/build.make test/CMakeFiles/test_coordinate_editor.dir/test_coordinate_editor.cpp.s
+.PHONY : test_coordinate_editor.cpp.s
 
 # Help Target
 help:
@@ -209,15 +185,14 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
-	@echo "... install"
-	@echo "... install/local"
-	@echo "... install/strip"
-	@echo "... list_install_components"
 	@echo "... rebuild_cache"
-	@echo "... CognitiveAgentsTests"
-	@echo "... StateManagerTest.o"
-	@echo "... StateManagerTest.i"
-	@echo "... StateManagerTest.s"
+	@echo "... test_coordinate_editor"
+	@echo "... __/src/coordinate_editor.o"
+	@echo "... __/src/coordinate_editor.i"
+	@echo "... __/src/coordinate_editor.s"
+	@echo "... test_coordinate_editor.o"
+	@echo "... test_coordinate_editor.i"
+	@echo "... test_coordinate_editor.s"
 .PHONY : help
 
 

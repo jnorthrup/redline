@@ -27,7 +27,7 @@ class MemoryManager:
             json.dump(memory, f, indent=2)
     
     def log_observation(self, observation: str):
-        timestamp = datetime.utcnow().isoformat() + 'Z'
+        timestamp = datetime.now(datetime.timezone.utc).isoformat()
         with open(self.observation_file, 'a') as f:
             f.write(f"{timestamp} - {observation}\n")
 
@@ -97,6 +97,29 @@ class PlanningAgent(Agent):
         context = self.get_context()
         prompt = f"""You are the Planning Agent responsible for creating a detailed execution plan.
         
+        Based on the cognitive analysis and current state, please create a structured plan.
+        
+        Cognitive Analysis:
+        {json.dumps(cognitive_response, indent=2)}
+        
+        Current Memory:
+        {json.dumps(context['memory'], indent=2)}
+        
+        Please structure your response as JSON with the following fields:
+        {{
+            "steps": [
+                {{
+                    "id": "step identifier",
+                    "description": "step description",
+                    "commands": ["list of commands to execute"],
+                    "expected_outcomes": ["expected results"],
+                    "validation_criteria": ["how to validate success"]
+                }}
+            ],
+            "dependencies": ["step dependencies"],
+            "estimated_completion_time": "time estimate"
+        }}"""
+        
         response = self.lmstudio.execute_prompt(prompt, self.llmApiUrl, self.modelName)
         self.memory_manager.log_observation(f"Plan: {response}")
         return json.loads(response)
@@ -104,7 +127,7 @@ class PlanningAgent(Agent):
 class ActionExecutionAgent(Agent):
     def execute_step(self, plan: Dict, current_step: Dict) -> Dict:
         context = self.get_context()
-        prompt = f"""You are the Action Execution Agent responsible for executing commands and collecting observations.
+        prompt = f"""You are the Action Execution Agent responsible for executing commands and collecting observations."""
         
         response = self.lmstudio.execute_prompt(prompt, self.llmApiUrl, self.modelName)
         self.memory_manager.log_observation(f"Action Results: {response}")
@@ -115,6 +138,27 @@ class FeedbackLoopAgent(Agent):
         context = self.get_context()
         prompt = f"""You are the Feedback Loop Agent responsible for evaluating results and determining next steps.
         
+        Please analyze the latest action results and provide feedback.
+        
+        Action Results:
+        {json.dumps(action_results, indent=2)}
+        
+        Original Plan:
+        {json.dumps(original_plan, indent=2)}
+        
+        Current Memory:
+        {json.dumps(context['memory'], indent=2)}
+        
+        Please structure your response as JSON with the following fields:
+        {{
+            "success_criteria_met": boolean,
+            "observations_analysis": "analysis of results",
+            "plan_adjustments": ["needed adjustments to plan"],
+            "next_step": "next step to take",
+            "memory_updates": ["updates to make to memory"],
+            "continue_iteration": boolean
+        }}"""
+        
         response = self.lmstudio.execute_prompt(prompt, self.llmApiUrl, self.modelName)
         self.memory_manager.log_observation(f"Feedback: {response}")
         return json.loads(response)
@@ -123,3 +167,20 @@ class CompletionAgent(Agent):
     def verify(self, full_history: str) -> Dict:
         context = self.get_context()
         prompt = f"""You are the Completion Agent responsible for final verification and delivery.
+
+        Based on the execution history and current state, please verify that all requirements have been met.
+
+        Execution History:
+        {full_history}
+
+        Current Memory:
+        {json.dumps(context['memory'], indent=2)}
+
+        Please structure your response as JSON with the following fields:
+        {{
+            "requirements_met": boolean,
+            "verification_details": ["verification steps performed"],
+            "outstanding_issues": ["any remaining issues"],
+            "final_artifacts": ["list of final deliverables"],
+            "completion_status": "FINISH or CONTINUE"
+        }}"""

@@ -1,0 +1,19 @@
+# External dependencies
+find_package(cpprestsdk CONFIG REQUIRED)
+set(CPPRESTSDK_DIR "/usr/local") # Generic cpprestsdk installation path
+include_directories(${CPPRESTSDK_INCLUDE_DIRS})
+link_libraries(${CPPRESTSDK_LIBRARIES})
+
+find_package(nlohmann_json CONFIG REQUIRED)
+include_directories(${nlohmann_json_INCLUDE_DIRS})
+# Define common link libraries
+set(COMMON_LIBS
+    core
+    reasoning
+    planning
+    action
+    feedback
+    lmstudio_client
+    cpprestsdk::cpprest
+    nlohmann_json::nlohmann_json
+)

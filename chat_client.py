@@ -5,8 +5,8 @@ import os
 from openai import OpenAI
 
 # Retrieve the API key and base URL from environment variables
-# api_key = os.environ.get("HUGGINGFACE_API_KEY")
-# base_url = "https://rajr8mu889ikx6zh.us-east-1.aws.endpoints.huggingface.cloud/v1/"
+api_key = os.environ.get("HUGGINGFACE_API_KEY")
+base_url = "https://rajr8mu889ikx6zh.us-east-1.aws.endpoints.huggingface.cloud/v1/"
 
 # Check if the environment variable is set
 if not api_key:

@@ -1,0 +1,19 @@
+LLM Call Sequence for Task Handoff:
+
+1. Initial Task Processing:
+   - Prompt: "Process this task through the Charter system: integrate the code from run_cmake into the charter fulfillment agents"
+   - Purpose: Initial task analysis and decomposition
+
+2. Agent Handoff Loop:
+   - While NEXT_AGENT is present in response:
+     a. Extract next agent name
+     b. Create agent-specific prompt
+     c. Call execute_llm with agent prompt
+     d. Process response
+
+3. File Edits (if needed):
+   - If FILE_EDIT is present in response:
+     a. Call execute_llm for edit coordinates
+     b. Process edit instructions
+
+Note: The actual number of calls depends on the LLM's response and the complexity of the task.

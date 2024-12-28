@@ -2,9 +2,11 @@
 #include <fstream>
 #include <string>
 #include <dirent.h>
+#include <cstdlib> // For getenv
 
 int main() {
-    std::string cache_dir = REDLINE_CACHE_DIR;
+    const char* env_cache_dir = std::getenv("REDLINE_CACHE_DIR");
+    std::string cache_dir = env_cache_dir ? env_cache_dir : "./cache";
     std::string work_dir = cache_dir + "/work_queue/feedback";
     DIR *dir;
     struct dirent *ent;

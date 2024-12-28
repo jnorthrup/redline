@@ -116,6 +116,69 @@ depend:
 	$(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
+#=============================================================================
+# Target rules for targets named simple_program
+
+# Build rule for target.
+simple_program: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 simple_program
+.PHONY : simple_program
+
+# fast build rule for target.
+simple_program/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/simple_program.dir/build.make CMakeFiles/simple_program.dir/build
+.PHONY : simple_program/fast
+
+#=============================================================================
+# Target rules for targets named llm_api_call
+
+# Build rule for target.
+llm_api_call: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 llm_api_call
+.PHONY : llm_api_call
+
+# fast build rule for target.
+llm_api_call/fast:
+	$(MAKE) $(MAKESILENT) -f src/CMakeFiles/llm_api_call.dir/build.make src/CMakeFiles/llm_api_call.dir/build
+.PHONY : llm_api_call/fast
+
+#=============================================================================
+# Target rules for targets named test_coordinate_editor
+
+# Build rule for target.
+test_coordinate_editor: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test_coordinate_editor
+.PHONY : test_coordinate_editor
+
+# fast build rule for target.
+test_coordinate_editor/fast:
+	$(MAKE) $(MAKESILENT) -f test/CMakeFiles/test_coordinate_editor.dir/build.make test/CMakeFiles/test_coordinate_editor.dir/build
+.PHONY : test_coordinate_editor/fast
+
+src/simple_program.o: src/simple_program.c.o
+.PHONY : src/simple_program.o
+
+# target to build an object file
+src/simple_program.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/simple_program.dir/build.make CMakeFiles/simple_program.dir/src/simple_program.c.o
+.PHONY : src/simple_program.c.o
+
+src/simple_program.i: src/simple_program.c.i
+.PHONY : src/simple_program.i
+
+# target to preprocess a source file
+src/simple_program.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/simple_program.dir/build.make CMakeFiles/simple_program.dir/src/simple_program.c.i
+.PHONY : src/simple_program.c.i
+
+src/simple_program.s: src/simple_program.c.s
+.PHONY : src/simple_program.s
+
+# target to generate assembly for a file
+src/simple_program.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/simple_program.dir/build.make CMakeFiles/simple_program.dir/src/simple_program.c.s
+.PHONY : src/simple_program.c.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -124,6 +187,12 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... llm_api_call"
+	@echo "... simple_program"
+	@echo "... test_coordinate_editor"
+	@echo "... src/simple_program.o"
+	@echo "... src/simple_program.i"
+	@echo "... src/simple_program.s"
 .PHONY : help
 
 

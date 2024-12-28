@@ -1,0 +1,45 @@
+cmake_minimum_required(VERSION 3.10)
+project(redline VERSION 1.0)
+
+# Base configuration
+set(REDLINE_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+set(AGENTS_ROOT ${REDLINE_ROOT}/agents)
+set(WORK_ROOT ${REDLINE_ROOT}/work)
+set(STATE_DIR ${WORK_ROOT}/state)
+set(QUEUE_DIR ${WORK_ROOT}/queue)
+
+# Agent definitions
+set(AGENT_TYPES
+    cognitive_agent
+    planning_agent
+    action_execution_agent
+    feedback_loop_agent
+)
+
+
+# Include agent subdirectories
+add_subdirectory(agents)
+
+# Define LLM API endpoint
+set(LLM_API_ENDPOINT "http://localhost:8080/v1/completions")
+
+# Function to execute LLM API call
+function(execute_llm PROMPT RESULT_VAR)
+    execute_process(
+        COMMAND bash -c "source ${CMAKE_SOURCE_DIR}/setup_agent_env.sh && \
+            curl -s -X POST \
+            -H \"Content-Type: application/json\" \
+            -d '{\"prompt\": \"${PROMPT}\"}' \
+            ${LLM_API_ENDPOINT}"
+        OUTPUT_VARIABLE response
+        RESULT_VARIABLE status
+        ERROR_VARIABLE error_message
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+    if(NOT status EQUAL 0)
+        message(FATAL_ERROR "LLM API call failed with status ${status}: ${error_message}")
+    endif()
+
+    set(${RESULT_VAR} "${response}" PARENT_SCOPE)
+endfunction()

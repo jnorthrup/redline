@@ -1,0 +1,41 @@
+file(REMOVE_RECURSE
+  "CMakeFiles/CharterParser.dir/CMakeFiles/3.31.3/CompilerIdCXX/CMakeCXXCompilerId.cpp.o"
+  "CMakeFiles/CharterParser.dir/CMakeFiles/3.31.3/CompilerIdCXX/CMakeCXXCompilerId.cpp.o.d"
+  "CMakeFiles/CharterParser.dir/CharterParser.cpp.o"
+  "CMakeFiles/CharterParser.dir/CharterParser.cpp.o.d"
+  "CMakeFiles/CharterParser.dir/action_execution_agent/action_execution_agent.cpp.o"
+  "CMakeFiles/CharterParser.dir/action_execution_agent/action_execution_agent.cpp.o.d"
+  "CMakeFiles/CharterParser.dir/build/CMakeFiles/3.31.3/CompilerIdCXX/CMakeCXXCompilerId.cpp.o"
+  "CMakeFiles/CharterParser.dir/build/CMakeFiles/3.31.3/CompilerIdCXX/CMakeCXXCompilerId.cpp.o.d"
+  "CMakeFiles/CharterParser.dir/cognitive_agent/cognitive_agent.cpp.o"
+  "CMakeFiles/CharterParser.dir/cognitive_agent/cognitive_agent.cpp.o.d"
+  "CMakeFiles/CharterParser.dir/completion_agent/completion_agent.cpp.o"
+  "CMakeFiles/CharterParser.dir/completion_agent/completion_agent.cpp.o.d"
+  "CMakeFiles/CharterParser.dir/feedback_loop_agent/feedback_loop_agent.cpp.o"
+  "CMakeFiles/CharterParser.dir/feedback_loop_agent/feedback_loop_agent.cpp.o.d"
+  "CMakeFiles/CharterParser.dir/mixer/build/CMakeFiles/3.31.3/CompilerIdCXX/CMakeCXXCompilerId.cpp.o"
+  "CMakeFiles/CharterParser.dir/mixer/build/CMakeFiles/3.31.3/CompilerIdCXX/CMakeCXXCompilerId.cpp.o.d"
+  "CMakeFiles/CharterParser.dir/planning_agent/planning_agent.cpp.o"
+  "CMakeFiles/CharterParser.dir/planning_agent/planning_agent.cpp.o.d"
+  "CMakeFiles/CharterParser.dir/src/CMakeFiles/3.31.3/CompilerIdCXX/CMakeCXXCompilerId.cpp.o"
+  "CMakeFiles/CharterParser.dir/src/CMakeFiles/3.31.3/CompilerIdCXX/CMakeCXXCompilerId.cpp.o.d"
+  "CMakeFiles/CharterParser.dir/src/charter_parser.cpp.o"
+  "CMakeFiles/CharterParser.dir/src/charter_parser.cpp.o.d"
+  "CMakeFiles/CharterParser.dir/src/coordinate_editor.cpp.o"
+  "CMakeFiles/CharterParser.dir/src/coordinate_editor.cpp.o.d"
+  "CMakeFiles/CharterParser.dir/src/core/LMStudioClient.cpp.o"
+  "CMakeFiles/CharterParser.dir/src/core/LMStudioClient.cpp.o.d"
+  "CMakeFiles/CharterParser.dir/src/llm_api_call.cpp.o"
+  "CMakeFiles/CharterParser.dir/src/llm_api_call.cpp.o.d"
+  "CMakeFiles/CharterParser.dir/src/lmstudio_tool.cpp.o"
+  "CMakeFiles/CharterParser.dir/src/lmstudio_tool.cpp.o.d"
+  "CMakeFiles/CharterParser.dir/test/test_coordinate_editor.cpp.o"
+  "CMakeFiles/CharterParser.dir/test/test_coordinate_editor.cpp.o.d"
+  "CharterParser"
+  "CharterParser.pdb"
+)
+
+# Per-language clean rules from dependency scanning.
+foreach(lang CXX)
+  include(CMakeFiles/CharterParser.dir/cmake_clean_${lang}.cmake OPTIONAL)
+endforeach()

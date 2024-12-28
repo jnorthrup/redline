@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.10)
 
 # Function to configure LMStudio client for offline use
 function(configure_lmstudio_offline)
-    set(CONFIG_FILE ~/.local/redline/lmstudio/config.json)
-    set(OFFLINE_CONFIG "{\"offline\": true, \"cache_dir\": \"~/.local/redline/lmstudio/cache\"}")
+    set(CONFIG_FILE ~/.local/cache/redline/lmstudio/config.json)
+    set(OFFLINE_CONFIG "{\"offline\": true, \"cache_dir\": \"~/.local/cache/redline/lmstudio/cache\"}")
 
     if(NOT EXISTS ${CONFIG_FILE})
         file(WRITE ${CONFIG_FILE} ${OFFLINE_CONFIG})

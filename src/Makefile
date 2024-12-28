@@ -85,51 +85,6 @@ rebuild_cache:
 rebuild_cache/fast: rebuild_cache
 .PHONY : rebuild_cache/fast
 
-# Special rule for the target list_install_components
-list_install_components:
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Available install components are: \"Unspecified\""
-.PHONY : list_install_components
-
-# Special rule for the target list_install_components
-list_install_components/fast: list_install_components
-.PHONY : list_install_components/fast
-
-# Special rule for the target install
-install: preinstall
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Install the project..."
-	/opt/homebrew/bin/cmake -P cmake_install.cmake
-.PHONY : install
-
-# Special rule for the target install
-install/fast: preinstall/fast
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Install the project..."
-	/opt/homebrew/bin/cmake -P cmake_install.cmake
-.PHONY : install/fast
-
-# Special rule for the target install/local
-install/local: preinstall
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing only the local directory..."
-	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
-.PHONY : install/local
-
-# Special rule for the target install/local
-install/local/fast: preinstall/fast
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing only the local directory..."
-	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
-.PHONY : install/local/fast
-
-# Special rule for the target install/strip
-install/strip: preinstall
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing the project stripped..."
-	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
-.PHONY : install/strip
-
-# Special rule for the target install/strip
-install/strip/fast: preinstall/fast
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing the project stripped..."
-	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
-.PHONY : install/strip/fast
-
 # The main all target
 all: cmake_check_build_system
 	cd /Users/jim/work/redline && $(CMAKE_COMMAND) -E cmake_progress_start /Users/jim/work/redline/CMakeFiles /Users/jim/work/redline/src//CMakeFiles/progress.marks
@@ -162,142 +117,90 @@ depend:
 .PHONY : depend
 
 # Convenience name for target.
-src/CMakeFiles/core.dir/rule:
-	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/CMakeFiles/core.dir/rule
-.PHONY : src/CMakeFiles/core.dir/rule
+src/CMakeFiles/llm_api_call.dir/rule:
+	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/CMakeFiles/llm_api_call.dir/rule
+.PHONY : src/CMakeFiles/llm_api_call.dir/rule
 
 # Convenience name for target.
-core: src/CMakeFiles/core.dir/rule
-.PHONY : core
+llm_api_call: src/CMakeFiles/llm_api_call.dir/rule
+.PHONY : llm_api_call
 
 # fast build rule for target.
-core/fast:
-	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/core.dir/build.make src/CMakeFiles/core.dir/build
-.PHONY : core/fast
+llm_api_call/fast:
+	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/llm_api_call.dir/build.make src/CMakeFiles/llm_api_call.dir/build
+.PHONY : llm_api_call/fast
 
-# Convenience name for target.
-src/CMakeFiles/CognitiveAgents.dir/rule:
-	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/CMakeFiles/CognitiveAgents.dir/rule
-.PHONY : src/CMakeFiles/CognitiveAgents.dir/rule
-
-# Convenience name for target.
-CognitiveAgents: src/CMakeFiles/CognitiveAgents.dir/rule
-.PHONY : CognitiveAgents
-
-# fast build rule for target.
-CognitiveAgents/fast:
-	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CognitiveAgents.dir/build.make src/CMakeFiles/CognitiveAgents.dir/build
-.PHONY : CognitiveAgents/fast
-
-# Convenience name for target.
-src/CMakeFiles/generate_lmstudio_script.dir/rule:
-	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/CMakeFiles/generate_lmstudio_script.dir/rule
-.PHONY : src/CMakeFiles/generate_lmstudio_script.dir/rule
-
-# Convenience name for target.
-generate_lmstudio_script: src/CMakeFiles/generate_lmstudio_script.dir/rule
-.PHONY : generate_lmstudio_script
-
-# fast build rule for target.
-generate_lmstudio_script/fast:
-	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/generate_lmstudio_script.dir/build.make src/CMakeFiles/generate_lmstudio_script.dir/build
-.PHONY : generate_lmstudio_script/fast
-
-core/LMStudioClient.o: core/LMStudioClient.cpp.o
-.PHONY : core/LMStudioClient.o
+charter_parser.o: charter_parser.cpp.o
+.PHONY : charter_parser.o
 
 # target to build an object file
-core/LMStudioClient.cpp.o:
-	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/core.dir/build.make src/CMakeFiles/core.dir/core/LMStudioClient.cpp.o
-.PHONY : core/LMStudioClient.cpp.o
+charter_parser.cpp.o:
+	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/llm_api_call.dir/build.make src/CMakeFiles/llm_api_call.dir/charter_parser.cpp.o
+.PHONY : charter_parser.cpp.o
 
-core/LMStudioClient.i: core/LMStudioClient.cpp.i
-.PHONY : core/LMStudioClient.i
+charter_parser.i: charter_parser.cpp.i
+.PHONY : charter_parser.i
 
 # target to preprocess a source file
-core/LMStudioClient.cpp.i:
-	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/core.dir/build.make src/CMakeFiles/core.dir/core/LMStudioClient.cpp.i
-.PHONY : core/LMStudioClient.cpp.i
+charter_parser.cpp.i:
+	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/llm_api_call.dir/build.make src/CMakeFiles/llm_api_call.dir/charter_parser.cpp.i
+.PHONY : charter_parser.cpp.i
 
-core/LMStudioClient.s: core/LMStudioClient.cpp.s
-.PHONY : core/LMStudioClient.s
+charter_parser.s: charter_parser.cpp.s
+.PHONY : charter_parser.s
 
 # target to generate assembly for a file
-core/LMStudioClient.cpp.s:
-	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/core.dir/build.make src/CMakeFiles/core.dir/core/LMStudioClient.cpp.s
-.PHONY : core/LMStudioClient.cpp.s
+charter_parser.cpp.s:
+	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/llm_api_call.dir/build.make src/CMakeFiles/llm_api_call.dir/charter_parser.cpp.s
+.PHONY : charter_parser.cpp.s
 
-core/StateManager.o: core/StateManager.cpp.o
-.PHONY : core/StateManager.o
+coordinate_editor.o: coordinate_editor.cpp.o
+.PHONY : coordinate_editor.o
 
 # target to build an object file
-core/StateManager.cpp.o:
-	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/core.dir/build.make src/CMakeFiles/core.dir/core/StateManager.cpp.o
-.PHONY : core/StateManager.cpp.o
+coordinate_editor.cpp.o:
+	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/llm_api_call.dir/build.make src/CMakeFiles/llm_api_call.dir/coordinate_editor.cpp.o
+.PHONY : coordinate_editor.cpp.o
 
-core/StateManager.i: core/StateManager.cpp.i
-.PHONY : core/StateManager.i
+coordinate_editor.i: coordinate_editor.cpp.i
+.PHONY : coordinate_editor.i
 
 # target to preprocess a source file
-core/StateManager.cpp.i:
-	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/core.dir/build.make src/CMakeFiles/core.dir/core/StateManager.cpp.i
-.PHONY : core/StateManager.cpp.i
+coordinate_editor.cpp.i:
+	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/llm_api_call.dir/build.make src/CMakeFiles/llm_api_call.dir/coordinate_editor.cpp.i
+.PHONY : coordinate_editor.cpp.i
 
-core/StateManager.s: core/StateManager.cpp.s
-.PHONY : core/StateManager.s
+coordinate_editor.s: coordinate_editor.cpp.s
+.PHONY : coordinate_editor.s
 
 # target to generate assembly for a file
-core/StateManager.cpp.s:
-	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/core.dir/build.make src/CMakeFiles/core.dir/core/StateManager.cpp.s
-.PHONY : core/StateManager.cpp.s
+coordinate_editor.cpp.s:
+	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/llm_api_call.dir/build.make src/CMakeFiles/llm_api_call.dir/coordinate_editor.cpp.s
+.PHONY : coordinate_editor.cpp.s
 
-core/greet.o: core/greet.cpp.o
-.PHONY : core/greet.o
+llm_api_call.o: llm_api_call.cpp.o
+.PHONY : llm_api_call.o
 
 # target to build an object file
-core/greet.cpp.o:
-	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/core.dir/build.make src/CMakeFiles/core.dir/core/greet.cpp.o
-.PHONY : core/greet.cpp.o
+llm_api_call.cpp.o:
+	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/llm_api_call.dir/build.make src/CMakeFiles/llm_api_call.dir/llm_api_call.cpp.o
+.PHONY : llm_api_call.cpp.o
 
-core/greet.i: core/greet.cpp.i
-.PHONY : core/greet.i
-
-# target to preprocess a source file
-core/greet.cpp.i:
-	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/core.dir/build.make src/CMakeFiles/core.dir/core/greet.cpp.i
-.PHONY : core/greet.cpp.i
-
-core/greet.s: core/greet.cpp.s
-.PHONY : core/greet.s
-
-# target to generate assembly for a file
-core/greet.cpp.s:
-	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/core.dir/build.make src/CMakeFiles/core.dir/core/greet.cpp.s
-.PHONY : core/greet.cpp.s
-
-core/main.o: core/main.cpp.o
-.PHONY : core/main.o
-
-# target to build an object file
-core/main.cpp.o:
-	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CognitiveAgents.dir/build.make src/CMakeFiles/CognitiveAgents.dir/core/main.cpp.o
-.PHONY : core/main.cpp.o
-
-core/main.i: core/main.cpp.i
-.PHONY : core/main.i
+llm_api_call.i: llm_api_call.cpp.i
+.PHONY : llm_api_call.i
 
 # target to preprocess a source file
-core/main.cpp.i:
-	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CognitiveAgents.dir/build.make src/CMakeFiles/CognitiveAgents.dir/core/main.cpp.i
-.PHONY : core/main.cpp.i
+llm_api_call.cpp.i:
+	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/llm_api_call.dir/build.make src/CMakeFiles/llm_api_call.dir/llm_api_call.cpp.i
+.PHONY : llm_api_call.cpp.i
 
-core/main.s: core/main.cpp.s
-.PHONY : core/main.s
+llm_api_call.s: llm_api_call.cpp.s
+.PHONY : llm_api_call.s
 
 # target to generate assembly for a file
-core/main.cpp.s:
-	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CognitiveAgents.dir/build.make src/CMakeFiles/CognitiveAgents.dir/core/main.cpp.s
-.PHONY : core/main.cpp.s
+llm_api_call.cpp.s:
+	cd /Users/jim/work/redline && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/llm_api_call.dir/build.make src/CMakeFiles/llm_api_call.dir/llm_api_call.cpp.s
+.PHONY : llm_api_call.cpp.s
 
 # Help Target
 help:
@@ -306,26 +209,17 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
-	@echo "... install"
-	@echo "... install/local"
-	@echo "... install/strip"
-	@echo "... list_install_components"
 	@echo "... rebuild_cache"
-	@echo "... generate_lmstudio_script"
-	@echo "... CognitiveAgents"
-	@echo "... core"
-	@echo "... core/LMStudioClient.o"
-	@echo "... core/LMStudioClient.i"
-	@echo "... core/LMStudioClient.s"
-	@echo "... core/StateManager.o"
-	@echo "... core/StateManager.i"
-	@echo "... core/StateManager.s"
-	@echo "... core/greet.o"
-	@echo "... core/greet.i"
-	@echo "... core/greet.s"
-	@echo "... core/main.o"
-	@echo "... core/main.i"
-	@echo "... core/main.s"
+	@echo "... llm_api_call"
+	@echo "... charter_parser.o"
+	@echo "... charter_parser.i"
+	@echo "... charter_parser.s"
+	@echo "... coordinate_editor.o"
+	@echo "... coordinate_editor.i"
+	@echo "... coordinate_editor.s"
+	@echo "... llm_api_call.o"
+	@echo "... llm_api_call.i"
+	@echo "... llm_api_call.s"
 .PHONY : help
 
 

@@ -56,7 +56,7 @@ endfunction()
 
 # Function to get agent home directory
 function(get_agent_home AGENT_NAME AGENT_ROLE OUTPUT_VAR)
-    set(AGENT_HOME "$ENV{HOME}/.local/redline/${AGENT_ROLE}/${AGENT_NAME}")
+    set(AGENT_HOME "$ENV{HOME}/.local/cache/redline/${AGENT_ROLE}/${AGENT_NAME}")
     set(${OUTPUT_VAR} "${AGENT_HOME}" PARENT_SCOPE)
 endfunction()
 
@@ -106,7 +106,7 @@ endfunction()
 # Initialize common variables
 if(NOT DEFINED REDLINE_INITIALIZED)
     set(REDLINE_INITIALIZED TRUE)
-    set(REDLINE_CACHE_DIR "$ENV{HOME}/.local/redline")
+    set(REDLINE_CACHE_DIR "$ENV{HOME}/.local/cache/redline")
     set(REDLINE_LOG_DIR "${CMAKE_BINARY_DIR}/logs")
     ensure_directory("${REDLINE_CACHE_DIR}")
     ensure_directory("${REDLINE_LOG_DIR}")
