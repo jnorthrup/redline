@@ -1,11 +1,26 @@
-# Core tools with consistent parameter tuple pattern (file-like, text-like, start, end)
-function  scan {
+#!/usr/bin/env bash
+
+: GHEAD=${GHEAD:=( $(which {g,}head) )}
+: GTAIL=${GTAIL:=( $(which {g,}tail) )}
+: GGREP=${GGREP:=( $(which {g,}grep) )}
+: GCAT=${GCAT:=( $(which {g,}cat) )}
+: GECHO=${GECHO:=( $(which {g,}echo) )}
+: GWC=${GWC:=( $(which {g,}wc) )}
+: GTEE=${GTEE:=( $(which {g,}tee) )}
+: GMV=${GMV:=( $(which {g,}mv) )}
+: GCP=${GCP:=( $(which {g,}cp) )}
+: GFIND=${GFIND:=( $(which {g,}find) )}
+: GDIFF=${GDIFF:=( $(which {g,}diff) )}
+: GSED=${GSED:=( $(which {g,}sed) )}
+
+# Core tools with consistent parameter tuple pattern (file-like   text-like  start  end )
+function scan {
     local filepat="$1"    # File-like: file pattern to search
     local pattern="$2"    # Text-like: regex pattern to match
-    echo "Scanning for pattern: $pattern in files matching: $filepat" | tee -a output.log
-    echo "Pattern: $pattern" | tee -a output.log
-    echo "Files: $(find . -iname "$filepat")" | tee -a output.log
-    grep -nC 2 -E "$pattern" $(find . -iname "$filepat") | tee -a output.log
+    $GECHO "Scanning for pattern: $pattern in files matching: $filepat" | $GTEE -a output.log
+    $GECHO "Pattern: $pattern" | $GTEE -a output.log
+    $GECHO "Files: $($GFIND . -iname "$filepat")" | $GTEE -a output.log
+    $GGREP -nC 2 -E "$pattern" $($GFIND . -iname "$filepat") | $GTEE -a output.log
 }
 
 function edit {
@@ -16,27 +31,50 @@ function edit {
     
     # File existence check
     if [[ ! -f "$file" ]]; then
-        echo "Error: File '$file' does not exist" | tee -a output.log
+        $GECHO "Error: File '$file' does not exist" | $GTEE -a output.log
         exit 1
     fi
     
     # Get total line count
-    local total_lines=$(wc -l < "$file")
+    local total_lines=$($GWC -l < "$file")
     
     # Validate line numbers
     if [[ "$start" -le 0 || "$end" -le 0 || "$start" -gt "$total_lines" || "$end" -gt "$((total_lines + 1))" || "$start" -ge "$end" ]]; then
-        echo "Error: Invalid line range $start to $end (file has $total_lines lines)" | tee -a output.log
+        $GECHO "Error: Invalid line range $start to $end (file has $total_lines lines)" | $GTEE -a output.log
         exit 1
     fi
     
-    echo "Editing file: $file from line $start to $end" | tee -a output.log
-    echo "New content: $new_text" | tee -a output.log
-    cat <(head -n "$((start-1))" "$file") <<< "$new_text" <(tail -n "+$((end))" "$file") > "${file}.new"
-    mv -f "${file}.new" "$file" | tee -a output.log
-
+    $GECHO "Editing file: $file from line $start to $end" | $GTEE -a output.log
+    $GECHO "New content: $new_text" | $GTEE -a output.log
+    $GCAT <($GHEAD -n "$((start-1))" "$file") <<< "$new_text" <($GTAIL -n "+$((end))" "$file") > "${file}.new"
+    $GMV -f "${file}.new" "$file" | $GTEE -a output.log
 }
 
-function  verify {
+function search {
+    local query="$1"
+    local json_message=$(build_openai_message "$query")
+    $GECHO "Searching for: $query" | $GTEE -a output.log
+    $GECHO "Generated OpenAI message:" | $GTEE -a output.log
+    $GECHO "$json_message" | $GTEE -a output.log
+}
+
+function build_openai_message {
+    local user_text="$1"
+    local json_message=$(jq -n \
+        --arg user_text "$user_text" \
+        '{
+            messages: [
+                {
+                    role: "system",
+                    content: $user_text
+                }
+            ]
+        }'
+    )
+    $GECHO "$json_message"
+}
+
+function verify {
     local file1="$1"      # File-like: original file
     local file2="$2"      # File-like: new file
     local start="$3"      # Start line to verify
@@ -45,30 +83,30 @@ function  verify {
     # File existence checks
     for f in "$file1" "$file2"; do
         if [[ ! -f "$f" ]]; then
-            echo "Error: File '$f' does not exist" | tee -a output.log
+            $GECHO "Error: File '$f' does not exist" | $GTEE -a output.log
             exit 1
         fi
     done
     
     # Get total line counts
-    local lines1=$(wc -l < "$file1")
-    local lines2=$(wc -l < "$file2")
+    local lines1=$($GWC -l < "$file1")
+    local lines2=$($GWC -l < "$file2")
     
     # Validate line numbers
     local max_lines=$((lines1 > lines2 ? lines1 : lines2))
     if [[ "$start" -le 0 || "$end" -le 0 || "$start" -gt "$max_lines" || "$end" -gt "$((max_lines + 1))" || "$start" -ge "$end" ]]; then
-        echo "Error: Invalid line range $start to $end (files have $lines1 and $lines2 lines)" | tee -a output.log
+        $GECHO "Error: Invalid line range $start to $end (files have $lines1 and $lines2 lines)" | $GTEE -a output.log
         exit 1
     fi
     
-    echo "Verifying files: $file1 and $file2 from line $start to $end" | tee -a output.log
-    echo "File 1: $file1" | tee -a output.log
-    echo "File 2: $file2" | tee -a output.log
+    $GECHO "Verifying files: $file1 and $file2 from line $start to $end" | $GTEE -a output.log
+    $GECHO "File 1: $file1" | $GTEE -a output.log
+    $GECHO "File 2: $file2" | $GTEE -a output.log
     
     if [[ "$start" -gt 1 ]]; then
-        diff <(head -n "$((start - 1))" "$file1") <(head -n "$((start - 1))" "$file2")
+        $GDIFF <($GHEAD -n "$((start - 1))" "$file1") <($GHEAD -n "$((start - 1))" "$file2")
     fi
     if [[ "$end" -le "$max_lines" ]]; then
-        diff <(tail -n "+$((end))" "$file1") <(tail -n "+$((end))" "$file2")
-    fi | tee -a output.log
+        $GDIFF <($GTAIL -n "+$((end))" "$file1") <($GTAIL -n "+$((end))" "$file2")
+    fi | $GTEE -a output.log
 }

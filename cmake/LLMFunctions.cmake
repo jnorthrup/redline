@@ -1,5 +1,4 @@
 function(execute_llm PROMPT RESULT_VAR)
-    # 8B09616B-1495-4070-AC50-F52D72E34238
     # Check for debug flags
     if(DEFINED DEBUG_SEND)
         message(STATUS "Debug mode enabled (SEND)")
@@ -8,6 +7,7 @@ function(execute_llm PROMPT RESULT_VAR)
     endif
 
     file(READ "${CMAKE_BINARY_DIR}/llm_config.json" config_content)
+    
     string(JSON config_without_brace GET "${config_content}" 1 -1)
     string(REPLACE "\"" "\\\"" ESCAPED_PROMPT "${PROMPT}")
     

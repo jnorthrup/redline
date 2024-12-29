@@ -1,0 +1,41 @@
+[2024-12-28 21:26:12] Capturing initial CMake errors...
+[2024-12-28 21:26:12] Capturing initial CMake errors...
+CMake Error at cmake/LLMFunctions.cmake:9:
+  Parse error.  Expected "(", got newline with text "
+
+  ".
+Call Stack (most recent call first):
+  CMakeLists.txt:19 (include)
+
+
+-- Configuring incomplete, errors occurred!
+[2024-12-28 21:42:34] Capturing initial CMake errors...
+[2024-12-28 21:42:34] Capturing initial CMake errors...
+CMake Error at cmake/LLMFunctions.cmake:9:
+  Parse error.  Expected "(", got newline with text "
+
+  ".
+Call Stack (most recent call first):
+  CMakeLists.txt:19 (include)
+
+
+-- Configuring incomplete, errors occurred!
+./run_cmake.sh: line 57: (: command not found
+./run_cmake.sh: line 57: (: command not found
+./run_cmake.sh: line 57: (: command not found
+./run_cmake.sh: line 57: (: command not found
+./run_cmake.sh: line 58: (: command not found
+./run_cmake.sh: line 58: (: command not found
+./run_cmake.sh: line 60: (: command not found
+./run_cmake.sh: line 60: (: command not found
+./run_cmake.sh: line 60: (: command not found
+./run_cmake.sh: line 60: (: command not found
+run_feedback_loop.sh: line 237: main: command not found
+./run_feedback_loop.sh: line 237: main: command not found
+./run_feedback_loop.sh: line 237: (: command not found
+./run_feedback_loop.sh: line 237: (: command not found
+./run_feedback_loop.sh: line 87: LLM_PROVIDER: unbound variable
+./run_feedback_loop.sh: line 237: LLM_PROVIDER: unbound variable
+./run_feedback_loop.sh: line 237: LLM_PROVIDER: unbound variable
+./run_feedback_loop.sh: line 237: LLM_PROVIDER: unbound variable
+./run_feedback_loop.sh: line 237: LLM_PROVIDER: unbound variable
