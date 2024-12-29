@@ -1,1 +1,0 @@
-sudo: strace: command not found

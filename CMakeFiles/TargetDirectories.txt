@@ -1,9 +1,0 @@
-/Users/jim/work/redline/CMakeFiles/simple_program.dir
-/Users/jim/work/redline/CMakeFiles/edit_cache.dir
-/Users/jim/work/redline/CMakeFiles/rebuild_cache.dir
-/Users/jim/work/redline/src/CMakeFiles/llm_api_call.dir
-/Users/jim/work/redline/src/CMakeFiles/edit_cache.dir
-/Users/jim/work/redline/src/CMakeFiles/rebuild_cache.dir
-/Users/jim/work/redline/test/CMakeFiles/test_coordinate_editor.dir
-/Users/jim/work/redline/test/CMakeFiles/edit_cache.dir
-/Users/jim/work/redline/test/CMakeFiles/rebuild_cache.dir

@@ -1,1 +1,0 @@
-Tool: perplexity_search - Performs a web search using the Perplexity API. Usage: perplexity_search 'your search query'

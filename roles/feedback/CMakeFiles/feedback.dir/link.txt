@@ -1,2 +1,0 @@
-/Library/Developer/CommandLineTools/usr/bin/ar qc ../../lib/libfeedback.a CMakeFiles/feedback.dir/src/feedback_main.cpp.o CMakeFiles/feedback.dir/src/analyze.cpp.o
-/Library/Developer/CommandLineTools/usr/bin/ranlib ../../lib/libfeedback.a

@@ -1,2 +1,0 @@
-/Library/Developer/CommandLineTools/usr/bin/ar qc ../../lib/libreasoning.a CMakeFiles/reasoning.dir/src/reasoning_main.cpp.o CMakeFiles/reasoning.dir/src/knowledge_gaps.cpp.o
-/Library/Developer/CommandLineTools/usr/bin/ranlib ../../lib/libreasoning.a

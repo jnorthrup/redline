@@ -1,5 +1,0 @@
-# LLM configuration
-set(LLM_API_ENDPOINT "http://localhost:1234/v1/completions")
-set(LLM_MODEL "default")
-
-# Ensure no trailing content

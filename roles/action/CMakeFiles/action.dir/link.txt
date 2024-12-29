@@ -1,2 +1,0 @@
-/Library/Developer/CommandLineTools/usr/bin/ar qc ../../lib/libaction.a CMakeFiles/action.dir/src/action_main.cpp.o CMakeFiles/action.dir/src/analyze.cpp.o
-/Library/Developer/CommandLineTools/usr/bin/ranlib ../../lib/libaction.a
