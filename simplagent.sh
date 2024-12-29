@@ -26,7 +26,7 @@ declare -A PROVIDER_MODELS=(
     ["GROK_API_KEY"]="https://api.x.ai grok-2-1212 grok-2-vision-1212 grok-beta grok-vision-beta"
     ["DEEPSEEK_API_KEY"]="https://api.deepseek.com deepseek-ai/DeepSeek-V2-Chat deepseek-ai/DeepSeek-V2 deepseek-ai/DeepSeek-67B deepseek-ai/DeepSeek-13B"
     ["CLAUDE_API_KEY"]="https://api.anthropic.com/v1 anthropic:messages:claude-3-5-sonnet-20241022 anthropic:messages:claude-3-5-haiku-20241022 anthropic:messages:claude-3-opus-20240229 anthropic:messages:claude-3-sonnet-20240229 anthropic:messages:claude-3-haiku-20240307"
-    ["OPENROUTER_API_KEY"]="https://openrouter.ai/api/v1 qwen/qwen-2.5-72b-instruct openrouter/auto openrouter/default openrouter/grok openrouter/claude"
+    ["OPENROUTER_API_KEY"]="https://openrouter.ai/api/v1 openrouter/auto openrouter/default openrouter/grok openrouter/claude"
     ["HUGGINGFACE_API_KEY"]="https://api-inference.huggingface.co meta-llama/Meta-Llama-3-8B-Instruct google/flan-t5-xxl EleutherAI/gpt-neo-2.7B bigscience/bloom-7b1"
 )
 
@@ -41,6 +41,27 @@ echo "Using model: $MODEL"
 
 # Initialize conversation history
 conversation=()
+
+# Function to handle the debounce logic
+debounce_send() {
+    local input="$1"
+    local last_char="${input: -1}"
+
+    if [[ "$last_char" == $'\n' ]]; then
+        # Remove the newline character
+        input="${input%$'\n'}"
+        # Add user input to conversation
+        conversation+=("$input")
+        # Format messages and make API request
+        messages=$(format_messages)
+        response=$(make_request "$messages")
+        # Extract and display assistant's response
+        assistant_response=$(echo "$response" | jq -r '.choices[0].message.content')
+        echo -e "\nAssistant: $assistant_response"
+        # Add assistant response to conversation
+        conversation+=("$assistant_response")
+    fi
+}
 
 function make_request() {
     local messages="$1"
@@ -70,6 +91,37 @@ function format_messages() {
     echo "$msgs_json"
 }
 
+# Function to handle the debounce logic using pure Bash
+debounce() {
+    local input="$1"
+    local last_char="${input: -1}"
+
+    if [[ "$last_char" == $'\n' ]]; then
+        # Remove the newline character
+        input="${input%$'\n'}"
+        # Add user input to conversation
+        conversation+=("$input")
+        # Format messages and make API request
+        messages=$(format_messages)
+        response=$(make_request "$messages")
+        # Extract and display assistant's response
+        assistant_response=$(echo "$response" | jq -r '.choices[0].message.content')
+        echo -e "\nAssistant: $assistant_response"
+        # Add assistant response to conversation
+        conversation+=("$assistant_response")
+    else
+        # Reset the timer
+        kill -0 "$timer_pid" 2>/dev/null && kill "$timer_pid"
+        {
+            sleep 0.25
+            if [[ "$input" == *$'\n' ]]; then
+                debounce_send "$input"
+            fi
+        } &
+        timer_pid=$!
+    fi
+}
+
 # Main chat loop
 echo "Starting chat (type 'exit' to quit)..."
 while true; do
@@ -80,19 +132,8 @@ while true; do
     # Exit condition
     [[ "$user_input" == "exit" ]] && break
     
-    # Add user input to conversation
-    conversation+=("$user_input")
-    
-    # Format messages and make API request
-    messages=$(format_messages)
-    response=$(make_request "$messages")
-    
-    # Extract and display assistant's response
-    assistant_response=$(echo "$response" | jq -r '.choices[0].message.content')
-    echo -e "\nAssistant: $assistant_response"
-    
-    # Add assistant response to conversation
-    conversation+=("$assistant_response")
+    # Debounce and send input
+    debounce "$user_input"
 done
 
 echo "Chat session ended."

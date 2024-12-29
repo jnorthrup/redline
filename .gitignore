@@ -58,3 +58,30 @@ aider.*
 # Redline local directories
 ~/.local/cache/redline/*/
 !~/.local/cache/redline/README.md
+
+# CMake build artifacts
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.o
+*.o.d
+build/
+dist/
+
+# Compiled binaries
+simplagent
+ssl_client
+
+# Temporary files
+*.bak
+*.tmp
+after_block.txt
+before_block.txt
+new_content.txt
+repair_log.txt
+
+# Scripts and tools
+run_cmake.sh
+arm-toolchain.cmake
+second
