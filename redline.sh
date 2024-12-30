@@ -200,7 +200,7 @@ function verify() {
     $GTECH "No differences found between files in the specified range."
     return 0
 }
-echo "source $0/redline.sh" ->
+echo "source $0   -> populates env with the cmdspec below"
 
 _scan
 _edit

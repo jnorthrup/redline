@@ -1,3 +1,4 @@
+
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <openssl/x509v3.h>
@@ -13,6 +14,7 @@
 #include <chrono>
 #include <map>
 #include <fstream>
+using namespace boost::asio;
 
 namespace beast = boost::beast;
 namespace http = beast::http;
@@ -299,11 +301,55 @@ private:
                     return;
                 }
                 std::cerr << "Handshake starting...\n";
-                
-                // Set handshake timeout with retry logic
-                auto handshake_timer = std::make_shared<asio::steady_timer>(ioc_);
-                handshake_timer->expires_after(std::chrono::seconds(30));
-                
+
+std::string get_api_key(const std::string& provider) {
+    // Convert provider name to uppercase for environment variable
+    std::string env_var = provider;
+    std::transform(env_var.begin(), env_var.end(), env_var.begin(), ::toupper);
+    env_var += "_API_KEY";
+    
+    // Get API key from environment
+    const char* api_key = std::getenv(env_var.c_str());
+    if (api_key && strlen(api_key) > 0) {
+        return std::string(api_key);
+    }
+    
+    // Check for common API key locations
+    std::vector<std::string> key_paths = {
+        "/usr/local/etc/" + provider + "/api_key",
+        "/opt/homebrew/etc/" + provider + "/api_key",
+        std::string(getenv("HOME")) + "/." + provider + "/api_key"
+    };
+    
+    for (const auto& path : key_paths) {
+        std::ifstream key_file(path);
+        if (key_file) {
+            std::string key;
+            std::getline(key_file, key);
+            if (!key.empty()) {
+                return key;
+            }
+        }
+    }
+    
+    // Check for local api_key.txt file
+    std::ifstream local_key_file("api_key.txt");
+    if (local_key_file) {
+        std::string key;
+        std::getline(local_key_file, key);
+        if (!key.empty()) {
+            return key;
+        }
+    }
+    
+    return ""; // Return empty string if no key found
+}
+
+
+int main() {
+    try {
+        io_context ioc;
+
                 std::function<void(const boost::system::error_code&)> handshake_handler;
                 handshake_handler = [this, req, stream, handshake_timer, &handshake_handler](const boost::system::error_code& ec) {
                     if (ec) {
