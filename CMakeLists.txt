@@ -1,56 +1,53 @@
-cmake_minimum_required(VERSION 3.14)
-project(simplagent)
+# GASP Analysis for C++20 Modernization
+#
+# Goals:
+# [ ] Replace Boost.Asio with C++20 experimental networking
+# [ ] Convert async callbacks to coroutines
+# [ ] Enhance provider meta with C++20 features
+# [ ] Add protocol extensibility using concepts
+#
+# Approach:
+# 1. Update CMake configuration for C++20 features
+# 2. Refactor networking code to use coroutines
+# 3. Modernize provider configuration
+# 4. Add protocol extensibility
+#
+# Steps:
+# [x] Update CMake for C++20 and experimental networking
+# [ ] Refactor SSLClient to use coroutines
+# [ ] Update provider config with designated initializers
+# [ ] Add protocol concepts for extensibility
+#
+# Plan:
+# - Test each feature incrementally
+# - Verify backward compatibility
+# - Ensure error handling remains robust
+# - Maintain OpenAI protocol feedback loop
 
-set(CMAKE_CXX_STANDARD 17)
+cmake_minimum_required(VERSION 3.20)
+project(simplagent LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Find Boost components
-find_package(Boost 1.87.0 REQUIRED COMPONENTS system thread json)
-
-# Find OpenSSL
+# Find dependencies
 find_package(OpenSSL REQUIRED)
-
-# Add Boost.Asio SSL
-add_definitions(-DBOOST_ASIO_ENABLE_SSL)
-
-# Include directories
-include_directories(
-    ${Boost_INCLUDE_DIRS}
-    ${OPENSSL_INCLUDE_DIR}
-)
 
 # Add executable
 add_executable(simplagent simplagent.cpp)
 
 # Link libraries
 target_link_libraries(simplagent PUBLIC
-    ${Boost_LIBRARIES}
-    ${OPENSSL_LIBRARIES}
-)
-
-target_link_libraries(simplagent PRIVATE
-    Boost::system
-    Boost::thread
-    Boost::json
     OpenSSL::SSL
     OpenSSL::Crypto
+    pthread
+    std::experimental::net
+    std::coroutine
 )
 
-# Add SSL-specific definitions
-add_definitions(-DBOOST_ASIO_SSL_HPP)
-add_definitions(-DBOOST_ASIO_ENABLE_HANDLER_TRACKING)
-
-# Add platform-specific configurations
-if(WIN32)
-    # Windows-specific settings
-    add_definitions(-DBOOST_ALL_NO_LIB)
-elseif(UNIX AND NOT APPLE)
-    # Linux-specific settings
-    add_definitions(-DBOOST_ASIO_HAS_PTHREADS)
-elseif(APPLE)
-    # macOS-specific settings
-    add_definitions(-DBOOST_ASIO_HAS_KQUEUE)
-    
+# Platform-specific configurations
+if(APPLE)
     # Apple Silicon specific configurations
     if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64")
         # Set Homebrew prefix for Apple Silicon
@@ -65,7 +62,30 @@ elseif(APPLE)
         set(CMAKE_PREFIX_PATH "${HOMEBREW_PREFIX}")
         
         message(STATUS "Configuring for Apple Silicon (arm64)")
-    else()
-        message(FATAL_ERROR "This project only supports Apple Silicon (arm64) platforms")
     endif()
 endif()
+
+# Add compiler definitions for POSIX features
+add_definitions(-D_POSIX_C_SOURCE=200809L)
+
+# Enable modern C++ features
+target_compile_features(simplagent PRIVATE cxx_std_20)
+
+# Add experimental networking
+target_compile_definitions(simplagent PRIVATE
+    _LIBCPP_ENABLE_EXPERIMENTAL
+)
+target_link_libraries(simplagent PUBLIC
+    std::experimental::net
+    std::coroutine
+)
+
+# Configure Ninja build system
+set(CMAKE_GENERATOR "Ninja" CACHE STRING "Build system generator" FORCE)
+set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type" FORCE)
+
+# Add C++20 networking headers
+include_directories(${CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES})
+target_include_directories(simplagent PUBLIC
+    ${CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES}
+)

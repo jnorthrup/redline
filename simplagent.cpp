@@ -1,14 +1,16 @@
 #include <iostream>
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
-#include <boost/asio/ssl/stream.hpp>
+#include <boost/asio/experimental/awaitable_operators.hpp>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <map>
 #include <vector>
 
-namespace asio = boost::asio;
-using tcp = asio::ip::tcp;
+namespace net = boost::asio;
+namespace ssl = net::ssl;
+using tcp = net::ip::tcp;
+using namespace net::experimental::awaitable_operators;
 
 struct ProviderConfig {
     std::string endpoint;
@@ -38,23 +40,21 @@ public:
     SSLClient(asio::io_context& io_context, asio::ssl::context& context)
         : resolver_(io_context), socket_(io_context, context), host_("") {}
 
-    void connect(const std::string& host, const std::string& port) {
+    net::awaitable<void> connect(const std::string& host, const std::string& port) {
         host_ = host;
-        resolver_.async_resolve(host, port,
-            [this](const boost::system::error_code& ec, tcp::resolver::results_type results) {
-                if (!ec) {
-                    handle_resolve(results);
-                } else {
-                    std::cerr << "Resolve error: " << ec.message() << "\n";
-                }
-            });
+        auto [ec, results] = co_await resolver_.async_resolve(host, port, net::use_awaitable);
+        if (ec) {
+            std::cerr << "Resolve error: " << ec.message() << "\n";
+            co_return;
+        }
+        co_await handle_resolve(results);
     }
 
     bool is_connected() const {
         return socket_.lowest_layer().is_open();
     }
 
-    void get_model_info(const std::string& provider) {
+    net::awaitable<void> get_model_info(const std::string& provider) {
         try {
             if (!socket_.lowest_layer().is_open()) {
                 throw std::runtime_error("Socket is not open");
@@ -66,15 +66,8 @@ public:
             request += "Accept: application/json\r\n";
             request += "Connection: close\r\n\r\n";
 
-            asio::async_write(socket_, asio::buffer(request),
-                [this](const boost::system::error_code& ec, std::size_t) {
-                    if (!ec) {
-                        receive_response();
-                    } else {
-                        std::cerr << "Write error: " << ec.message() << "\n";
-                        ERR_print_errors_fp(stderr);
-                    }
-                });
+            co_await asio::async_write(socket_, asio::buffer(request), net::use_awaitable);
+            co_await receive_response();
         } catch (const std::exception& e) {
             std::cerr << "Error in get_model_info: " << e.what() << "\n";
             throw;
@@ -82,38 +75,36 @@ public:
     }
 
 private:
-    void handle_resolve(tcp::resolver::results_type results) {
-        asio::async_connect(socket_.lowest_layer(), results,
-            [this](const boost::system::error_code& ec, const tcp::endpoint&) {
-                if (!ec) {
-                    handle_connect();
-                } else {
-                    std::cerr << "Connect error: " << ec.message() << "\n";
-                }
-            });
+    net::awaitable<void> handle_resolve(tcp::resolver::results_type results) {
+        auto [ec, endpoint] = co_await asio::async_connect(socket_.lowest_layer(), results, net::use_awaitable);
+        if (ec) {
+            std::cerr << "Connect error: " << ec.message() << "\n";
+            co_return;
+        }
+        co_await handle_connect();
     }
 
-    void handle_connect() {
+    net::awaitable<void> handle_connect() {
         void* native_handle = socket_.native_handle();
         if (!native_handle) {
             std::cerr << "Failed to get native SSL handle\n";
-            return;
+            co_return;
         }
         
         SSL* ssl_handle = reinterpret_cast<SSL*>(native_handle);
         if (!ssl_handle) {
             std::cerr << "Failed to cast native handle to SSL pointer\n";
-            return;
+            co_return;
         }
         
         if (!SSL_set_tlsext_host_name(ssl_handle, host_.c_str())) {
             std::cerr << "Failed to set SNI hostname\n";
-            return;
+            co_return;
         }
 
         if (!socket_.lowest_layer().is_open()) {
             std::cerr << "Socket is not open\n";
-            return;
+            co_return;
         }
 
         boost::system::error_code ec;
@@ -125,51 +116,11 @@ private:
                       << ":" << endpoint.port() << "\n";
         }
 
-        socket_.async_handshake(asio::ssl::stream_base::client,
-            [this](const boost::system::error_code& ec) {
-                if (!ec) {
-                    send_request();
-                } else {
-                    std::cerr << "Handshake error: " << ec.message() << "\n";
-                    ERR_print_errors_fp(stderr);
-                    
-                    void* native_handle = socket_.native_handle();
-                    if (!native_handle) {
-                        std::cerr << "Failed to get native SSL handle\n";
-                        return;
-                    }
-                    
-                    SSL* ssl_handle = reinterpret_cast<SSL*>(native_handle);
-                    if (!ssl_handle) {
-                        std::cerr << "Failed to cast native handle to SSL pointer\n";
-                        return;
-                    }
-                    
-                    // Verify SSL handle is valid before using SSL functions
-                    if (ssl_handle) {
-                        long verify_result = SSL_get_verify_result(ssl_handle);
-                        if (verify_result != X509_V_OK) {
-                            std::cerr << "Certificate verification failed: " 
-                                    << X509_verify_cert_error_string(verify_result) << "\n";
-                        }
-
-                        const SSL* const_ssl_handle = ssl_handle;
-                        const char* state_str = SSL_state_string_long(const_ssl_handle);
-                        std::cerr << "SSL state: " << (state_str ? state_str : "Unknown") << "\n";
-                        
-                        int ssl_error = SSL_get_error(const_ssl_handle, 0);
-                        if (ssl_error != SSL_ERROR_NONE) {
-                            const char* error_str = ERR_error_string(ssl_error, NULL);
-                            std::cerr << "SSL error: " << (error_str ? error_str : "Unknown") << "\n";
-                            const char* error_desc = SSL_state_string_long(const_ssl_handle);
-                            std::cerr << "SSL error description: " << (error_desc ? error_desc : "Unknown") << "\n";
-                        }
-                    }
-                }
-            });
+        co_await socket_.async_handshake(asio::ssl::stream_base::client, net::use_awaitable);
+        co_await send_request();
     }
 
-    void send_request() {
+    net::awaitable<void> send_request() {
         std::string request = "POST /chat/completions HTTP/1.1\r\n";
         request += "Host: api.deepseek.com\r\n";
         request += "User-Agent: SSLClient/1.0\r\n";
@@ -196,7 +147,7 @@ private:
             
             if (!api_key || strlen(api_key) == 0) {
                 std::cerr << "Error: API key not found. Please set " << provider_upper << "_API_KEY environment variable\n";
-                return;
+                co_return;
             }
         }
         request += "Authorization: Bearer " + std::string(api_key) + "\r\n";
@@ -211,28 +162,23 @@ private:
         request += "Content-Length: " + std::to_string(json_body.length()) + "\r\n\r\n";
         request += json_body;
 
-        asio::async_write(socket_, asio::buffer(request),
-            [this](const boost::system::error_code& ec, std::size_t) {
-                if (!ec) {
-                    receive_response();
-                } else {
-                    std::cerr << "Write error: " << ec.message() << "\n";
-                }
-            });
+        co_await asio::async_write(socket_, asio::buffer(request), net::use_awaitable);
+        co_await receive_response();
     }
 
-    void receive_response() {
-        asio::async_read(socket_, response_, asio::transfer_at_least(1),
-            [this](const boost::system::error_code& ec, std::size_t length) {
-                if (!ec) {
-                    std::cout << &response_;
-                    receive_response();
-                } else if (ec == asio::error::eof) {
-                    std::cout << "Connection closed by server\n";
-                } else {
-                    std::cerr << "Read error: " << ec.message() << "\n";
-                }
-            });
+    net::awaitable<void> receive_response() {
+        try {
+            while (true) {
+                std::size_t length = co_await asio::async_read(socket_, response_, asio::transfer_at_least(1), net::use_awaitable);
+                std::cout << &response_;
+            }
+        } catch (const boost::system::system_error& e) {
+            if (e.code() == asio::error::eof) {
+                std::cout << "Connection closed by server\n";
+            } else {
+                std::cerr << "Read error: " << e.what() << "\n";
+            }
+        }
     }
 };
 
