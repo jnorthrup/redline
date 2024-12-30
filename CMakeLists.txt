@@ -1,28 +1,31 @@
-cmake_minimum_required(VERSION 3.31)
-set(CMAKE_PREFIX_PATH "$ENV{HOMEBREW_PREFIX}")
+cmake_minimum_required(VERSION 3.14)
 project(simplagent)
 
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Find Boost components
+find_package(Boost 1.87.0 REQUIRED COMPONENTS system thread json)
 
 # Find OpenSSL
 find_package(OpenSSL REQUIRED)
 
-# Platform-independent Boost configuration
-set(BOOST_MIN_VERSION "1.87.0")
-find_package(Boost ${BOOST_MIN_VERSION} REQUIRED COMPONENTS system thread json)
+# Add Boost.Asio SSL
+add_definitions(-DBOOST_ASIO_ENABLE_SSL)
 
-if(NOT Boost_FOUND)
-    message(FATAL_ERROR "Could not find Boost ${BOOST_MIN_VERSION} or higher")
-endif()
+# Include directories
+include_directories(
+    ${Boost_INCLUDE_DIRS}
+    ${OPENSSL_INCLUDE_DIR}
+)
 
-# Create executable target first
+# Add executable
 add_executable(simplagent simplagent.cpp)
 
-# Then configure its properties
-target_include_directories(simplagent PRIVATE 
-    ${Boost_INCLUDE_DIRS}
-    ${OPENSSL_INCLUDE_DIRS}
-    /opt/homebrew/opt/openssl@3/include
+# Link libraries
+target_link_libraries(simplagent PUBLIC
+    ${Boost_LIBRARIES}
+    ${OPENSSL_LIBRARIES}
 )
 
 target_link_libraries(simplagent PRIVATE

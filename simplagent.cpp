@@ -1,449 +1,410 @@
-
-#include <openssl/ssl.h>
-#include <openssl/err.h>
-#include <openssl/x509v3.h>
+#include <iostream>
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
-#include <boost/beast.hpp>
-#include <boost/beast/ssl.hpp>
-#include <boost/json.hpp>
-#include <iostream>
-#include <string>
-#include <memory>
-#include <iomanip>
-#include <chrono>
+#include <boost/asio/ssl/stream.hpp>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 #include <map>
-#include <fstream>
-using namespace boost::asio;
-
-namespace beast = boost::beast;
-namespace http = beast::http;
-namespace json = boost::json;
-
-struct ProviderConfig {
-    std::string endpoint;
-    // Add other provider-specific configuration here
-};
-
-int main() {
-    try {
-        asio::io_context ioc;
-        std::string provider = "OPENROUTER"; // Hardcoded provider for now
-        std::string model = "gpt-3.5-turbo"; // Example model
-        std::string api_key = get_api_key(provider);
-        if (api_key.empty()) {
-            std::cerr << "API key for " << provider << " not found. Please set the environment variable " << provider << "_API_KEY or create api_key.txt." << std::endl;
-            return 1;
-        }
-
-        SimplAgent agent(ioc, api_key, provider, model);
-        agent.start();
-        ioc.run();
-    } catch (const std::exception& e) {
-        std::cerr << "Exception: " << e.what() << std::endl;
-        return 1;
-    }
-    return 0;
-}
-
-std::string get_api_key(const std::string& provider) {
-    // Convert provider name to uppercase for environment variable
-    std::string env_var = provider;
-    std::transform(env_var.begin(), env_var.end(), env_var.begin(), ::toupper);
-    env_var += "_API_KEY";
-    
-    // Get API key from environment
-    const char* api_key = std::getenv(env_var.c_str());
-    if (api_key && strlen(api_key) > 0) {
-        return std::string(api_key);
-    }
-    
-    // Check for common API key locations
-    std::vector<std::string> key_paths = {
-        "/usr/local/etc/" + provider + "/api_key",
-        "/opt/homebrew/etc/" + provider + "/api_key",
-        std::string(getenv("HOME")) + "/." + provider + "/api_key"
-    };
-    
-    for (const auto& path : key_paths) {
-        std::ifstream key_file(path);
-        if (key_file) {
-            std::string key;
-            std::getline(key_file, key);
-            if (!key.empty()) {
-                return key;
-            }
-        }
-    }
-    
-    // Check for local api_key.txt file
-    std::ifstream local_key_file("api_key.txt");
-    if (local_key_file) {
-        std::string key;
-        std::getline(local_key_file, key);
-        if (!key.empty()) {
-            return key;
-        }
-    }
-    
-    return ""; // Return empty string if no key found
-}
-
-const std::map<std::string, ProviderConfig> PROVIDER_CONFIGS = {
-    {"OPENROUTER", {"openrouter.ai"}}
-    // Add other provider configurations here
-};
-
-// Constants
-constexpr int SSL_READ_BUFFER_SIZE = 4096;
-constexpr int SSL_HANDSHAKE_TIMEOUT = 10; // seconds
-constexpr int SSL_READ_TIMEOUT = 30; // seconds
+#include <vector>
 
 namespace asio = boost::asio;
 using tcp = asio::ip::tcp;
 
-class SimplAgent {
+struct ProviderConfig {
+    std::string endpoint;
+    std::vector<std::string> models;
+};
+
+const std::map<std::string, ProviderConfig> PROVIDER_CONFIGS = {
+    {"ANTHROPIC", {"https://api.anthropic.com/v1", {"anthropic:messages:claude-3-5-sonnet-20241022", "anthropic:messages:claude-3-5-haiku-20241022", "anthropic:messages:claude-3-opus-20240229", "anthropic:messages:claude-3-sonnet-20240229", "anthropic:messages:claude-3-haiku-20240307"}}},
+    {"GEMINI", {"https://generativelanguage.googleapis.com/v1beta", {"gemini-pro", "gemini-pro-vision", "gemini-ultra", "gemini-nano"}}},
+    {"OPENAI", {"https://api.openai.com/v1", {"gpt-4", "gpt-4-1106-preview", "gpt-3.5-turbo-1106", "gpt-3.5-turbo"}}},
+    {"PERPLEXITY", {"https://api.perplexity.ai", {"llama-3.1-sonar-huge-128k-online", "llama-3.1-sonar-large-128k-online", "llama-3.1-sonar-small-128k-online", "llama-3.1-8b-instruct", "llama-3.1-70b-instruct"}}},
+    {"GROK", {"https://api.x.ai", {"grok-2-1212", "grok-2-vision-1212", "grok-beta", "grok-vision-beta"}}},
+    {"DEEPSEEK", {"https://api.deepseek.com", {"deepseek-ai/DeepSeek-V2-Chat", "deepseek-ai/DeepSeek-V2", "deepseek-ai/DeepSeek-67B", "deepseek-ai/DeepSeek-13B"}}},
+    {"CLAUDE", {"https://api.anthropic.com/v1", {"anthropic:messages:claude-3-5-sonnet-20241022", "anthropic:messages:claude-3-5-haiku-20241022", "anthropic:messages:claude-3-opus-20240229", "anthropic:messages:claude-3-sonnet-20240229", "anthropic:messages:claude-3-haiku-20240307"}}},
+    {"OPENROUTER", {"https://openrouter.ai/api/v1", {"openrouter/auto", "openrouter/default", "openrouter/grok", "openrouter/claude"}}},
+    {"HUGGINGFACE", {"https://api-inference.huggingface.co", {"meta-llama/Meta-Llama-3-8B-Instruct", "google/flan-t5-xxl", "EleutherAI/gpt-neo-2.7B", "bigscience/bloom-7b1"}}}
+};
+
+class SSLClient {
 private:
-    asio::io_context& ioc_;
-    asio::steady_timer timer_;
-    std::string api_key_;
-    std::string provider_;
-    ProviderConfig provider_config_;
-    std::string current_input_;
-    std::vector<json::value> conversation_;
-    std::string model_;
-    asio::ssl::context ssl_ctx_;
-    beast::flat_buffer buffer_;
+    tcp::resolver resolver_;
+    asio::ssl::stream<tcp::socket> socket_;
+    std::string host_;
+    asio::streambuf response_;
 
 public:
-    SimplAgent(asio::io_context& ioc, const std::string& api_key, const std::string& provider, const std::string& model)
-        : ioc_(ioc), 
-          timer_(ioc), 
-          api_key_(api_key), 
-          provider_(provider), 
-          model_(model), 
-          ssl_ctx_(asio::ssl::context::tlsv13_client) {
-        
-        auto it = PROVIDER_CONFIGS.find(provider);
-        if (it == PROVIDER_CONFIGS.end()) {
-            throw std::runtime_error("Invalid provider: " + provider);
-        }
-        provider_config_ = it->second;
+    SSLClient(asio::io_context& io_context, asio::ssl::context& context)
+        : resolver_(io_context), socket_(io_context, context), host_("") {}
 
-        // Configure SSL context with modern settings
-        std::cerr << "Using OpenSSL version: " << OpenSSL_version(OPENSSL_VERSION) << "\n";
-        ssl_ctx_.set_default_verify_paths();
-        ssl_ctx_.set_verify_mode(asio::ssl::verify_peer | asio::ssl::verify_fail_if_no_peer_cert);
-        
-        // Set modern TLS options
-        SSL_CTX_set_options(ssl_ctx_.native_handle(), 
-            SSL_OP_ALL | SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3 | 
-            SSL_OP_NO_TLSv1 | SSL_OP_NO_TLSv1_1);
-        
-        // Set secure cipher list
-        SSL_CTX_set_cipher_list(ssl_ctx_.native_handle(), 
-            "ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256");
-        std::cerr << "SSL context configured with modern TLS settings\n";
-        
-        // macOS-specific SSL configuration
-        #ifdef __APPLE__
-            // Use system's default certificate store
-            ssl_ctx_.set_default_verify_paths();
-            // Set macOS-specific SSL options
-            SSL_CTX_set_options(ssl_ctx_.native_handle(), SSL_OP_ALL | SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3);
-            // Load system certificates with error handling
-            std::vector<std::string> cert_paths = {
-                "/etc/ssl/cert.pem",
-                "/usr/local/etc/openssl@3/cert.pem",
-                "/opt/homebrew/etc/openssl@3/cert.pem"
-            };
-            
-            bool certs_loaded = false;
-            for (const auto& path : cert_paths) {
-                // Detailed file access check
-                struct stat file_stat;
-                if (stat(path.c_str(), &file_stat) == 0) {
-                    std::cerr << "Certificate file found: " << path << "\n";
-                    std::cerr << "File size: " << file_stat.st_size << " bytes\n";
-                    std::cerr << "Permissions: " << std::oct << file_stat.st_mode << std::dec << "\n";
-                    
-                    if (file_stat.st_size == 0) {
-                        std::cerr << "Warning: Certificate file is empty\n";
-                        continue;
-                    }
-
-                    if (access(path.c_str(), R_OK) != 0) {
-                        std::cerr << "Warning: Certificate file not readable\n";
-                        std::cerr << "Access error: " << strerror(errno) << "\n";
-                        continue;
-                    }
-
-                    // Try loading using SSL_CTX_load_verify_locations
-                    if (SSL_CTX_load_verify_locations(ssl_ctx_.native_handle(), path.c_str(), nullptr) == 1) {
-                        std::cerr << "Successfully loaded certificates from: " << path << "\n";
-                        certs_loaded = true;
-                        break;
-                    } else {
-                        std::cerr << "Warning: Failed to load certificates from " << path << "\n";
-                        std::cerr << "SSL error: " << ERR_error_string(ERR_get_error(), nullptr) << "\n";
-                    }
+    void connect(const std::string& host, const std::string& port) {
+        host_ = host;
+        resolver_.async_resolve(host, port,
+            [this](const boost::system::error_code& ec, tcp::resolver::results_type results) {
+                if (!ec) {
+                    handle_resolve(results);
                 } else {
-                    std::cerr << "Warning: Certificate file " << path << " not found\n";
-                    std::cerr << "Stat error: " << strerror(errno) << "\n";
-                }
-            }
-            
-            if (!certs_loaded) {
-                std::cerr << "Warning: No certificate files found, using default system certificates\n";
-                ssl_ctx_.set_default_verify_paths();
-            }
-        #endif
-        
-        // Enable detailed SSL debugging
-        SSL_CTX_set_info_callback(ssl_ctx_.native_handle(), [](const SSL* ssl, int where, int ret) {
-            if (where & SSL_CB_ALERT) {
-                std::cerr << "SSL Alert: " << SSL_alert_desc_string_long(ret) << "\n";
-            }
-            if (where & SSL_CB_HANDSHAKE_START) {
-                std::cerr << "Handshake started\n";
-            }
-            if (where & SSL_CB_HANDSHAKE_DONE) {
-                std::cerr << "Handshake completed\n";
-            }
-        });
-    }
-
-    void start() {
-        std::cout << "Starting chat (type 'exit' to quit)...\n";
-        prompt_input();
-    }
-
-private:
-    void prompt_input() {
-        std::cout << "\nYou: ";
-        std::getline(std::cin, current_input_);
-        
-        if (current_input_ == "exit") {
-            std::cout << "Chat session ended.\n";
-            return;
-        }
-
-        start_debounce();
-    }
-
-    void start_debounce() {
-        timer_.expires_after(std::chrono::milliseconds(250));
-        timer_.async_wait([this](const boost::system::error_code& ec) {
-            if (!ec) {
-                process_input();
-            }
-        });
-    }
-
-    void process_input() {
-        if (current_input_.empty()) {
-            prompt_input();
-            return;
-        }
-
-        conversation_.emplace_back(json::object{
-            {"role", "user"},
-            {"content", current_input_}
-        });
-
-        make_request();
-    }
-
-    void make_request() {
-        auto req = std::make_shared<http::request<http::string_body>>();
-        req->method(http::verb::post);
-        req->target("/api/v1/chat/completions");
-        req->set(http::field::host, provider_config_.endpoint);
-        req->set(http::field::authorization, "Bearer " + api_key_);
-        req->set(http::field::content_type, "application/json");
-        req->set("HTTP-Referer", "http://localhost:8000");
-        req->set("X-Title", "CLI Chat");
-
-        json::array messages;
-        for (const auto& msg : conversation_) {
-            messages.push_back(msg);
-        }
-        
-        json::value body = {
-            {"model", model_},
-            {"messages", messages},
-            {"temperature", 0.7}
-        };
-        req->body() = json::serialize(body);
-        req->prepare_payload();
-
-        auto resolver = std::make_shared<tcp::resolver>(ioc_);
-        resolver->async_resolve(provider_config_.endpoint, "https",
-            [this, req, resolver](const boost::system::error_code& ec,
-                                tcp::resolver::results_type results) {
-                if (ec) {
                     std::cerr << "Resolve error: " << ec.message() << "\n";
-                    return;
                 }
-                connect_and_send(req, results);
             });
     }
 
-    void connect_and_send(std::shared_ptr<http::request<http::string_body>> req,
-                        tcp::resolver::results_type results) {
-        auto stream = std::make_shared<beast::ssl_stream<beast::tcp_stream>>(ioc_, ssl_ctx_);
-        std::cerr << "Connecting to: " << provider_config_.endpoint << "\n";
-        beast::get_lowest_layer(*stream).async_connect(results,
-            [this, req, stream](const boost::system::error_code& ec,
-                              tcp::resolver::results_type::endpoint_type) {
-                if (ec) {
-                    std::cerr << "Connect error: " << ec.message() << "\n";
-                    return;
-                }
-                std::cerr << "Handshake starting...\n";
-
-std::string get_api_key(const std::string& provider) {
-    // Convert provider name to uppercase for environment variable
-    std::string env_var = provider;
-    std::transform(env_var.begin(), env_var.end(), env_var.begin(), ::toupper);
-    env_var += "_API_KEY";
-    
-    // Get API key from environment
-    const char* api_key = std::getenv(env_var.c_str());
-    if (api_key && strlen(api_key) > 0) {
-        return std::string(api_key);
+    bool is_connected() const {
+        return socket_.lowest_layer().is_open();
     }
-    
-    // Check for common API key locations
-    std::vector<std::string> key_paths = {
-        "/usr/local/etc/" + provider + "/api_key",
-        "/opt/homebrew/etc/" + provider + "/api_key",
-        std::string(getenv("HOME")) + "/." + provider + "/api_key"
-    };
-    
-    for (const auto& path : key_paths) {
-        std::ifstream key_file(path);
-        if (key_file) {
-            std::string key;
-            std::getline(key_file, key);
-            if (!key.empty()) {
-                return key;
+
+    void get_model_info(const std::string& provider) {
+        try {
+            if (!socket_.lowest_layer().is_open()) {
+                throw std::runtime_error("Socket is not open");
             }
+
+            std::string request = "GET /models HTTP/1.1\r\n";
+            request += "Host: " + PROVIDER_CONFIGS.at(provider).endpoint + "\r\n";
+            request += "User-Agent: SSLClient/1.0\r\n";
+            request += "Accept: application/json\r\n";
+            request += "Connection: close\r\n\r\n";
+
+            asio::async_write(socket_, asio::buffer(request),
+                [this](const boost::system::error_code& ec, std::size_t) {
+                    if (!ec) {
+                        receive_response();
+                    } else {
+                        std::cerr << "Write error: " << ec.message() << "\n";
+                        ERR_print_errors_fp(stderr);
+                    }
+                });
+        } catch (const std::exception& e) {
+            std::cerr << "Error in get_model_info: " << e.what() << "\n";
+            throw;
         }
     }
-    
-    // Check for local api_key.txt file
-    std::ifstream local_key_file("api_key.txt");
-    if (local_key_file) {
-        std::string key;
-        std::getline(local_key_file, key);
-        if (!key.empty()) {
-            return key;
-        }
+
+private:
+    void handle_resolve(tcp::resolver::results_type results) {
+        asio::async_connect(socket_.lowest_layer(), results,
+            [this](const boost::system::error_code& ec, const tcp::endpoint&) {
+                if (!ec) {
+                    handle_connect();
+                } else {
+                    std::cerr << "Connect error: " << ec.message() << "\n";
+                }
+            });
     }
-    
-    return ""; // Return empty string if no key found
-}
 
+    void handle_connect() {
+        void* native_handle = socket_.native_handle();
+        if (!native_handle) {
+            std::cerr << "Failed to get native SSL handle\n";
+            return;
+        }
+        
+        SSL* ssl_handle = reinterpret_cast<SSL*>(native_handle);
+        if (!ssl_handle) {
+            std::cerr << "Failed to cast native handle to SSL pointer\n";
+            return;
+        }
+        
+        if (!SSL_set_tlsext_host_name(ssl_handle, host_.c_str())) {
+            std::cerr << "Failed to set SNI hostname\n";
+            return;
+        }
 
-int main() {
-    try {
-        io_context ioc;
+        if (!socket_.lowest_layer().is_open()) {
+            std::cerr << "Socket is not open\n";
+            return;
+        }
 
-                std::function<void(const boost::system::error_code&)> handshake_handler;
-                handshake_handler = [this, req, stream, handshake_timer, &handshake_handler](const boost::system::error_code& ec) {
-                    if (ec) {
-                        if (ec == asio::error::would_block || ec == asio::error::try_again) {
-                            // Retry handshake after short delay
-                            std::cerr << "Handshake would block, retrying...\n";
-                            auto retry_timer = std::make_shared<asio::steady_timer>(ioc_);
-                            retry_timer->expires_after(std::chrono::milliseconds(100));
-                            retry_timer->async_wait([this, req, stream, handshake_timer, &handshake_handler](const boost::system::error_code& ec) {
-                                if (!ec) {
-                                    stream->async_handshake(asio::ssl::stream_base::client, handshake_handler);
-                                }
-                            });
-                            return;
-                        }
-                        
-                        std::cerr << "Handshake error: " << ec.message() << "\n";
-                        std::cerr << "SSL error: " << ec.category().name() << " - " << ec.value() << "\n";
-                        std::cerr << "SSL error string: " << ERR_error_string(ERR_get_error(), nullptr) << "\n";
-                        std::cerr << "SSL shutdown state: " << SSL_get_shutdown(stream->native_handle()) << "\n";
+        boost::system::error_code ec;
+        auto endpoint = socket_.lowest_layer().remote_endpoint(ec);
+        if (ec) {
+            std::cerr << "Failed to get remote endpoint: " << ec.message() << "\n";
+        } else {
+            std::cout << "Connected to " << endpoint.address().to_string() 
+                      << ":" << endpoint.port() << "\n";
+        }
+
+        socket_.async_handshake(asio::ssl::stream_base::client,
+            [this](const boost::system::error_code& ec) {
+                if (!ec) {
+                    send_request();
+                } else {
+                    std::cerr << "Handshake error: " << ec.message() << "\n";
+                    ERR_print_errors_fp(stderr);
+                    
+                    void* native_handle = socket_.native_handle();
+                    if (!native_handle) {
+                        std::cerr << "Failed to get native SSL handle\n";
                         return;
                     }
                     
-                    handshake_timer->cancel();
-                    std::cerr << "Handshake successful\n";
-                    std::cerr << "SSL version: " << SSL_get_version(stream->native_handle()) << "\n";
-                    std::cerr << "Cipher: " << SSL_get_cipher(stream->native_handle()) << "\n";
-                    http::async_write(*stream, *req,
-                        [this, req, stream](const boost::system::error_code& ec,
-                                          std::size_t) {
-                            if (ec) {
-                                std::cerr << "Write error: " << ec.message() << "\n";
-                                std::cerr << "SSL error: " << ec.category().name() << " - " << ec.value() << "\n";
-                                return;
-                            }
-                            receive_response(stream);
-                        });
-                };
-
-                handshake_timer->async_wait([stream](const boost::system::error_code& ec) {
-                    if (!ec) {
-                        std::cerr << "Handshake timeout\n";
-                        beast::get_lowest_layer(*stream).close();
+                    SSL* ssl_handle = reinterpret_cast<SSL*>(native_handle);
+                    if (!ssl_handle) {
+                        std::cerr << "Failed to cast native handle to SSL pointer\n";
+                        return;
                     }
-                });
-
-                stream->async_handshake(asio::ssl::stream_base::client, handshake_handler);
-            });
-    }
-
-    void receive_response(std::shared_ptr<beast::ssl_stream<beast::tcp_stream>> stream) {
-        auto res = std::make_shared<http::response<http::string_body>>();
-        http::async_read(*stream, buffer_, *res,
-            [this, stream, res](const boost::system::error_code& ec,
-                              std::size_t) {
-                if (ec) {
-                    std::cerr << "Read error: " << ec.message() << "\n";
-                    return;
-                }
-                process_response(res->body());
-                prompt_input();
-            });
-    }
-
-    void process_response(const std::string& response) {
-        try {
-            auto json = json::parse(response);
-            if (json.is_object() && json.as_object().contains("choices")) {
-                auto choices = json.at("choices");
-                if (choices.is_array() && choices.as_array().size() > 0) {
-                    auto choice = choices.at(0);
-                    if (choice.is_object() && choice.as_object().contains("message")) {
-                        auto message = choice.at("message");
-                        if (message.is_object() && message.as_object().contains("content")) {
-                            auto content = message.at("content").as_string();
-                            std::cout << "\nAssistant: " << content << "\n";
-                            conversation_.emplace_back(json::object{
-                                {"role", "assistant"},
-                                {"content", content}
-                            });
-                        } else {
-                            std::cerr << "Error: 'message' does not contain 'content'\n";
+                    
+                    // Verify SSL handle is valid before using SSL functions
+                    if (ssl_handle) {
+                        long verify_result = SSL_get_verify_result(ssl_handle);
+                        if (verify_result != X509_V_OK) {
+                            std::cerr << "Certificate verification failed: " 
+                                    << X509_verify_cert_error_string(verify_result) << "\n";
                         }
-                    } else {
-                        std::cerr << "Error: 'choice' is not an object or does not contain 'message'\n";
+
+                        const SSL* const_ssl_handle = ssl_handle;
+                        const char* state_str = SSL_state_string_long(const_ssl_handle);
+                        std::cerr << "SSL state: " << (state_str ? state_str : "Unknown") << "\n";
+                        
+                        int ssl_error = SSL_get_error(const_ssl_handle, 0);
+                        if (ssl_error != SSL_ERROR_NONE) {
+                            const char* error_str = ERR_error_string(ssl_error, NULL);
+                            std::cerr << "SSL error: " << (error_str ? error_str : "Unknown") << "\n";
+                            const char* error_desc = SSL_state_string_long(const_ssl_handle);
+                            std::cerr << "SSL error description: " << (error_desc ? error_desc : "Unknown") << "\n";
+                        }
                     }
-                } else {
-                    std::cerr << "Error: 'choices' is not an array or is empty\n";
                 }
-            } else {
-                std::cerr << "Error: 'choices' not found in response\n";
+            });
+    }
+
+    void send_request() {
+        std::string request = "POST /chat/completions HTTP/1.1\r\n";
+        request += "Host: api.deepseek.com\r\n";
+        request += "User-Agent: SSLClient/1.0\r\n";
+        request += "Accept: application/json\r\n";
+        request += "Content-Type: application/json\r\n";
+        
+        std::string env_var = "DEEPSEEK_API_KEY";
+        const char* api_key = std::getenv(env_var.c_str());
+        if (!api_key || strlen(api_key) == 0) {
+            std::string provider_upper = "DEEPSEEK";
+            std::transform(provider_upper.begin(), provider_upper.end(), provider_upper.begin(), ::toupper);
+            std::vector<std::string> key_vars = {
+                provider_upper + "_API_KEY",
+                "OPENROUTER_API_KEY",
+                "API_KEY"
+            };
+            
+            for (const auto& key : key_vars) {
+                api_key = std::getenv(key.c_str());
+                if (api_key && strlen(api_key) > 0) {
+                    break;
+                }
             }
-        } catch (const std::exception& e) {
-            std::cerr << "Error parsing response: " << e.what() << "\n";
+            
+            if (!api_key || strlen(api_key) == 0) {
+                std::cerr << "Error: API key not found. Please set " << provider_upper << "_API_KEY environment variable\n";
+                return;
+            }
         }
+        request += "Authorization: Bearer " + std::string(api_key) + "\r\n";
+        request += "Connection: close\r\n";
+        
+        std::string json_body = R"({
+            "model": "deepseek-ai/DeepSeek-V2-Chat",
+            "messages": [{"role": "user", "content": "Hello"}],
+            "temperature": 0.7
+        })";
+        
+        request += "Content-Length: " + std::to_string(json_body.length()) + "\r\n\r\n";
+        request += json_body;
+
+        asio::async_write(socket_, asio::buffer(request),
+            [this](const boost::system::error_code& ec, std::size_t) {
+                if (!ec) {
+                    receive_response();
+                } else {
+                    std::cerr << "Write error: " << ec.message() << "\n";
+                }
+            });
+    }
+
+    void receive_response() {
+        asio::async_read(socket_, response_, asio::transfer_at_least(1),
+            [this](const boost::system::error_code& ec, std::size_t length) {
+                if (!ec) {
+                    std::cout << &response_;
+                    receive_response();
+                } else if (ec == asio::error::eof) {
+                    std::cout << "Connection closed by server\n";
+                } else {
+                    std::cerr << "Read error: " << ec.message() << "\n";
+                }
+            });
     }
 };
+
+struct ErrorData {
+    std::string timestamp;
+    std::string error_type;
+    std::string provider;
+    std::string endpoint;
+    std::string details;
+};
+
+class ErrorInstrumentation {
+public:
+    static void record_error(const ErrorData& data) {
+        errors.push_back(data);
+    }
+
+    static std::vector<ErrorData> get_errors() {
+        return errors;
+    }
+
+private:
+    static std::vector<ErrorData> errors;
+};
+
+std::vector<ErrorData> ErrorInstrumentation::errors;
+
+int main(int argc, char* argv[]) {
+    bool enable_fallback = true;
+    bool verbose_logging = false;
+    std::string primary_provider = "DEEPSEEK";
+    std::string fallback_provider = "GEMINI";
+
+    for (int i = 1; i < argc; ++i) {
+        std::string arg = argv[i];
+        if (arg == "--no-fallback") {
+            enable_fallback = false;
+        } else if (arg == "--verbose") {
+            verbose_logging = true;
+        } else if (arg == "--provider" && i + 1 < argc) {
+            primary_provider = argv[++i];
+        } else if (arg == "--fallback" && i + 1 < argc) {
+            fallback_provider = argv[++i];
+        }
+    }
+
+    try {
+        asio::io_context io_context;
+        asio::ssl::context ctx(asio::ssl::context::tls_client);
+        
+        ctx.set_default_verify_paths();
+        ctx.set_verify_mode(asio::ssl::verify_peer | asio::ssl::verify_fail_if_no_peer_cert);
+        ctx.set_verify_callback([](bool preverified, boost::asio::ssl::verify_context& verify_ctx) {
+            if (!preverified) {
+                X509* cert = X509_STORE_CTX_get_current_cert(verify_ctx.native_handle());
+                char buf[256];
+                X509_NAME_oneline(X509_get_subject_name(cert), buf, sizeof(buf));
+                std::cerr << "Certificate verification failed for: " << buf << "\n";
+                return false;
+            }
+            return true;
+        });
+        
+        SSL_CTX_set_min_proto_version(ctx.native_handle(), TLS1_2_VERSION);
+        SSL_CTX_set_max_proto_version(ctx.native_handle(), TLS1_3_VERSION);
+        
+        SSL_CTX_set_cipher_list(ctx.native_handle(), 
+            "ECDHE-ECDSA-AES128-GCM-SHA256:"
+            "ECDHE-RSA-AES128-GCM-SHA256:"
+            "ECDHE-ECDSA-AES256-GCM-SHA384:"
+            "ECDHE-RSA-AES256-GCM-SHA384:"
+            "ECDHE-ECDSA-CHACHA20-POLY1305:"
+            "ECDHE-RSA-CHACHA20-POLY1305:"
+            "DHE-RSA-AES128-GCM-SHA256:"
+            "DHE-RSA-AES256-GCM-SHA384");
+        
+        SSL_CTX_set_options(ctx.native_handle(),
+            SSL_OP_ALL | SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3 | 
+            SSL_OP_NO_TLSv1 | SSL_OP_NO_TLSv1_1);
+
+        auto try_provider = [&](const std::string& provider) -> bool {
+            try {
+                if (PROVIDER_CONFIGS.find(provider) == PROVIDER_CONFIGS.end()) {
+                    throw std::runtime_error("Unknown provider: " + provider);
+                }
+                const auto& config = PROVIDER_CONFIGS.at(provider);
+                
+                std::string host = config.endpoint;
+                size_t pos = host.find("://");
+                if (pos != std::string::npos) {
+                    host = host.substr(pos + 3);
+                }
+                pos = host.find('/');
+                if (pos != std::string::npos) {
+                    host = host.substr(0, pos);
+                }
+                
+                SSLClient client(io_context, ctx);
+                if (verbose_logging) {
+                    std::cout << "Connecting to " << host << ":443...\n";
+                }
+                client.connect(host, "443");
+                
+                if (!client.is_connected()) {
+                    std::string error_msg = "Failed to establish connection to " + host;
+                    if (verbose_logging) {
+                        error_msg += "\nCheck network connectivity and SSL/TLS configuration";
+                    }
+                    throw std::runtime_error(error_msg);
+                } else if (verbose_logging) {
+                    std::cout << "Successfully connected to " << host << "\n";
+                    std::cout << "HTTP status codes are not considered errors\n";
+                }
+                if (verbose_logging) {
+                    std::cout << "Successfully connected to " << host << "\n";
+                }
+                
+                client.get_model_info(provider);
+
+                io_context.run();
+                return true;
+            } catch (const std::exception& e) {
+                ErrorData error{
+                    .timestamp = std::to_string(std::time(nullptr)),
+                    .error_type = "ConnectionError",
+                    .provider = provider,
+                    .endpoint = PROVIDER_CONFIGS.at(provider).endpoint,
+                    .details = e.what()
+                };
+                ErrorInstrumentation::record_error(error);
+
+                if (verbose_logging) {
+                    std::cerr << "Error with provider " << provider << ": " << e.what() << "\n";
+                }
+                
+                std::cout << "\nRunning enhanced diagnostic checks...\n";
+                
+                std::string curl_cmd = "curl -v " + PROVIDER_CONFIGS.at(provider).endpoint;
+                std::cout << "Executing: " << curl_cmd << "\n";
+                int curl_result = std::system(curl_cmd.c_str());
+                std::cout << "Curl exit code: " << curl_result << "\n";
+                
+                std::string google_test = "curl -v https://google.com";
+                std::cout << "Executing: " << google_test << "\n";
+                int google_result = std::system(google_test.c_str());
+                std::cout << "Google.com test exit code: " << google_result << "\n";
+                
+                std::cout << "\nFallback test results:\n";
+                std::cout << "Provider curl vs Google fallback: " 
+                          << ((curl_result == google_result) ? "Same" : "Different") << "\n";
+                
+                return false;
+            }
+        };
+
+        if (!try_provider(primary_provider) && enable_fallback) {
+            std::cout << "Attempting fallback to provider: " << fallback_provider << "\n";
+            try_provider(fallback_provider);
+        }
+
+        const auto& errors = ErrorInstrumentation::get_errors();
+        if (!errors.empty()) {
+            std::cout << "\nEncountered " << errors.size() << " errors:\n";
+            for (const auto& error : errors) {
+                std::cout << "[" << error.timestamp << "] " << error.provider 
+                          << " (" << error.endpoint << "): " << error.details << "\n";
+            }
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Fatal error: " << e.what() << "\n";
+        return 1;
+    }
+
+    return 0;
+}
