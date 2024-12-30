@@ -6,6 +6,10 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# Set the C and C++ compilers to LLVM 19
+set(CMAKE_C_COMPILER /opt/homebrew/opt/llvm/bin/clang-19)
+set(CMAKE_CXX_COMPILER /opt/homebrew/opt/llvm/bin/clang++-19)
+
 # Find OpenSSL
 find_package(OpenSSL REQUIRED)
 
