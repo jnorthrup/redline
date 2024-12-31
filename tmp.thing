@@ -1,6 +1,0 @@
-Initializing redline protocol...
-source ./redline.sh   -> populates env with the cmdspec below
-Debug: _scan function called with arguments: , 
-^\s+scan\s+$regex
-^\s+edit\s+(?<file>[\w\-\.]+)\s+(?<new_text>.+)\s+(?<start>\d+)\s+(?<end>\d+)$
-^\s+verify\s+$regex

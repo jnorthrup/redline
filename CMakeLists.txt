@@ -1,4 +1,13 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.23)
+
+# Specify the Homebrew-installed g++ compiler
+# Specify the Homebrew-installed LLVM 19 compiler
+set(CMAKE_CXX_COMPILER /opt/homebrew/opt/llvm@19/bin/clang++)
+
+# Set the C++ standard to C++23
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 project(SimplAgent)
 
 set(CMAKE_CXX_STANDARD 23)

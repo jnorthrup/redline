@@ -15,6 +15,16 @@
 
 using json = boost::json::value;
 
+// Custom logging function
+void custom_log(const std::string& message) {
+    std::cerr << message << "\n";
+    std::ofstream log_file("simplagent.log", std::ios::app);
+    if (log_file.is_open()) {
+        log_file << message << "\n";
+        log_file.close();
+    }
+}
+
 // Static Fibonacci counter
 static int fib_counter = 0;
 static int fib_a = 0;
@@ -106,7 +116,7 @@ public:
         std::string auth_header = "Authorization: Bearer " + *api_key;
 
 // Mask the API key in debug output
-log("API Key: " + api_key->substr(0, 4) + "xxxxxx");
+custom_log("API Key: " + api_key->substr(0, 4) + "xxxxxx");
         headers = curl_slist_append(headers, auth_header.c_str());
         headers = curl_slist_append(headers, "Accept: application/json");
         headers = curl_slist_append(headers, "Content-Type: application/json");
@@ -116,7 +126,7 @@ log("API Key: " + api_key->substr(0, 4) + "xxxxxx");
         curl_slist_free_all(headers);
 
         if (res != CURLE_OK) {
-            log("curl_easy_perform() failed: " + std::string(curl_easy_strerror(res)));
+            custom_log("curl_easy_perform() failed: " + std::string(curl_easy_strerror(res)));
             return false;
         }
 
@@ -128,12 +138,12 @@ log("API Key: " + api_key->substr(0, 4) + "xxxxxx");
                 json j = boost::json::parse(response);
                 std::cout << boost::json::serialize(j) << std::endl;
             } catch (const std::exception& e) {
-                log("JSON parse error: " + std::string(e.what()));
+                custom_log("JSON parse error: " + std::string(e.what()));
                 return false;
             }
         } else {
-            log("HTTP Error: " + std::to_string(http_code));
-            log("Response: " + response); // Print the full response for debugging
+            custom_log("HTTP Error: " + std::to_string(http_code));
+            custom_log("Response: " + response); // Print the full response for debugging
             return false;
         }
 
@@ -188,7 +198,7 @@ log("API Key: " + api_key->substr(0, 4) + "xxxxxx");
         };
 
         // Print the request payload for debugging
-        log("Request Payload: " + boost::json::serialize(request_json));
+        custom_log("Request Payload: " + boost::json::serialize(request_json));
 
         std::string request_str = boost::json::serialize(request_json);
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request_str.c_str());
@@ -198,7 +208,7 @@ log("API Key: " + api_key->substr(0, 4) + "xxxxxx");
         curl_slist_free_all(headers);
 
         if (res != CURLE_OK) {
-            log("curl_easy_perform() failed: " + std::string(curl_easy_strerror(res)));
+            custom_log("curl_easy_perform() failed: " + std::string(curl_easy_strerror(res)));
             return false;
         }
 
@@ -211,12 +221,12 @@ log("API Key: " + api_key->substr(0, 4) + "xxxxxx");
                 std::cout << boost::json::serialize(j) << std::endl;
                 return true;
             } catch (const std::exception& e) {
-                log("JSON parse error: " + std::string(e.what()));
+                custom_log("JSON parse error: " + std::string(e.what()));
                 return false;
             }
         } else {
-            log("HTTP Error: " + std::to_string(http_code));
-            log("Response: " + response); // Print the full response for debugging
+            custom_log("HTTP Error: " + std::to_string(http_code));
+            custom_log("Response: " + response); // Print the full response for debugging
             return false;
         }
 
@@ -258,11 +268,11 @@ public:
 
     static void dump_feedbacks() {
         for (const auto& feedback : feedbacks) {
-            log("Feedback Timestamp: " + feedback.timestamp);
-            log("Feedback Request: " + feedback.request);
-            log("Feedback Response: " + feedback.response);
-            log("Feedback: " + feedback.feedback);
-            log("Rating: " + std::to_string(feedback.rating));
+            custom_log("Feedback Timestamp: " + feedback.timestamp);
+            custom_log("Feedback Request: " + feedback.request);
+            custom_log("Feedback Response: " + feedback.response);
+            custom_log("Feedback: " + feedback.feedback);
+            custom_log("Rating: " + std::to_string(feedback.rating));
         }
     }
 
@@ -284,18 +294,18 @@ public:
 
     static void log_error(const ErrorData& data, const std::string& response) {
         if (next_fib() == fib_counter) {
-            log("Error logged at Fibonacci interval " + std::to_string(fib_counter) + ":");
-            log("Timestamp: " + data.timestamp);
-            log("Error Type: " + data.error_type);
-            log("Provider: " + data.provider);
-            log("Endpoint: " + data.endpoint);
-            log("Details: " + data.details);
-            log("HTTP Error Code: " + std::to_string(data.http_code)); // Add HTTP error code
-            log("First 10 lines of JSON response:");
+            custom_log("Error logged at Fibonacci interval " + std::to_string(fib_counter) + ":");
+            custom_log("Timestamp: " + data.timestamp);
+            custom_log("Error Type: " + data.error_type);
+            custom_log("Provider: " + data.provider);
+            custom_log("Endpoint: " + data.endpoint);
+            custom_log("Details: " + data.details);
+            custom_log("HTTP Error Code: " + std::to_string(data.http_code)); // Add HTTP error code
+            custom_log("First 10 lines of JSON response:");
             std::istringstream iss(response);
             std::string line;
             for (int i = 0; i < 10 && std::getline(iss, line); ++i) {
-                log(line);
+                custom_log(line);
             }
             fib_counter = next_fib();
         }
@@ -303,12 +313,12 @@ public:
 
     static void dump_errors() {
         for (const auto& error : errors) {
-            log("Error Timestamp: " + error.timestamp);
-            log("Error Type: " + error.error_type);
-            log("Provider: " + error.provider);
-            log("Endpoint: " + error.endpoint);
-            log("Details: " + error.details);
-            log("HTTP Error Code: " + std::to_string(error.http_code));
+            custom_log("Error Timestamp: " + error.timestamp);
+            custom_log("Error Type: " + error.error_type);
+            custom_log("Provider: " + error.provider);
+            custom_log("Endpoint: " + error.endpoint);
+            custom_log("Details: " + error.details);
+            custom_log("HTTP Error Code: " + std::to_string(error.http_code));
         }
     }
 
@@ -330,19 +340,10 @@ void process_response(const std::string& provider, const std::string& request, c
 }
 
 void signal_handler(int signal) {
-    log("Received signal " + std::to_string(signal) + ". Dumping logs...");
+    custom_log("Received signal " + std::to_string(signal) + ". Dumping logs...");
     FeedbackStorage::dump_feedbacks();
     ErrorInstrumentation::dump_errors();
     exit(signal);
-}
-
-void log(const std::string& message) {
-    std::cerr << message << "\n";
-    std::ofstream log_file("simplagent.log", std::ios::app);
-    if (log_file.is_open()) {
-        log_file << message << "\n";
-        log_file.close();
-    }
 }
 
 int main() {
@@ -389,7 +390,7 @@ int main() {
                 request = "Based on the feedback: " + user_feedback + ", please improve the response: " + response;
                 failure_count = 0; // Reset failure count on success
             } else {
-                log("Failed to fetch response from DEEPSEEK");
+                custom_log("Failed to fetch response from DEEPSEEK");
                 ErrorData error_data;
                 error_data.timestamp = std::to_string(std::time(nullptr));
                 error_data.error_type = "HTTP Error";
@@ -401,12 +402,12 @@ int main() {
                 failure_count++; // Increment failure count on failure
 
                 if (failure_count >= 3) {
-                    log("Three consecutive failures. Exiting.");
+                    custom_log("Three consecutive failures. Exiting.");
                     break; // Exit after three consecutive failures
                 }
             }
         } catch (const std::exception& e) {
-            log("Exception: " + std::string(e.what()));
+            custom_log("Exception: " + std::string(e.what()));
             ErrorData error_data;
             error_data.timestamp = std::to_string(std::time(nullptr));
             error_data.error_type = "Exception";
@@ -418,7 +419,7 @@ int main() {
             failure_count++; // Increment failure count on exception
 
             if (failure_count >= 3) {
-                log("Three consecutive failures. Exiting.");
+                custom_log("Three consecutive failures. Exiting.");
                 break; // Exit after three consecutive failures
             }
         }
