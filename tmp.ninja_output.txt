@@ -1,0 +1,43 @@
+ninja: Entering directory `build'
+[1/15] Building CXX object _deps/spdlog-build/CMakeFiles/spdlog.dir/src/file_sinks.cpp.o
+[2/15] Building CXX object _deps/spdlog-build/CMakeFiles/spdlog.dir/src/cfg.cpp.o
+[3/15] Building CXX object _deps/spdlog-build/CMakeFiles/spdlog.dir/src/stdout_sinks.cpp.o
+[4/15] Building CXX object _deps/spdlog-build/CMakeFiles/spdlog.dir/src/color_sinks.cpp.o
+[5/15] Building CXX object _deps/spdlog-build/CMakeFiles/spdlog.dir/src/async.cpp.o
+[6/15] Building CXX object CMakeFiles/simplagent.dir/simplagent.cpp.o
+FAILED: CMakeFiles/simplagent.dir/simplagent.cpp.o 
+/Library/Developer/CommandLineTools/usr/bin/c++ -DBOOST_CONTAINER_DYN_LINK -DBOOST_CONTAINER_NO_LIB -DBOOST_JSON_DYN_LINK -DBOOST_JSON_NO_LIB -DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO -DSPDLOG_COMPILED_LIB -I/Users/jim/work/redline/build/_deps/spdlog-src/include -I/Users/jim/work/redline/build/_deps/spdlog-build/include -I/Users/jim/work/redline -isystem /opt/homebrew/include -O3 -DNDEBUG -std=c++2b -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk -MD -MT CMakeFiles/simplagent.dir/simplagent.cpp.o -MF CMakeFiles/simplagent.dir/simplagent.cpp.o.d -o CMakeFiles/simplagent.dir/simplagent.cpp.o -c /Users/jim/work/redline/simplagent.cpp
+/Users/jim/work/redline/simplagent.cpp:19:1: error: unknown type name 'logger'; did you mean 'spdlog::logger'?
+   19 | logger->set_level(spdlog::level::from_str(SPDLOG_LEVEL_NAME_STR));
+      | ^~~~~~
+      | spdlog::logger
+/Users/jim/work/redline/build/_deps/spdlog-src/include/spdlog/details/synchronous_factory.h:11:7: note: 'spdlog::logger' declared here
+   11 | class logger;
+      |       ^
+/Users/jim/work/redline/simplagent.cpp:19:7: error: cannot use arrow operator on a type
+   19 | logger->set_level(spdlog::level::from_str(SPDLOG_LEVEL_NAME_STR));
+      |       ^
+/Users/jim/work/redline/simplagent.cpp:30:19: error: use of undeclared identifier 'v'
+   30 |                -v[v[v]] Set verbosity level (info, debug, trace)
+      |                   ^
+/Users/jim/work/redline/simplagent.cpp:30:17: error: use of undeclared identifier 'v'
+   30 |                -v[v[v]] Set verbosity level (info, debug, trace)
+      |                 ^
+/Users/jim/work/redline/simplagent.cpp:38:1: error: expected ']'
+   38 | }
+      | ^
+/Users/jim/work/redline/simplagent.cpp:30:18: note: to match this '['
+   30 |                -v[v[v]] Set verbosity level (info, debug, trace)
+      |                  ^
+/Users/jim/work/redline/simplagent.cpp:30:21: error: use of undeclared identifier 'v'
+   30 |                -v[v[v]] Set verbosity level (info, debug, trace)
+      |                     ^
+6 errors generated.
+[7/15] Building CXX object CMakeFiles/simplagent.dir/src/provider_utils.cpp.o
+[8/15] Building CXX object _deps/spdlog-build/CMakeFiles/spdlog.dir/src/bundled_fmtlib_format.cpp.o
+[9/15] Building CXX object CMakeFiles/simplagent.dir/src/openai_provider.cpp.o
+[10/15] Building CXX object CMakeFiles/simplagent.dir/curl_utils.cpp.o
+[11/15] Building CXX object CMakeFiles/simplagent.dir/openrouter_provider.cpp.o
+[12/15] Building CXX object CMakeFiles/simplagent.dir/providers.cpp.o
+[13/15] Building CXX object _deps/spdlog-build/CMakeFiles/spdlog.dir/src/spdlog.cpp.o
+ninja: build stopped: subcommand failed.

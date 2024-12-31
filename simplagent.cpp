@@ -15,7 +15,8 @@
 #include "providers.h"
 
 // Define and initialize logger
-std::shared_ptr<spdlog::logger> logger = spdlog::basic_logger_mt("simplagent_logger", "simplagent.log");
+auto logger = spdlog::basic_logger_mt("simplagent_logger", "simplagent.log");
+logger->set_level(spdlog::level::warn); // Default to warn level
 
 void show_help() {
     logger->info("Displaying help information");
@@ -26,6 +27,9 @@ void show_help() {
               << "  --provider <name>    Set the LLM provider (default: LMSTUDIO)\n"
               << "  --model <name>       Set the model to use\n"
               << "  --input <text>       Process the given input text\n"
+              << "  -v                   Set verbosity to info level\n"
+              << "  -vv                  Set verbosity to debug level\n"
+              << "  -vvv                 Set verbosity to trace level\n"
               << "\nAvailable providers:\n"
               << "Available providers:\n";
     
@@ -261,6 +265,12 @@ int main(int argc, char* argv[]) {
             model = argv[++i];
         } else if (arg == "--input" && i + 1 < argc) {
             input = argv[++i];
+        } else if (arg == "-v") {
+            logger->set_level(spdlog::level::info);
+        } else if (arg == "-vv") {
+            logger->set_level(spdlog::level::debug);
+        } else if (arg == "-vvv") {
+            logger->set_level(spdlog::level::trace);
         } else {
             std::cerr << "Unknown argument: " << arg << std::endl;
             show_help();

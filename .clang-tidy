@@ -1,0 +1,39 @@
+---
+Checks: >
+  modernize-*,
+  performance-*,
+  readability-*,
+  bugprone-*,
+  clang-analyzer-*,
+  cppcoreguidelines-*,
+  misc-*,
+  portability-*
+  
+WarningsAsErrors: true
+HeaderFilterRegex: '.*'
+CheckOptions:
+  - key:   modernize-use-nullptr.ReplacementFunction
+    value: 'nullptr'
+  - key:   modernize-use-override.IgnoreDestructors
+    value: 'false'
+  - key:   modernize-use-equals-default.IgnoreMacros
+    value: 'true'
+  - key:   performance-unnecessary-value-param.AllowTypesToMatch
+    value: 'std::.*'
+  - key:   readability-identifier-naming.ClassCase
+    value: 'CamelCase'
+  - key:   readability-identifier-naming.FunctionCase
+    value: 'camelBack'
+  - key:   readability-identifier-naming.VariableCase
+    value: 'camelBack'
+  - key:   readability-magic-numbers.IgnoredNumbers
+    value: '0,1,2,3,4,5,10,100,1000'
+  - key:   bugprone-exception-escape.AllowedExceptions
+    value: 'std::exception'
+  - key:   cppcoreguidelines-pro-type-member-init.IgnoreArrays
+    value: 'true'
+  - key:   cppcoreguidelines-pro-type-vararg.AllowVoidPtr
+    value: 'true'
+  - key:   misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesPublic
+    value: 'true'
+...

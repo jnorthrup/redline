@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.23)
 set(CMAKE_GENERATOR "Ninja" CACHE STRING "CMake Generator" FORCE)
+
+# Log level configuration
+set(LOG_LEVEL "INFO" CACHE STRING "Set the logging level (TRACE, DEBUG, INFO, WARN, ERROR, CRITICAL, OFF)")
+set_property(CACHE LOG_LEVEL PROPERTY STRINGS TRACE DEBUG INFO WARN ERROR CRITICAL OFF)
+message(STATUS "Log level: ${LOG_LEVEL}")
 # Improved detection of Apple Silicon (macOS)
 if(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "arm64" OR CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "aarch64")
     set(HOMEBREW_PREFIX "/opt/homebrew")
@@ -76,6 +81,9 @@ FetchContent_Declare(
 # Make spdlog available
 FetchContent_MakeAvailable(spdlog)
 
+# Add spdlog include directories to global includes
+include_directories(${spdlog_SOURCE_DIR}/include ${spdlog_BINARY_DIR}/include)
+
 # Add the shell script as the main executable
 install(PROGRAMS simplagent.sh
         DESTINATION bin
@@ -96,8 +104,10 @@ target_link_libraries(simplagent Boost::json)
 # Link libcurl library
 target_link_libraries(simplagent CURL::libcurl)
 
-# Link spdlog library
+# Link spdlog library and pass log level
 target_link_libraries(simplagent spdlog::spdlog)
+target_include_directories(simplagent PRIVATE ${spdlog_SOURCE_DIR}/include ${spdlog_BINARY_DIR}/include)
+target_compile_definitions(simplagent PRIVATE SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_${LOG_LEVEL})
 
 # Create bin directory if it doesn't exist
 file(MAKE_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
