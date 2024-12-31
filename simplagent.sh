@@ -6,12 +6,21 @@ set -euo pipefail
 # API Key convention: <PROVIDER^^>_API_KEY
 # Model mapping: map<apiroot,model*>
 
+# Debug output
+echo "Debug: Starting simplagent.sh"
+echo "Debug: Current environment variables:"
+printenv | grep _API_KEY
+
 # Validate environment
 # Check for a non-empty API key for the configured provider
 PROVIDER_API_KEY_VAR="${$(echo "$API_URL" | awk -F'://' '{print $2}' | awk -F'[/.]' '{print toupper($1)}' | sed 's/-/__/g')^^_API_KEY}"
+echo "Debug: Looking for API key variable: $PROVIDER_API_KEY_VAR"
+
 if [[ -z "${!PROVIDER_API_KEY_VAR:-}" ]]; then
     echo "Error: ${PROVIDER_API_KEY_VAR} environment variable is required" >&2
     exit 1
+else
+    echo "Debug: Found API key for provider"
 fi
 
 # Dependencies check
@@ -25,19 +34,20 @@ done
 # Provider maps
 # Maps API key environment variables to API root URLs and available models
 declare -A PROVIDER_MODELS=(
-    ["ANTHROPIC_API_KEY"]="https://api.anthropic.com/v1 anthropic:messages:claude-3-5-sonnet-20241022 anthropic:messages:claude-3-5-haiku-20241022 anthropic:messages:claude-3-opus-20240229 anthropic:messages:claude-3-sonnet-20240229 anthropic:messages:claude-3-haiku-20240307"
-    ["GEMINI_API_KEY"]="https://generativelanguage.googleapis.com/v1beta gemini-pro gemini-pro-vision gemini-ultra gemini-nano"
-    ["OPENAI_API_KEY"]="https://api.openai.com/v1 gpt-4 gpt-4-1106-preview gpt-3.5-turbo-1106 gpt-3.5-turbo"
-    ["PERPLEXITY_API_KEY"]="https://api.perplexity.ai llama-3.1-sonar-huge-128k-online llama-3.1-sonar-large-128k-online llama-3.1-sonar-small-128k-online llama-3.1-8b-instruct llama-3.1-70b-instruct"
-    ["GROK_API_KEY"]="https://api.x.ai grok-2-1212 grok-2-vision-1212 grok-beta grok-vision-beta"
-    ["DEEPSEEK_API_KEY"]="https://api.deepseek.com deepseek-ai/DeepSeek-V2-Chat deepseek-ai/DeepSeek-V2 deepseek-ai/DeepSeek-67B deepseek-ai/DeepSeek-13B"
-    ["CLAUDE_API_KEY"]="https://api.anthropic.com/v1 anthropic:messages:claude-3-5-sonnet-20241022 anthropic:messages:claude-3-5-haiku-20241022 anthropic:messages:claude-3-opus-20240229 anthropic:messages:claude-3-sonnet-20240229 anthropic:messages:claude-3-haiku-20240307"
-    ["OPENROUTER_API_KEY"]="https://openrouter.ai/api/v1 qwen/qwen-2.5-72b-instruct openrouter/auto openrouter/default openrouter/grok openrouter/claude"
-    ["HUGGINGFACE_API_KEY"]="https://api-inference.huggingface.co meta-llama/Meta-Llama-3-8B-Instruct google/flan-t5-xxl EleutherAI/gpt-neo-2.7B bigscience/bloom-7b1"
+    ["ANTHROPIC"]="https://api.anthropic.com/v1 anthropic:messages:claude-3-5-sonnet-20241022 anthropic:messages:claude-3-5-haiku-20241022 anthropic:messages:claude-3-opus-20240229 anthropic:messages:claude-3-sonnet-20240229 anthropic:messages:claude-3-haiku-20240307"
+    ["GEMINI"]="https://generativelanguage.googleapis.com/v1beta gemini-pro gemini-pro-vision gemini-ultra gemini-nano"
+    ["OPENAI"]="https://api.openai.com/v1 gpt-4 gpt-4-1106-preview gpt-3.5-turbo-1106 gpt-3.5-turbo"
+    ["PERPLEXITY"]="https://api.perplexity.ai llama-3.1-sonar-huge-128k-online llama-3.1-sonar-large-128k-online llama-3.1-sonar-small-128k-online llama-3.1-8b-instruct llama-3.1-70b-instruct"
+    ["GROK"]="https://api.x.ai grok-2-1212 grok-2-vision-1212 grok-beta grok-vision-beta"
+    ["DEEPSEEK"]="https://api.deepseek.com deepseek-ai/DeepSeek-V2-Chat deepseek-ai/DeepSeek-V2 deepseek-ai/DeepSeek-67B deepseek-ai/DeepSeek-13B"
+    ["CLAUDE"]="https://api.anthropic.com/v1 anthropic:messages:claude-3-5-sonnet-20241022 anthropic:messages:claude-3-5-haiku-20241022 anthropic:messages:claude-3-opus-20240229 anthropic:messages:claude-3-sonnet-20240229 anthropic:messages:claude-3-haiku-20240307"
+    ["OPENROUTER"]="https://openrouter.ai/api/v1 qwen/qwen-2.5-72b-instruct openrouter/auto openrouter/default openrouter/grok openrouter/claude"
+    ["HUGGINGFACE"]="https://api-inference.huggingface.co meta-llama/Meta-Llama-3-8B-Instruct google/flan-t5-xxl EleutherAI/gpt-neo-2.7B bigscience/bloom-7b1"
+    ["LMSTUDIO"]="http://localhost:1234/v1 local-model" # LM Studio local endpoint
 )
 
 # Configuration
-API_URL="https://api.deepseek.com/v1/chat/completions" # Default API URL
+API_URL="http://localhost:1234/v1/chat/completions" # Default to LM Studio local endpoint
 MODEL=${1:-"deepseek-ai/DeepSeek-V2-Chat"} # Default model
 TEMPERATURE=${2:-0.7}
 

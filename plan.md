@@ -1,175 +1,89 @@
-c++23, liobcurl+ssl, boost::json, cmake-only build files checked in, llvm19 and apple-silly custom footprint right now
+# Simplagent Development Plan
 
-implement cleanly 
-{
-  "openapi": "3.0.0",
-  "info": {
-    "title": "Generic AI Model API",
-    "version": "1.0.0"
-  },
-  "servers": [
-    {
-      "url": "https://api.example.com/v1"
-    }
-  ],
-  "components": {
-    "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer"
-      }
-    },
-    "schemas": {
-      "ModelInfo": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string",
-            "enum": ["ready", "loading", "error"]
-          }
-        }
-      },
-      "Completion": {
-        "type": "object",
-        "required": ["prompt"],
-        "properties": {
-          "prompt": {
-            "type": "string"
-          },
-          "max_tokens": {
-            "type": "integer"
-          },
-          "temperature": {
-            "type": "number",
-            "minimum": 0,
-            "maximum": 1
-          }
-        }
-      },
-      "CompletionResponse": {
-        "type": "object",
-        "properties": {
-          "text": {
-            "type": "string"
-          },
-          "usage": {
-            "type": "object",
-            "properties": {
-              "total_tokens": {
-                "type": "integer"
-              }
-            }
-          }
-        }
-      },
-      "Error": {
-        "type": "object",
-        "properties": {
-          "error": {
-            "type": "object",
-            "properties": {
-              "message": {
-                "type": "string"
-              },
-              "type": {
-                "type": "string"
-              },
-              "code": {
-                "type": "string"
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-  "paths": {
-    "/models": {
-      "get": {
-        "summary": "List available models",
-        "operationId": "listModels",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of models",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/ModelInfo"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/completions": {
-      "post": {
-        "summary": "Create completion",
-        "operationId": "createCompletion",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Completion"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CompletionResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
+## Core Features
+- [x] Provider management system
+- [x] API request handling with curl
+- [x] Error handling and instrumentation
+- [x] Feedback collection system
+- [x] Playlist management for providers/models
+- [x] Shell script interface
+- [x] Logging configuration
+
+## Remaining Tasks
+
+### Core Functionality
+- [ ] Implement model switching during runtime
+- [ ] Add support for streaming responses
+- [ ] Implement token usage tracking
+- [ ] Add rate limiting and backoff strategies
+- [1] llm response
+- [1] finishing priority
+
+### Error Handling
+- [ ] Implement automatic provider fallback
+- [ ] Add detailed error reporting to UI
+- [ ] Implement error recovery mechanisms
+
+### User Interface
+- [ ] Add interactive shell mode
+- [ ] Implement command history
+- [ ] Add syntax highlighting for responses
+- [ ] Implement session persistence
+
+### Testing & Validation
+- [ ] Add unit tests for core components
+- [ ] Implement integration testing
+- [ ] Add CI/CD pipeline
+- [ ] Create performance benchmarks
+
+### Documentation
+- [ ] Write API documentation
+- [ ] Create user guide
+- [ ] Add code comments
+- [ ] Generate architecture diagrams
+
+## Development Notes
+
+### Dependencies
+- C++23
+- libcurl with SSL
+- Boost.JSON
+- spdlog
+- CMake build system
+
+### Current Providers
+- LM Studio
+- Deepseek
+- OpenRouter
+- Gemini
+- Grok
+- Perplexity
+- Anthropic
+- OpenAI
+- Claude
+- HuggingFace
+
+### Environment Variables
+Required API keys should be set as:
+- `<PROVIDER>_API_KEY` (e.g. OPENAI_API_KEY)
+- OPENROUTER_API_KEY
+- API_KEY (fallback)
+
+### Build Instructions
+```bash
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+```
+
+### Run Instructions
+```bash
+./simplagent --provider <PROVIDER> --model <MODEL>
+```
+
+### Shell Script Usage
+```bash
+./simplagent.sh <MODEL> <TEMPERATURE>
+```
+
+## Version History
+- 0.1.0: Initial implementation with core functionality

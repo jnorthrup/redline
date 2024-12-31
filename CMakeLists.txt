@@ -19,11 +19,32 @@ find_package(Boost 1.70 REQUIRED COMPONENTS json)
 # Find the libcurl library
 find_package(CURL REQUIRED)
 
-# Add the executable
-add_executable(simplagent simplagent.cpp)
+# Include FetchContent for external dependencies
+include(FetchContent)
+
+# Fetch and make spdlog available
+FetchContent_Declare(
+  spdlog
+  GIT_REPOSITORY https://github.com/gabime/spdlog.git
+  GIT_TAG        v1.12.0
+)
+
+# Make spdlog available
+FetchContent_MakeAvailable(spdlog)
+
+# Add the shell script as the main executable
+install(PROGRAMS simplagent.sh
+        DESTINATION bin
+        RENAME simplagent)
+
+# Add the C++ components as a library
+add_library(simplagent_lib STATIC simplagent.cpp providers.cpp)
 
 # Link Boost JSON library
-target_link_libraries(simplagent Boost::json)
+target_link_libraries(simplagent_lib Boost::json)
 
 # Link libcurl library
-target_link_libraries(simplagent CURL::libcurl)
+target_link_libraries(simplagent_lib CURL::libcurl)
+
+# Link spdlog library
+target_link_libraries(simplagent_lib spdlog::spdlog)
