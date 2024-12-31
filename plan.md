@@ -1,17 +1,175 @@
-# Project Plan: Simplagent Enhancement
+c++23, liobcurl+ssl, boost::json, cmake-only build files checked in, llvm19 and apple-silly custom footprint right now
 
-## Current Architecture Analysis
-
-### Boost.Asio Usage
-- The project heavily relies on Boost.Asio for:
-  - Asynchronous networking operations
-  - SSL/TLS support
-  - Coroutine-based asynchronous programming
-- Replacing Boost.Asio would require significant refactoring and might not be practical because:
-  1. C++23 networking TS is still experimental
-  2. Boost.Asio provides a more mature and feature-rich networking API
-  3. The codebase is deeply integrated with Boost.Asio's asynchronous model
-  llvm, clang, etc. > 19.0 
-
- first is llm feedback conversation loop then hueristic memory for llm then agent roles and tools with redline mode 
- 
+implement cleanly 
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Generic AI Model API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.example.com/v1"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    },
+    "schemas": {
+      "ModelInfo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["ready", "loading", "error"]
+          }
+        }
+      },
+      "Completion": {
+        "type": "object",
+        "required": ["prompt"],
+        "properties": {
+          "prompt": {
+            "type": "string"
+          },
+          "max_tokens": {
+            "type": "integer"
+          },
+          "temperature": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        }
+      },
+      "CompletionResponse": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "usage": {
+            "type": "object",
+            "properties": {
+              "total_tokens": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "code": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/models": {
+      "get": {
+        "summary": "List available models",
+        "operationId": "listModels",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of models",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ModelInfo"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/completions": {
+      "post": {
+        "summary": "Create completion",
+        "operationId": "createCompletion",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Completion"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompletionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

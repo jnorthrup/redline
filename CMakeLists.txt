@@ -1,33 +1,20 @@
-cmake_minimum_required(VERSION 3.20)
-project(Simplagent LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.10)
+project(SimplAgent)
 
-# Set C++ standard to 23
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Set the C and C++ compilers to LLVM 19
-set(CMAKE_C_COMPILER /opt/homebrew/opt/llvm/bin/clang-19)
-set(CMAKE_CXX_COMPILER /opt/homebrew/opt/llvm/bin/clang++-19)
+# Find the Boost library
+find_package(Boost 1.70 REQUIRED COMPONENTS json)
 
-# Find OpenSSL
-find_package(OpenSSL REQUIRED)
+# Find the libcurl library
+find_package(CURL REQUIRED)
 
-# Find Boost components
-find_package(Boost 1.85.0 REQUIRED COMPONENTS json)
-
-# Include directories
-include_directories(include include/data_frame ${OPENSSL_INCLUDE_DIR} /opt/homebrew/Cellar/boost@1.87/1.87.0/include /opt/homebrew/Cellar/boost@1.87/1.87.0/include/boost)
-
-# Add executable
+# Add the executable
 add_executable(simplagent simplagent.cpp)
 
-# Link libraries
-target_link_libraries(simplagent PRIVATE include/data_frame/build/src/libdataframe.a OpenSSL::SSL OpenSSL::Crypto Boost::json)
+# Link Boost JSON library
+target_link_libraries(simplagent Boost::json)
 
-# Find Boost
-find_package(Boost REQUIRED)
-if(Boost_FOUND)
-    include_directories(${Boost_INCLUDE_DIRS})
-    target_link_libraries(simplagent ${Boost_LIBRARIES})
-endif()
+# Link libcurl library
+target_link_libraries(simplagent CURL::libcurl)
