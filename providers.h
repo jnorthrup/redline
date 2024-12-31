@@ -6,6 +6,10 @@
 #include <curl/curl.h>
 #include <boost/json.hpp>
 #include <spdlog/spdlog.h>
+
+// Declare logger for use across translation units
+extern std::shared_ptr<spdlog::logger> logger;
+
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/ordered_index.hpp>
 #include <boost/multi_index/member.hpp>
@@ -51,16 +55,6 @@ public:
 
 void initialize_providers();
 
-class OpenRouterProvider {
-public:
-    OpenRouterProvider(const ProviderConfig& config);
-    bool send_request(const std::string& input, std::string& response);
-
-private:
-    ProviderConfig config;
-    std::string create_request_json(const std::string& input);
-};
-
 class RequestCreator {
 public:
     virtual ~RequestCreator() = default;
@@ -73,11 +67,6 @@ public:
 };
 
 class DeepSeekRequestCreator : public RequestCreator {
-public:
-    std::string create_request_json(const std::string& input, const ProviderConfig& config) override;
-};
-
-class OpenRouterRequestCreator : public RequestCreator {
 public:
     std::string create_request_json(const std::string& input, const ProviderConfig& config) override;
 };
@@ -123,8 +112,11 @@ public:
     ~CurlClient();
     
     bool send_llm_request(const std::string& provider_name, const std::string& input, std::string& response);
+    bool get_model_info(const std::string& provider);
+    std::string create_request_json(const std::string& input, const ProviderConfig& config);
 
 private:
+    CURL* curl;
     static size_t write_callback(char* ptr, size_t size, size_t nmemb, std::string* data);
     std::unique_ptr<RequestCreator> get_request_creator(const std::string& provider_name);
 };

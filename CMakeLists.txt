@@ -18,7 +18,7 @@ set(CMAKE_CXX_COMPILER /opt/homebrew/opt/llvm@19/bin/clang++)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-
+run the 
 # Set source and binary directories
 set(CMAKE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(CMAKE_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
