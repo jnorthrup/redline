@@ -136,16 +136,36 @@ function make_request() {
     local max_retries=3
     
     while (( retry_count < max_retries )); do
-        response=$(curl -s -w "\n%{http_code}" "$API_URL" \
+        # Create temp files for headers
+        request_headers=$(mktemp)
+        response_headers=$(mktemp)
+        
+        echo "Debug: Request Headers:" >&2
+        echo "Authorization: Bearer $api_key" >&2
+        echo "Content-Type: application/json" >&2
+        echo "HTTP-Referer: http://localhost:8000" >&2
+        echo "X-Title: CLI Chat" >&2
+        
+        response=$(curl -v -s -w "\n%{http_code}" "$API_URL" \
             -H "Authorization: Bearer $api_key" \
             -H "Content-Type: application/json" \
             -H "HTTP-Referer: http://localhost:8000" \
             -H "X-Title: CLI Chat" \
+            --dump-header "$response_headers" \
             -d "{
                 \"model\": \"$MODEL\",
                 \"messages\": $messages,
                 \"temperature\": $TEMPERATURE
-            }")
+            }" 2>"$request_headers")
+            
+        echo "Debug: Full Request Headers:" >&2
+        cat "$request_headers" >&2
+        
+        echo "Debug: Response Headers:" >&2
+        cat "$response_headers" >&2
+        
+        # Clean up temp files
+        rm -f "$request_headers" "$response_headers"
         
         status_code=$(echo "$response" | tail -n1)
         response=$(echo "$response" | sed '$d')

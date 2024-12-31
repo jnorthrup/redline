@@ -1,6 +1,16 @@
 cmake_minimum_required(VERSION 3.23)
 
-# Specify the Homebrew-installed g++ compiler
+# Generate unique build identifier
+execute_process(COMMAND uuidgen OUTPUT_VARIABLE BUILD_UUID OUTPUT_STRIP_TRAILING_WHITESPACE)
+string(TIMESTAMP BUILD_TIMESTAMP "%Y-%m-%dT%H:%M:%SZ" UTC)
+
+message(STATUS "Build UUID: ${BUILD_UUID}")
+message(STATUS "Build Timestamp: ${BUILD_TIMESTAMP}")
+
+# Set CMake policies
+cmake_policy(SET CMP0167 NEW)
+cmake_policy(SET CMP0144 NEW)
+
 # Specify the Homebrew-installed LLVM 19 compiler
 set(CMAKE_CXX_COMPILER /opt/homebrew/opt/llvm@19/bin/clang++)
 
@@ -8,13 +18,26 @@ set(CMAKE_CXX_COMPILER /opt/homebrew/opt/llvm@19/bin/clang++)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+# Set source and binary directories
+set(CMAKE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set(CMAKE_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
+
+message(STATUS "Source directory: ${CMAKE_SOURCE_DIR}")
+message(STATUS "Binary directory: ${CMAKE_BINARY_DIR}")
+
 project(SimplAgent)
 
-set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# Set Boost paths explicitly
+set(Boost_ROOT /opt/homebrew/Cellar/boost/1.87.0)
+set(Boost_INCLUDEDIR ${Boost_ROOT}/include)
+set(Boost_LIBRARYDIR ${Boost_ROOT}/lib)
 
 # Find the Boost library
-find_package(Boost 1.70 REQUIRED COMPONENTS json)
+find_package(Boost 1.87 REQUIRED COMPONENTS json)
+
+# Enable detailed logging
+set(CMAKE_VERBOSE_MAKEFILE ON)
 
 # Find the libcurl library
 find_package(CURL REQUIRED)
@@ -37,14 +60,24 @@ install(PROGRAMS simplagent.sh
         DESTINATION bin
         RENAME simplagent)
 
-# Add the C++ components as a library
-add_library(simplagent_lib STATIC simplagent.cpp providers.cpp)
+# Set output directory for executables
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+# Add the C++ components as an executable
+add_executable(simplagent simplagent.cpp providers.cpp curl_utils.cpp)
 
 # Link Boost JSON library
-target_link_libraries(simplagent_lib Boost::json)
+target_link_libraries(simplagent Boost::json)
 
 # Link libcurl library
-target_link_libraries(simplagent_lib CURL::libcurl)
+target_link_libraries(simplagent CURL::libcurl)
 
 # Link spdlog library
-target_link_libraries(simplagent_lib spdlog::spdlog)
+target_link_libraries(simplagent spdlog::spdlog)
+
+# Create bin directory if it doesn't exist
+file(MAKE_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+
+# Install the executable
+install(TARGETS simplagent
+        DESTINATION bin)

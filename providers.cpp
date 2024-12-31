@@ -6,6 +6,11 @@
 #include <curl/curl.h>
 #include <boost/json.hpp>
 #include <spdlog/spdlog.h>
+#include <boost/multi_index_container.hpp>
+#include <boost/multi_index/ordered_index.hpp>
+#include <boost/multi_index/member.hpp>
+#include <csignal>
+#include <memory>
 #include <spdlog/sinks/basic_file_sink.h>
 
 using json = boost::json::value;
@@ -14,6 +19,34 @@ using json = boost::json::value;
 auto logger = spdlog::basic_logger_mt("providers_logger", "providers.log");
 
 // Initialize PROVIDER_CONFIGS
+// Comprehensive common schema for LLM providers
+const char* COMMON_SCHEMA = R"({
+    "type": "object",
+    "properties": {
+        "model": {"type": "string"},
+        "messages": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "role": {"type": "string"},
+                    "content": {"type": "string"}
+                },
+                "required": ["role", "content"]
+            }
+        },
+        "temperature": {"type": "number"},
+        "max_tokens": {"type": "number"},
+        "stream": {"type": "boolean"},
+        "top_p": {"type": "number"},
+        "frequency_penalty": {"type": "number"},
+        "presence_penalty": {"type": "number"}
+    },
+    "required": ["model", "messages"]
+})";
+
+using namespace boost::multi_index;
+
 ProviderContainer PROVIDER_CONFIGS;
 
 void initialize_providers() {
@@ -77,7 +110,7 @@ bool CurlClient::get_model_info(const std::string& provider) {
 
     if (!api_key) {
         throw std::runtime_error("API key not found. Please set " + provider_upper + "_API_KEY environment variable");
-    }
+}
 
     struct curl_slist* headers = nullptr;
     std::string auth_header = "Authorization: Bearer " + *api_key;
@@ -200,8 +233,8 @@ bool CurlClient::send_llm_request(const std::string& provider, const std::string
     } else {
         logger->error("HTTP Error: {}", http_code);
         logger->info("Response: {}", response);
-        return false;
-    }
+            return false;
+}
 
     return false;
 }

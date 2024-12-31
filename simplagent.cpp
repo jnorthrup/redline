@@ -6,29 +6,47 @@
 #include <optional>
 #include <cstdlib>
 #include <algorithm>
-#include <sstream> // Include for std::istringstream
-#include <thread>  // Include for std::this_thread::sleep_for
-#include <csignal> // Include for signal handling
-#include <spdlog/spdlog.h> // Include for spdlog
-#include <spdlog/sinks/basic_file_sink.h> // Include for file logging
+#include <sstream>
+#include <thread>
+#include <csignal>
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <boost/json.hpp>
 #include "providers.h"
-
-using json = boost::json::value;
 
 // Initialize spdlog logger
 auto logger = spdlog::basic_logger_mt("simplagent_logger", "simplagent.log");
 
-// Static Fibonacci counter
-static int fib_counter = 0;
-static int fib_a = 0;
-static int fib_b = 1;
+void show_help() {
+    logger->info("Displaying help information");
+    std::cout << "SimplAgent - A simple LLM agent\n\n"
+              << "Usage: simplagent [options]\n\n"
+              << "Options:\n"
+              << "  --help               Show this help message\n"
+              << "  --provider <name>    Set the LLM provider (default: LMSTUDIO)\n"
+              << "  --model <name>       Set the model to use\n"
+              << "  --input <text>       Process the given input text\n"
+              << "  --interactive        Run in interactive mode\n\n"
+              << "Available providers:\n";
+    
+    for (const auto& provider : PROVIDER_CONFIGS) {
+        std::cout << "  " << provider.name << "\n";
+    }
+    std::cout << std::endl;
+}
 
-// Function to get the next Fibonacci number
-static int next_fib() {
-    int next = fib_a + fib_b;
-    fib_a = fib_b;
-    fib_b = next;
-    return fib_a;
+using json = boost::json::value;
+
+// Configurable error logging interval
+static std::atomic<int> log_interval = 1;
+static std::atomic<int> log_counter = 0;
+
+// Set error logging interval (1 = log every error, 2 = every other, etc)
+void set_error_log_interval(int interval) {
+    if (interval > 0) {
+        log_interval = interval;
+        log_counter = 0;
+    }
 }
 
 struct ErrorData {
@@ -90,21 +108,21 @@ public:
     }
 
     static void log_error(const ErrorData& data, const std::string& response) {
-        if (next_fib() == fib_counter) {
-            logger->error("Error logged at Fibonacci interval {}: ", fib_counter);
+        if (++log_counter >= log_interval) {
+            logger->error("Error logged (interval {}): ", log_interval);
+            log_counter = 0;
             logger->info("Timestamp: {}", data.timestamp);
             logger->info("Error Type: {}", data.error_type);
             logger->info("Provider: {}", data.provider);
             logger->info("Endpoint: {}", data.endpoint);
             logger->info("Details: {}", data.details);
-            logger->info("HTTP Error Code: {}", data.http_code); // Add HTTP error code
+            logger->info("HTTP Error Code: {}", data.http_code);
             logger->info("First 10 lines of JSON response:");
             std::istringstream iss(response);
             std::string line;
             for (int i = 0; i < 10 && std::getline(iss, line); ++i) {
                 logger->info(line);
             }
-            fib_counter = next_fib();
         }
     }
 
@@ -126,11 +144,9 @@ private:
 std::vector<ErrorData> ErrorInstrumentation::errors;
 
 void process_response(const std::string& provider, const std::string& request, const std::string& response) {
-    // Parse and process the LLM response
     try {
         json response_json = boost::json::parse(response);
         
-        // Extract the main response content
         std::string content;
         if (response_json.as_object().contains("choices")) {
             auto& choices = response_json.at("choices").as_array();
@@ -142,7 +158,6 @@ void process_response(const std::string& provider, const std::string& request, c
             }
         }
 
-        // Log and process the response
         if (!content.empty()) {
             logger->info("Received response from {}: {}", provider, content);
             std::cout << "Response: " << content << std::endl;
@@ -151,20 +166,18 @@ void process_response(const std::string& provider, const std::string& request, c
             std::cerr << "Warning: Empty response content" << std::endl;
         }
 
-        // Record feedback
         FeedbackData feedback_data;
         feedback_data.timestamp = std::to_string(std::time(nullptr));
         feedback_data.request = request;
         feedback_data.response = response;
-        feedback_data.feedback = ""; // Initialize feedback as empty
-        feedback_data.rating = 0.0;  // Initialize rating as 0.0
+        feedback_data.feedback = "";
+        feedback_data.rating = 0.0;
 
         FeedbackStorage::record_feedback(feedback_data);
     } catch (const std::exception& e) {
         logger->error("Error processing response from {}: {}", provider, e.what());
         std::cerr << "Error processing response: " << e.what() << std::endl;
         
-        // Record error
         ErrorData error_data;
         error_data.timestamp = std::to_string(std::time(nullptr));
         error_data.error_type = "Response Processing Error";
@@ -187,78 +200,125 @@ void signal_handler(int signal) {
     exit(signal);
 }
 
-#include <list>
-
-// Playlist map
-std::map<std::string, std::string> playlist;
-std::list<std::string> playlist_order;
-
-// Function to get the first inserted playlist item
-std::optional<std::string> get_first_playlist_item() {
-    if (!playlist_order.empty()) {
-        return playlist[playlist_order.front()];
+class SimplAgent {
+public:
+    SimplAgent(const std::string& provider = "LMSTUDIO") {
+        signal(SIGINT, signal_handler);
+        signal(SIGTERM, signal_handler);
+        
+        provider_it = PROVIDER_CONFIGS.find(provider);
+        if (provider_it == PROVIDER_CONFIGS.end()) {
+            throw std::runtime_error("Provider not found: " + provider);
+        }
+        model = provider_it->models[0];
     }
-    return std::nullopt;
-}
 
-// Function to add an item to the playlist
-void add_to_playlist(const std::string& key, const std::string& value) {
-    if (playlist.find(key) == playlist.end()) {
-        playlist_order.push_back(key);
+    void set_provider(const std::string& provider) {
+        provider_it = PROVIDER_CONFIGS.find(provider);
+        if (provider_it == PROVIDER_CONFIGS.end()) {
+            throw std::runtime_error("Provider not found: " + provider);
+        }
+        model = provider_it->models[0];
     }
-    playlist[key] = value;
-}
+
+    void set_model(const std::string& model_name) {
+        if (std::find(provider_it->models.begin(), provider_it->models.end(), model_name) == provider_it->models.end()) {
+            throw std::runtime_error("Unknown model for provider: " + model_name);
+        }
+        model = model_name;
+    }
+
+    std::string process_input(const std::string& input) {
+        std::string response;
+        if (curl_client.send_llm_request(provider_it->name, input, response)) {
+            process_response(provider_it->name, input, response);
+            return response;
+        }
+        throw std::runtime_error("Failed to get response from LLM");
+    }
+
+private:
+    ProviderContainer::const_iterator provider_it;
+    std::string model;
+    CurlClient curl_client;
+};
 
 int main(int argc, char* argv[]) {
-    // Register signal handler
-    signal(SIGINT, signal_handler);
-    signal(SIGTERM, signal_handler);
-    
-    std::string provider = "LMSTUDIO"; // Default provider
-    auto provider_it = PROVIDER_CONFIGS.find(provider);
-    if (provider_it == PROVIDER_CONFIGS.end()) {
-        throw std::runtime_error("Provider not found: " + provider);
-    }
-    std::string model = provider_it->models[0]; // Use first model from provider's model list
+    initialize_providers();
+    std::string provider = "LMSTUDIO";
+    std::string model;
+    std::string input;
+    bool interactive = false;
 
-    // Parse command-line arguments
+    // Parse command line arguments
     for (int i = 1; i < argc; i++) {
         std::string arg = argv[i];
-        if (arg == "--provider" && i + 1 < argc) {
+        if (arg == "--help") {
+            show_help();
+            return 0;
+        } else if (arg == "--provider" && i + 1 < argc) {
             provider = argv[++i];
         } else if (arg == "--model" && i + 1 < argc) {
             model = argv[++i];
-        } else if (arg == "--endpoint" && i + 1 < argc) {
-            // Override the provider endpoint if specified
-            auto it = PROVIDER_CONFIGS.find(provider);
-            if (it != PROVIDER_CONFIGS.end()) {
-                ProviderConfig config = *it; // Create a copy
-                config.endpoint = argv[++i];
-                PROVIDER_CONFIGS.erase(it);
-                PROVIDER_CONFIGS.insert(config);
-            }
+        } else if (arg == "--input" && i + 1 < argc) {
+            input = argv[++i];
+        } else if (arg == "--interactive") {
+            interactive = true;
+        } else {
+            std::cerr << "Unknown argument: " << arg << std::endl;
+            show_help();
+            return 1;
         }
     }
 
-    // Check if the provided provider and model exist in PROVIDER_CONFIGS
-    if (PROVIDER_CONFIGS.find(provider) == PROVIDER_CONFIGS.end()) {
-        logger->error("Unknown provider: {}", provider);
+    try {
+        SimplAgent agent(provider);
+        if (!model.empty()) {
+            agent.set_model(model);
+        }
+
+        if (!input.empty()) {
+            std::string response = agent.process_input(input);
+            std::cout << response << std::endl;
+        } else if (interactive) {
+            std::string line;
+            std::vector<std::string> conversation_context;
+            
+            std::cout << "Interactive mode. Type 'exit' to quit.\n";
+            while (true) {
+                std::cout << "> ";
+                if (!std::getline(std::cin, line)) break;
+                if (line == "exit") break;
+                
+                // Add user input to context
+                conversation_context.push_back("User: " + line);
+                
+                try {
+                    // Process input with context
+                    std::string context_str;
+                    for (const auto& msg : conversation_context) {
+                        context_str += msg + "\n";
+                    }
+                    context_str += "Assistant:";
+                    
+                    std::string response = agent.process_input(context_str);
+                    
+                    // Add assistant response to context
+                    conversation_context.push_back("Assistant: " + response);
+                    std::cout << response << "\n\n";
+                } catch (const std::exception& e) {
+                    std::cerr << "Error: " << e.what() << "\n";
+                    conversation_context.push_back("System Error: " + std::string(e.what()));
+                }
+            }
+        } else {
+            std::cerr << "No input provided. Use --input or --interactive" << std::endl;
+            show_help();
+            return 1;
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
         return 1;
-    }
-
-    const auto& config = *provider_it;
-    if (std::find(config.models.begin(), config.models.end(), model) == config.models.end()) {
-        logger->error("Unknown model for provider {}: {}", provider, model);
-        return 1;
-    }
-
-    // Add the provided provider and model to the playlist
-    add_to_playlist(provider, model);
-
-    // Log playlist contents
-    logger->info("Playlist contents:");
-    for (const auto& [key, value] : playlist) {
-        logger->info("  {}: {}", key, value);
     }
 
     return 0;
