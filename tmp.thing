@@ -1,0 +1,11 @@
+Change Dir: '/Users/jim/work/redline'
+
+Run Build Command(s): /opt/homebrew/bin/cmake -E env VERBOSE=1 /opt/homebrew/bin/gmake -f Makefile
+/opt/homebrew/bin/cmake -S/Users/jim/work/redline -B/Users/jim/work/redline --check-build-system CMakeFiles/Makefile.cmake 0
+Re-run cmake file: Makefile older than: CMakeLists.txt
+-- Build UUID: B45AB8A2-013F-4838-A01C-3E434B253A19
+-- Build Timestamp: 2024-12-31T15:00:16Z
+-- Source directory: /Users/jim/work/redline
+-- Binary directory: /Users/jim/work/redline
+-- Configuring incomplete, errors occurred!
+

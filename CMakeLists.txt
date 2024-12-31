@@ -18,7 +18,7 @@ set(CMAKE_CXX_COMPILER /opt/homebrew/opt/llvm@19/bin/clang++)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-run the 
+
 # Set source and binary directories
 set(CMAKE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(CMAKE_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
@@ -33,8 +33,11 @@ set(Boost_ROOT /opt/homebrew/Cellar/boost/1.87.0)
 set(Boost_INCLUDEDIR ${Boost_ROOT}/include)
 set(Boost_LIBRARYDIR ${Boost_ROOT}/lib)
 
+# Add Boost components directory to search path
+list(APPEND CMAKE_PREFIX_PATH "${Boost_LIBRARYDIR}/cmake")
+
 # Find the Boost library
-find_package(Boost 1.87 REQUIRED COMPONENTS json)
+find_package(Boost 1.87 REQUIRED COMPONENTS json container)
 
 # Enable detailed logging
 set(CMAKE_VERBOSE_MAKEFILE ON)
@@ -64,9 +67,12 @@ install(PROGRAMS simplagent.sh
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Add the C++ components as an executable
-add_executable(simplagent simplagent.cpp providers.cpp curl_utils.cpp)
+add_executable(simplagent simplagent.cpp providers.cpp curl_utils.cpp openrouter_provider.cpp src/openai_provider.cpp src/provider_utils.cpp)
 
-# Link Boost JSON library
+# Add include directories
+target_include_directories(simplagent PRIVATE ${CMAKE_SOURCE_DIR})
+
+# Link Boost libraries
 target_link_libraries(simplagent Boost::json)
 
 # Link libcurl library

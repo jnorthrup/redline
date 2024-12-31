@@ -25,17 +25,63 @@ struct ProviderConfig {
     std::function<void(CURL*)> curl_setup; // Lambda for provider-specific CURL setup
     bool local_only; // Flag for local-only providers like LMStudio
     bool streaming; // Flag for streaming
-    std::string json_schema; // JSON schema for API calls
+    std::string request_schema; // JSON schema for API requests
+    std::string response_schema; // JSON schema for API responses
+    
+    // Validate request against schema
+    bool validate_request(const std::string& request) const {
+        try {
+            auto json_request = boost::json::parse(request);
+            // TODO: Implement schema validation
+            return true;
+        } catch (const std::exception& e) {
+            logger->error("Request validation failed: {}", e.what());
+            return false;
+        }
+    }
+    
+    // Validate response against schema
+    bool validate_response(const std::string& response) const {
+        try {
+            auto json_response = boost::json::parse(response);
+            // TODO: Implement schema validation
+            return true;
+        } catch (const std::exception& e) {
+            logger->error("Response validation failed: {}", e.what());
+            return false;
+        }
+    }
 };
 
-// Define the multi-index container
+// Define the multi-index container with additional indices
 typedef multi_index_container<
     ProviderConfig,
     indexed_by<
+        // Primary key: provider name
         ordered_unique<member<ProviderConfig, std::string, &ProviderConfig::name>>,
-        ordered_non_unique<member<ProviderConfig, std::string, &ProviderConfig::endpoint>>
+        
+        // Index by endpoint
+        ordered_non_unique<member<ProviderConfig, std::string, &ProviderConfig::endpoint>>,
+        
+        // Index by local_only flag
+        ordered_non_unique<member<ProviderConfig, bool, &ProviderConfig::local_only>>,
+        
+        // Index by streaming capability
+        ordered_non_unique<member<ProviderConfig, bool, &ProviderConfig::streaming>>
     >
 > ProviderContainer;
+
+// Helper functions for BMIC operations
+namespace ProviderUtils {
+    // Find provider by name
+    ProviderContainer::const_iterator find_by_name(const ProviderContainer& providers, const std::string& name);
+    
+    // Get all local providers
+    std::vector<ProviderConfig> get_local_providers(const ProviderContainer& providers);
+    
+    // Get all streaming providers
+    std::vector<ProviderConfig> get_streaming_providers(const ProviderContainer& providers);
+}
 
 extern ProviderContainer PROVIDER_CONFIGS;
 

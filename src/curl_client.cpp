@@ -104,48 +104,22 @@ bool CurlClient::send_llm_request(const std::string& provider, const std::string
     }
 
     const auto& config = *it;
-    std::string url = config.base_url + "/completions";
+    std::string url = config.base_url + config.endpoint;
 
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
 
-    std::string provider_upper = provider;
-    std::transform(provider_upper.begin(), provider_upper.end(), provider_upper.begin(), ::toupper);
-
-    std::vector<std::string> key_vars = {
-        provider_upper + "_API_KEY",
-        "OPENROUTER_API_KEY",
-        "API_KEY"
-    };
-
-    std::optional<std::string> api_key;
-    for (const auto& key : key_vars) {
-        if (const char* env_value = std::getenv(key.c_str())) {
-            api_key = env_value;
-            break;
-        }
-    }
-
-    if (!api_key) {
-        throw std::runtime_error("API key not found. Please set " + provider_upper + "_API_KEY environment variable");
-    }
-
+    // Set headers
     struct curl_slist* headers = nullptr;
-    std::string auth_header = "Authorization: Bearer " + *api_key;
-    headers = curl_slist_append(headers, auth_header.c_str());
     headers = curl_slist_append(headers, "Accept: application/json");
     headers = curl_slist_append(headers, "Content-Type: application/json");
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-    json request_json = {
-        {"prompt", input},
-        {"max_tokens", 150},
-        {"temperature", 0.7},
-        {"model", config.models[0]}
-    };
-
-    std::string request_str = boost::json::serialize(request_json);
+    // Create request using the appropriate creator
+    std::unique_ptr<RequestCreator> creator = get_request_creator(provider);
+    std::string request_str = creator->create_request_json(input, config);
+    
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request_str.c_str());
     curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, request_str.size());
 

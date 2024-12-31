@@ -14,8 +14,8 @@
 #include <boost/json.hpp>
 #include "providers.h"
 
-// Initialize spdlog logger
-auto logger = spdlog::basic_logger_mt("simplagent_logger", "simplagent.log");
+// Define and initialize logger
+std::shared_ptr<spdlog::logger> logger = spdlog::basic_logger_mt("simplagent_logger", "simplagent.log");
 
 void show_help() {
     logger->info("Displaying help information");

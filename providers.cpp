@@ -16,11 +16,11 @@
 
 using json = boost::json::value;
 
-// Initialize logger
-std::shared_ptr<spdlog::logger> logger = spdlog::default_logger();
+// Declare logger
+extern std::shared_ptr<spdlog::logger> logger;
 
-// Initialize PROVIDER_CONFIGS
-const char* COMMON_SCHEMA = R"({
+// LMStudio v0 request schema
+const char* LMSTUDIO_REQUEST_SCHEMA = R"({
     "type": "object",
     "properties": {
         "model": {"type": "string"},
@@ -29,20 +29,84 @@ const char* COMMON_SCHEMA = R"({
             "items": {
                 "type": "object",
                 "properties": {
-                    "role": {"type": "string"},
+                    "role": {"type": "string", "enum": ["system", "user", "assistant"]},
                     "content": {"type": "string"}
                 },
                 "required": ["role", "content"]
             }
         },
-        "temperature": {"type": "number"},
-        "max_tokens": {"type": "number"},
-        "stream": {"type": "boolean"},
-        "top_p": {"type": "number"},
-        "frequency_penalty": {"type": "number"},
-        "presence_penalty": {"type": "number"}
+        "temperature": {"type": "number", "minimum": 0, "maximum": 2},
+        "max_tokens": {"type": "integer"},
+        "stream": {"type": "boolean"}
     },
     "required": ["model", "messages"]
+})";
+
+// LMStudio v0 response schema
+const char* LMSTUDIO_RESPONSE_SCHEMA = R"({
+    "type": "object",
+    "properties": {
+        "id": {"type": "string"},
+        "object": {"type": "string"},
+        "created": {"type": "integer"},
+        "model": {"type": "string"},
+        "choices": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "index": {"type": "integer"},
+                    "logprobs": {"type": ["null", "object"]},
+                    "finish_reason": {"type": "string"},
+                    "message": {
+                        "type": "object",
+                        "properties": {
+                            "role": {"type": "string"},
+                            "content": {"type": "string"}
+                        }
+                    }
+                }
+            }
+        },
+        "usage": {
+            "type": "object",
+            "properties": {
+                "prompt_tokens": {"type": "integer"},
+                "completion_tokens": {"type": "integer"},
+                "total_tokens": {"type": "integer"}
+            }
+        },
+        "stats": {
+            "type": "object",
+            "properties": {
+                "tokens_per_second": {"type": "number"},
+                "time_to_first_token": {"type": "number"},
+                "generation_time": {"type": "number"},
+                "stop_reason": {"type": "string"}
+            }
+        },
+        "model_info": {
+            "type": "object",
+            "properties": {
+                "arch": {"type": "string"},
+                "quant": {"type": "string"},
+                "format": {"type": "string"},
+                "context_length": {"type": "integer"}
+            }
+        },
+        "runtime": {
+            "type": "object",
+            "properties": {
+                "name": {"type": "string"},
+                "version": {"type": "string"},
+                "supported_formats": {
+                    "type": "array",
+                    "items": {"type": "string"}
+                }
+            }
+        }
+    },
+    "required": ["id", "object", "created", "model", "choices", "usage", "stats", "model_info", "runtime"]
 })";
 
 using namespace boost::multi_index;
@@ -53,9 +117,12 @@ ProviderContainer PROVIDER_CONFIGS;
 ProviderConfig ProviderFactory::createLMStudio() {
     return ProviderConfig{
         .name = "LMSTUDIO",
-        .base_url = "http://localhost:1234/api/v1",
-        .models = {"CultriX/Qwen2.5-14B-Wernickev5.Q4.mlx"},
-        .local_only = true
+        .base_url = "http://localhost:1234/api/v0",
+        .endpoint = "/chat/completions",
+        .models = {"granite-3.0-2b-instruct"},
+        .local_only = true,
+        .request_schema = LMSTUDIO_REQUEST_SCHEMA,
+        .response_schema = LMSTUDIO_RESPONSE_SCHEMA
     };
 }
 
@@ -131,6 +198,48 @@ ProviderConfig ProviderFactory::createHuggingFace() {
         .models = {"meta-llama/Meta-Llama-3-8B-Instruct", "google/flan-t5-xxl", 
                   "EleutherAI/gpt-neo-2.7B", "bigscience/bloom-7b1"}
     };
+}
+
+std::string LMStudioRequestCreator::create_request_json(const std::string& input, const ProviderConfig& config) {
+    try {
+        // Parse input as JSON
+        auto input_json = boost::json::parse(input);
+        
+        // Create messages array
+        boost::json::array messages;
+        if (input_json.is_object() && input_json.as_object().contains("messages")) {
+            messages = input_json.at("messages").as_array();
+        } else {
+            // Create default user message
+            messages.push_back({
+                {"role", "user"},
+                {"content", input}
+            });
+        }
+        
+        // Create request JSON
+        boost::json::value request = {
+            {"model", config.models[0]}, // Use first model by default
+            {"messages", messages},
+            {"temperature", 0.7},
+            {"max_tokens", -1}, // Unlimited tokens
+            {"stream", false}
+        };
+        
+        // Override with any provided parameters
+        if (input_json.is_object()) {
+            for (const auto& [key, value] : input_json.as_object()) {
+                if (key != "messages") {
+                    request.as_object()[key] = value;
+                }
+            }
+        }
+        
+        return boost::json::serialize(request);
+    } catch (const std::exception& e) {
+        logger->error("Failed to create LMStudio request: {}", e.what());
+        throw;
+    }
 }
 
 void initialize_providers() {

@@ -16,7 +16,7 @@ ProviderConfig OpenRouterProvider::createConfig() {
         .api_key = "",
         .local_only = false,
         .streaming = true,
-        .json_schema = R"({
+        .request_schema = R"({
             "type": "object",
             "properties": {
                 "model": {"type": "string"},
@@ -39,6 +39,41 @@ ProviderConfig OpenRouterProvider::createConfig() {
                 "presence_penalty": {"type": "number"}
             },
             "required": ["model", "messages"]
+        })",
+        .response_schema = R"({
+            "type": "object",
+            "properties": {
+                "id": {"type": "string"},
+                "object": {"type": "string"},
+                "created": {"type": "integer"},
+                "model": {"type": "string"},
+                "choices": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "index": {"type": "integer"},
+                            "message": {
+                                "type": "object",
+                                "properties": {
+                                    "role": {"type": "string"},
+                                    "content": {"type": "string"}
+                                }
+                            },
+                            "finish_reason": {"type": "string"}
+                        }
+                    }
+                },
+                "usage": {
+                    "type": "object",
+                    "properties": {
+                        "prompt_tokens": {"type": "integer"},
+                        "completion_tokens": {"type": "integer"},
+                        "total_tokens": {"type": "integer"}
+                    }
+                }
+            },
+            "required": ["id", "object", "created", "model", "choices", "usage"]
         })"
     };
 }
