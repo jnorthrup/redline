@@ -1,0 +1,11 @@
+{
+  "tool_call": {
+    "function_name": "get_weather",
+    "arguments": {
+      "location": "current",
+      "format": "rhyme",
+      "units": "metric",
+      "detailed": false
+    }
+  }
+}
