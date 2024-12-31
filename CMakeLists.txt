@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.23)
 
+# Set Ninja as the exclusive generator
+set(CMAKE_GENERATOR "Ninja")
+
 # Generate unique build identifier
 execute_process(COMMAND uuidgen OUTPUT_VARIABLE BUILD_UUID OUTPUT_STRIP_TRAILING_WHITESPACE)
 string(TIMESTAMP BUILD_TIMESTAMP "%Y-%m-%dT%H:%M:%SZ" UTC)

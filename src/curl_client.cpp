@@ -48,6 +48,7 @@ bool CurlClient::get_model_info(const std::string& provider) {
     std::vector<std::string> key_vars = {
         provider_upper + "_API_KEY",
         "OPENROUTER_API_KEY",
+        "LMSTUDIO_API_KEY",
         "API_KEY"
     };
 
@@ -59,15 +60,17 @@ bool CurlClient::get_model_info(const std::string& provider) {
         }
     }
 
-    if (!api_key) {
-        throw std::runtime_error("API key not found. Please set " + provider_upper + "_API_KEY environment variable");
-    }
-
     struct curl_slist* headers = nullptr;
-    std::string auth_header = "Authorization: Bearer " + *api_key;
-    headers = curl_slist_append(headers, auth_header.c_str());
     headers = curl_slist_append(headers, "Accept: application/json");
     headers = curl_slist_append(headers, "Content-Type: application/json");
+    
+    // Only add Authorization header if API key is present
+    if (api_key) {
+        std::string auth_header = "Authorization: Bearer " + *api_key;
+        headers = curl_slist_append(headers, auth_header.c_str());
+    } else if (provider != "lmstudio") {
+        throw std::runtime_error("API key not found. Please set " + provider_upper + "_API_KEY environment variable");
+    }
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
     CURLcode res = curl_easy_perform(curl);
@@ -114,11 +117,22 @@ bool CurlClient::send_llm_request(const std::string& provider, const std::string
     struct curl_slist* headers = nullptr;
     headers = curl_slist_append(headers, "Accept: application/json");
     headers = curl_slist_append(headers, "Content-Type: application/json");
+    
+    // Only add Authorization header if API key is present
+    if (api_key) {
+        std::string auth_header = "Authorization: Bearer " + *api_key;
+        headers = curl_slist_append(headers, auth_header.c_str());
+    } else if (provider != "lmstudio") {
+        throw std::runtime_error("API key not found. Please set " + provider_upper + "_API_KEY environment variable");
+    }
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
     // Create request using the appropriate creator
     std::unique_ptr<RequestCreator> creator = get_request_creator(provider);
     std::string request_str = creator->create_request_json(input, config);
+    
+    // Debug logging
+    spdlog::debug("Sending request to {}: {}", url, request_str);
     
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request_str.c_str());
     curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, request_str.size());
