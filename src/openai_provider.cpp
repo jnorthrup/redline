@@ -110,7 +110,7 @@ const char* OPENAI_RESPONSE_SCHEMA = R"({
     "required": ["id", "object", "created", "model", "choices", "usage"]
 })";
 
-std::string OpenAIRequestCreator::create_request_json(const std::string& input, const ProviderConfig& config) {
+std::string OpenAIRequestCreator::create_request_json(const std::string& input, const ProviderConfig& config, const std::string& endpoint_type) {
     try {
         // Parse input as JSON
         auto input_json = boost::json::parse(input);

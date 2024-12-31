@@ -88,7 +88,7 @@ std::string OpenRouterProvider::create_request_json(const std::string& input) {
     return "";
 }
 
-std::string OpenRouterRequestCreator::create_request_json(const std::string& input, const ProviderConfig& config) {
+std::string OpenRouterRequestCreator::create_request_json(const std::string& input, const ProviderConfig& config, const std::string& endpoint_type) {
     // Implementation of OpenRouter specific request creation
     return "";
 }

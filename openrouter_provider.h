@@ -19,7 +19,7 @@ private:
 
 class OpenRouterRequestCreator : public RequestCreator {
 public:
-    std::string create_request_json(const std::string& input, const ProviderConfig& config) override;
+    std::string create_request_json(const std::string& input, const ProviderConfig& config, const std::string& endpoint_type = "chat") override;
 };
 
 class OpenRouterToolUse {

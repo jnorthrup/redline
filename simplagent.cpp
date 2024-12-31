@@ -26,7 +26,7 @@ void show_help() {
               << "  --provider <name>    Set the LLM provider (default: LMSTUDIO)\n"
               << "  --model <name>       Set the model to use\n"
               << "  --input <text>       Process the given input text\n"
-              << "  --interactive        Run in interactive mode\n\n"
+              << "\nAvailable providers:\n"
               << "Available providers:\n";
     
     for (const auto& provider : PROVIDER_CONFIGS) {
@@ -248,7 +248,6 @@ int main(int argc, char* argv[]) {
     std::string provider = "LMSTUDIO";
     std::string model;
     std::string input;
-    bool interactive = false;
 
     // Parse command line arguments
     for (int i = 1; i < argc; i++) {
@@ -262,8 +261,6 @@ int main(int argc, char* argv[]) {
             model = argv[++i];
         } else if (arg == "--input" && i + 1 < argc) {
             input = argv[++i];
-        } else if (arg == "--interactive") {
-            interactive = true;
         } else {
             std::cerr << "Unknown argument: " << arg << std::endl;
             show_help();
@@ -280,41 +277,16 @@ int main(int argc, char* argv[]) {
         if (!input.empty()) {
             std::string response = agent.process_input(input);
             std::cout << response << std::endl;
-        } else if (interactive) {
-            std::string line;
-            std::vector<std::string> conversation_context;
-            
-            std::cout << "Interactive mode. Type 'exit' to quit.\n";
-            while (true) {
-                std::cout << "> ";
-                if (!std::getline(std::cin, line)) break;
-                if (line == "exit") break;
-                
-                // Add user input to context
-                conversation_context.push_back("User: " + line);
-                
-                try {
-                    // Process input with context
-                    std::string context_str;
-                    for (const auto& msg : conversation_context) {
-                        context_str += msg + "\n";
-                    }
-                    context_str += "Assistant:";
-                    
-                    std::string response = agent.process_input(context_str);
-                    
-                    // Add assistant response to context
-                    conversation_context.push_back("Assistant: " + response);
-                    std::cout << response << "\n\n";
-                } catch (const std::exception& e) {
-                    std::cerr << "Error: " << e.what() << "\n";
-                    conversation_context.push_back("System Error: " + std::string(e.what()));
-                }
-            }
         } else {
-            std::cerr << "No input provided. Use --input or --interactive" << std::endl;
-            show_help();
-            return 1;
+            std::cout << "Enter your queries (type 'exit' to quit):\n";
+            std::string line;
+            while (std::getline(std::cin, line)) {
+                if (line == "exit") {
+                    break;
+                }
+                std::string response = agent.process_input(line);
+                std::cout << "Response: " << response << std::endl;
+            }
         }
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;

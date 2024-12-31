@@ -119,7 +119,23 @@ ProviderConfig ProviderFactory::createLMStudio() {
         .name = "LMSTUDIO",
         .base_url = "http://localhost:1234/api/v0",
         .endpoint = "/chat/completions",
-        .models = {"granite-3.0-2b-instruct"},
+        .models = {"Qwen2.5-Coder-0.5B-Instruct-128K-GGUF",       //     420.09 MB          Qwen2                   
+
+"Qwen2.5-14B-Wernickev5.Q4.mlx",               //       8.32 GB                          ✓ 
+"nomic-embed-text-v1.5-GGUF",                    //      84.11 MB                          ✓
+"Qwenvergence-14B-v3-Prose-Q4.mlx",            //     8.32 GB                                  
+"Qwenvergence-14B-v3-Prose-Q8.mlx",            //    15.71 GB                                  
+"Llama-3.2-3B-Instruct-GGUF",                  //                    (...2 options)              
+"Llama-3.2-1B-Instruct-GGUF",                  //       1.32 GB          Llama                   
+"Qwen2.5-Coder-1.5B-Instruct-128K-GGUF",       //       1.65 GB          Qwen2                   
+"Qwen2.5-Math-1.5B-Instruct-8bit",             // 1.65 GB                                  
+"Llama-3.2-3B-Instruct",                       // 6.43 GB                                  
+"Qwen2.5-Coder-3B-Instruct-128K-GGUF",         //       1.93 GB          Qwen2                   
+"alt-llama3-8b-kotlin-instruct-Q8",            //         8.54 GB          Llama                   
+"Qwen2.5-Coder-7B-4bit",                       // 4.30 GB                                  
+
+
+         },
         .local_only = true,
         .request_schema = LMSTUDIO_REQUEST_SCHEMA,
         .response_schema = LMSTUDIO_RESPONSE_SCHEMA
@@ -177,6 +193,7 @@ ProviderConfig ProviderFactory::createOpenAI() {
     return ProviderConfig{
         .name = "OPENAI",
         .base_url = "https://api.openai.com/v1",
+        .endpoint = "/chat/completions",
         .models = {"gpt-4", "gpt-4-1106-preview", "gpt-3.5-turbo-1106", "gpt-3.5-turbo"}
     };
 }
@@ -200,36 +217,47 @@ ProviderConfig ProviderFactory::createHuggingFace() {
     };
 }
 
-std::string LMStudioRequestCreator::create_request_json(const std::string& input, const ProviderConfig& config) {
+std::string LMStudioRequestCreator::create_request_json(const std::string& input, const ProviderConfig& config, const std::string& endpoint_type) {
     try {
         // Parse input as JSON
         auto input_json = boost::json::parse(input);
         
-        // Create messages array
-        boost::json::array messages;
-        if (input_json.is_object() && input_json.as_object().contains("messages")) {
-            messages = input_json.at("messages").as_array();
-        } else {
-            // Create default user message
-            messages.push_back({
-                {"role", "user"},
-                {"content", input}
-            });
-        }
+        boost::json::value request;
         
-        // Create request JSON
-        boost::json::value request = {
-            {"model", config.models[0]}, // Use first model by default
-            {"messages", messages},
-            {"temperature", 0.7},
-            {"max_tokens", -1}, // Unlimited tokens
-            {"stream", false}
-        };
+        if (endpoint_type == "chat") {
+            // Create messages array
+            boost::json::array messages;
+            if (input_json.is_object() && input_json.as_object().contains("messages")) {
+                messages = input_json.at("messages").as_array();
+            } else {
+                // Create default user message
+                messages.push_back({
+                    {"role", "user"},
+                    {"content", input}
+                });
+            }
+            
+            request = {
+                {"model", config.models[0]}, // Use first model by default
+                {"messages", messages},
+                {"temperature", 0.7},
+                {"max_tokens", -1}, // Unlimited tokens
+                {"stream", true}
+            };
+        } else if (endpoint_type == "completion") {
+            request = {
+                {"model", config.models[0]},
+                {"prompt", input},
+                {"max_tokens", -1},
+                {"temperature", 0.7}
+            };
+        }
         
         // Override with any provided parameters
         if (input_json.is_object()) {
             for (const auto& [key, value] : input_json.as_object()) {
-                if (key != "messages") {
+                if ((endpoint_type == "chat" && key != "messages") || 
+                    (endpoint_type == "completion" && key != "prompt")) {
                     request.as_object()[key] = value;
                 }
             }
@@ -243,6 +271,15 @@ std::string LMStudioRequestCreator::create_request_json(const std::string& input
 }
 
 void initialize_providers() {
+    // Initialize logger
+    try {
+        logger = spdlog::basic_logger_mt("simplagent", "build/bin/simplagent.log");
+        logger->set_level(spdlog::level::info);
+        logger->info("Initializing providers");
+    } catch (const spdlog::spdlog_ex& ex) {
+        std::cerr << "Log init failed: " << ex.what() << std::endl;
+    }
+
     PROVIDER_CONFIGS.insert(ProviderFactory::createLMStudio());
     PROVIDER_CONFIGS.insert(ProviderFactory::createDeepSeek());
     PROVIDER_CONFIGS.insert(ProviderFactory::createOpenRouter());

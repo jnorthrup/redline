@@ -8,6 +8,12 @@
 using json = boost::json::value;
 
 CurlClient::CurlClient() {
+    // Configure spdlog to output to console
+    auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+    auto logger = std::make_shared<spdlog::logger>("curl_client", console_sink);
+    logger->set_level(spdlog::level::debug);
+    spdlog::set_default_logger(logger);
+
     curl_global_init(CURL_GLOBAL_DEFAULT);
     curl = curl_easy_init();
     if (!curl) {
@@ -27,6 +33,11 @@ size_t CurlClient::write_callback(char* ptr, size_t size, size_t nmemb, std::str
     return size * nmemb;
 }
 
+size_t CurlClient::header_callback(char* buffer, size_t size, size_t nitems, std::string* headers) {
+    headers->append(buffer, size * nitems);
+    return size * nitems;
+}
+
 bool CurlClient::get_model_info(const std::string& provider) {
     auto it = PROVIDER_CONFIGS.find(provider);
     if (it == PROVIDER_CONFIGS.end()) {
@@ -34,13 +45,16 @@ bool CurlClient::get_model_info(const std::string& provider) {
     }
 
     const auto& config = *it;
-    std::string url = config.base_url + "/models";
+    std::string url = config.base_url + config.endpoint + "/models";
 
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
     
     std::string response;
+    std::string headers;
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, &headers);
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
 
     std::string provider_upper = provider;
     std::transform(provider_upper.begin(), provider_upper.end(), provider_upper.begin(), ::toupper);
@@ -69,7 +83,7 @@ bool CurlClient::get_model_info(const std::string& provider) {
         std::string auth_header = "Authorization: Bearer " + *api_key;
         headers = curl_slist_append(headers, auth_header.c_str());
     } else if (provider != "lmstudio") {
-        throw std::runtime_error("API key not found. Please set " + provider_upper + "_API_KEY environment variable");
+        spdlog::warn("API key not found. Proceeding without authentication");
     }
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
@@ -95,7 +109,12 @@ bool CurlClient::get_model_info(const std::string& provider) {
         }
     } else {
         spdlog::error("HTTP Error: {}", http_code);
-        spdlog::info("Response: {}", response);
+        spdlog::info("Full Response Details:\n"
+                    "Request URL: {}\n"
+                    "Status Code: {}\n"
+                    "Response Headers:\n{}\n"
+                    "Response Body:\n{}", 
+                    url, http_code, headers, response);
         return false;
     }
 }
@@ -112,6 +131,11 @@ bool CurlClient::send_llm_request(const std::string& provider, const std::string
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+    
+    // Capture response headers
+    std::string response_headers;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, &response_headers);
 
     // Set headers
     struct curl_slist* headers = nullptr;
@@ -152,6 +176,9 @@ bool CurlClient::send_llm_request(const std::string& provider, const std::string
         try {
             json j = boost::json::parse(response);
             std::cout << boost::json::serialize(j) << std::endl;
+            
+            // Log headers for debugging
+            spdlog::debug("Response headers:\n{}", response_headers);
             return true;
         } catch (const std::exception& e) {
             spdlog::error("JSON parse error: {}", e.what());
@@ -159,7 +186,7 @@ bool CurlClient::send_llm_request(const std::string& provider, const std::string
         }
     } else {
         spdlog::error("HTTP Error: {}", http_code);
-        spdlog::info("Response: {}", response);
+        spdlog::info("Response headers:\n{}\nResponse body:\n{}", response_headers, response);
         return false;
     }
 }

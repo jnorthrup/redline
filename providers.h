@@ -104,52 +104,52 @@ void initialize_providers();
 class RequestCreator {
 public:
     virtual ~RequestCreator() = default;
-    virtual std::string create_request_json(const std::string& input, const ProviderConfig& config) = 0;
+    virtual std::string create_request_json(const std::string& input, const ProviderConfig& config, const std::string& endpoint_type = "chat") = 0;
 };
 
 class LMStudioRequestCreator : public RequestCreator {
 public:
-    std::string create_request_json(const std::string& input, const ProviderConfig& config) override;
+    std::string create_request_json(const std::string& input, const ProviderConfig& config, const std::string& endpoint_type = "chat") override;
 };
 
 class DeepSeekRequestCreator : public RequestCreator {
 public:
-    std::string create_request_json(const std::string& input, const ProviderConfig& config) override;
+    std::string create_request_json(const std::string& input, const ProviderConfig& config, const std::string& endpoint_type = "chat") override;
 };
 
 class GeminiRequestCreator : public RequestCreator {
 public:
-    std::string create_request_json(const std::string& input, const ProviderConfig& config) override;
+    std::string create_request_json(const std::string& input, const ProviderConfig& config, const std::string& endpoint_type = "chat") override;
 };
 
 class GrokRequestCreator : public RequestCreator {
 public:
-    std::string create_request_json(const std::string& input, const ProviderConfig& config) override;
+    std::string create_request_json(const std::string& input, const ProviderConfig& config, const std::string& endpoint_type = "chat") override;
 };
 
 class PerplexityRequestCreator : public RequestCreator {
 public:
-    std::string create_request_json(const std::string& input, const ProviderConfig& config) override;
+    std::string create_request_json(const std::string& input, const ProviderConfig& config, const std::string& endpoint_type = "chat") override;
 };
 
 class AnthropicRequestCreator : public RequestCreator {
 public:
-    std::string create_request_json(const std::string& input, const ProviderConfig& config) override;
+    std::string create_request_json(const std::string& input, const ProviderConfig& config, const std::string& endpoint_type = "chat") override;
 };
 
 class OpenAIRequestCreator : public RequestCreator {
 public:
-    std::string create_request_json(const std::string& input, const ProviderConfig& config) override;
+    std::string create_request_json(const std::string& input, const ProviderConfig& config, const std::string& endpoint_type = "chat") override;
 };
 
 class ClaudeRequestCreator : public RequestCreator {
 public:
-    std::string create_request_json(const std::string& input, const ProviderConfig& config) override;
+    std::string create_request_json(const std::string& input, const ProviderConfig& config, const std::string& endpoint_type = "chat") override;
 };
 
 class HuggingFaceRequestCreator : public RequestCreator {
 public:
-    std::string create_request_json(const std::string& input, const ProviderConfig& config) override;
+    std::string create_request_json(const std::string& input, const ProviderConfig& config, const std::string& endpoint_type = "chat") override;
 };
 
 class CurlClient {

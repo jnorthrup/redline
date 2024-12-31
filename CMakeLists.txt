@@ -1,7 +1,13 @@
 cmake_minimum_required(VERSION 3.23)
-
-# Set Ninja as the exclusive generator
-set(CMAKE_GENERATOR "Ninja")
+set(CMAKE_GENERATOR "Ninja" CACHE STRING "CMake Generator" FORCE)
+# Improved detection of Apple Silicon (macOS)
+if(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "arm64" OR CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "aarch64")
+    set(HOMEBREW_PREFIX "/opt/homebrew")
+    message(STATUS "Detected Apple Silicon, using Homebrew prefix: ${HOMEBREW_PREFIX}")
+else()
+    set(HOMEBREW_PREFIX "/usr/local")
+    message(STATUS "Detected Intel architecture, using Homebrew prefix: ${HOMEBREW_PREFIX}")
+endif()
 
 # Generate unique build identifier
 execute_process(COMMAND uuidgen OUTPUT_VARIABLE BUILD_UUID OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -14,30 +20,39 @@ message(STATUS "Build Timestamp: ${BUILD_TIMESTAMP}")
 cmake_policy(SET CMP0167 NEW)
 cmake_policy(SET CMP0144 NEW)
 
-# Specify the Homebrew-installed LLVM 19 compiler
-set(CMAKE_CXX_COMPILER /opt/homebrew/opt/llvm@19/bin/clang++)
+message(STATUS "Source directory: ${CMAKE_CURRENT_SOURCE_DIR}")
+message(STATUS "Binary directory: ${CMAKE_CURRENT_BINARY_DIR}")
 
-# Set the C++ standard to C++23
+# Declare project first to initialize compiler
+project(SimplAgent LANGUAGES CXX)
+
+# Set C++ standard and verify support
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Set source and binary directories
-set(CMAKE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-set(CMAKE_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
+# Verify C++23 support with a test compile
+include(CheckCXXSourceCompiles)
 
-message(STATUS "Source directory: ${CMAKE_SOURCE_DIR}")
-message(STATUS "Binary directory: ${CMAKE_BINARY_DIR}")
+set(CMAKE_REQUIRED_FLAGS "-std=c++23")
+check_cxx_source_compiles("
+    #include <concepts>
+    static_assert(std::integral<std::size_t>);
+    int main() { return 0; }
+" HAS_CXX23)
 
-project(SimplAgent)
+if(NOT HAS_CXX23)
+    message(FATAL_ERROR "The compiler does not fully support C++23")
+endif()
 
 # Set Boost paths explicitly
-set(Boost_ROOT /opt/homebrew/Cellar/boost/1.87.0)
+set(Boost_ROOT ${HOMEBREW_PREFIX}/Cellar/boost/1.87.0)
 set(Boost_INCLUDEDIR ${Boost_ROOT}/include)
 set(Boost_LIBRARYDIR ${Boost_ROOT}/lib)
 
-# Add Boost components directory to search path
+# Add Boost components directory to search path without overriding
 list(APPEND CMAKE_PREFIX_PATH "${Boost_LIBRARYDIR}/cmake")
+list(REMOVE_DUPLICATES CMAKE_PREFIX_PATH)
 
 # Find the Boost library
 find_package(Boost 1.87 REQUIRED COMPONENTS json container)
@@ -90,3 +105,13 @@ file(MAKE_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 # Install the executables
 install(TARGETS simplagent
         DESTINATION bin)
+
+# Add super clean target
+add_custom_target(superclean
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_SOURCE_DIR}/CMakeFiles
+    COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_SOURCE_DIR}/CMakeCache.txt
+    COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_SOURCE_DIR}/cmake_install.cmake
+    COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_SOURCE_DIR}/Makefile
+    COMMENT "Removing all build artifacts and CMake-generated files"
+)
