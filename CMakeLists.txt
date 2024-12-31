@@ -78,6 +78,6 @@ target_link_libraries(simplagent spdlog::spdlog)
 # Create bin directory if it doesn't exist
 file(MAKE_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-# Install the executable
+# Install the executables
 install(TARGETS simplagent
         DESTINATION bin)
