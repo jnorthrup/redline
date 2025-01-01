@@ -8,12 +8,21 @@ set -euo pipefail
 
 # Debug output
 echo "Debug: Starting simplagent.sh"
-echo "Debug: Current environment variables:"
-printenv | grep _API_KEY
+echo "Debug: Checking for required API keys..."
+
+# Configuration
+API_URL="${API_URL:-http://localhost:1234/v1/chat/completions}" # Default to LM Studio local endpoint
 
 # Validate environment
 # Check for a non-empty API key for the configured provider
-PROVIDER_API_KEY_VAR="${$(echo "$API_URL" | awk -F'://' '{print $2}' | awk -F'[/.]' '{print toupper($1)}' | sed 's/-/__/g')^^_API_KEY}"
+PROVIDER=$(echo "$API_URL" | awk -F'://' '{print $2}' | awk -F'[/.]' '{print toupper($1)}' | sed 's/-/__/g')
+PROVIDER_API_KEY_VAR="${PROVIDER^^}_API_KEY"
+
+# Check if API_URL is set
+if [[ -z "$API_URL" ]]; then
+    echo "Error: API_URL must be set" >&2
+    exit 1
+fi
 echo "Debug: Looking for API key variable: $PROVIDER_API_KEY_VAR"
 
 if [[ -z "${!PROVIDER_API_KEY_VAR:-}" ]]; then

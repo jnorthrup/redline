@@ -50,50 +50,50 @@ cmake_ninja_workdir = /Users/jim/work/redline/
 build cmake_object_order_depends_target_simplagent: phony || cmake_object_order_depends_target_spdlog
 
 build CMakeFiles/simplagent.dir/simplagent.cpp.o: CXX_COMPILER__simplagent_unscanned_Release /Users/jim/work/redline/simplagent.cpp || cmake_object_order_depends_target_simplagent
-  DEFINES = -DBOOST_CONTAINER_DYN_LINK -DBOOST_CONTAINER_NO_LIB -DBOOST_JSON_DYN_LINK -DBOOST_JSON_NO_LIB -DSPDLOG_COMPILED_LIB
+  DEFINES = -DBOOST_CONTAINER_DYN_LINK -DBOOST_CONTAINER_NO_LIB -DBOOST_JSON_DYN_LINK -DBOOST_JSON_NO_LIB -DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO -DSPDLOG_COMPILED_LIB
   DEP_FILE = CMakeFiles/simplagent.dir/simplagent.cpp.o.d
-  FLAGS = -O3 -DNDEBUG -std=c++2b -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk
-  INCLUDES = -I/Users/jim/work/redline -I/Users/jim/work/redline/_deps/spdlog-src/include -isystem /opt/homebrew/include
+  FLAGS = -I/opt/homebrew/include -O3 -DNDEBUG -std=c++2b -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk
+  INCLUDES = -I/Users/jim/work/redline -I/Users/jim/work/redline/_deps/spdlog-src/include -I/Users/jim/work/redline/_deps/spdlog-build/include -isystem /opt/homebrew/include
   OBJECT_DIR = CMakeFiles/simplagent.dir
   OBJECT_FILE_DIR = CMakeFiles/simplagent.dir
 
 build CMakeFiles/simplagent.dir/providers.cpp.o: CXX_COMPILER__simplagent_unscanned_Release /Users/jim/work/redline/providers.cpp || cmake_object_order_depends_target_simplagent
-  DEFINES = -DBOOST_CONTAINER_DYN_LINK -DBOOST_CONTAINER_NO_LIB -DBOOST_JSON_DYN_LINK -DBOOST_JSON_NO_LIB -DSPDLOG_COMPILED_LIB
+  DEFINES = -DBOOST_CONTAINER_DYN_LINK -DBOOST_CONTAINER_NO_LIB -DBOOST_JSON_DYN_LINK -DBOOST_JSON_NO_LIB -DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO -DSPDLOG_COMPILED_LIB
   DEP_FILE = CMakeFiles/simplagent.dir/providers.cpp.o.d
-  FLAGS = -O3 -DNDEBUG -std=c++2b -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk
-  INCLUDES = -I/Users/jim/work/redline -I/Users/jim/work/redline/_deps/spdlog-src/include -isystem /opt/homebrew/include
+  FLAGS = -I/opt/homebrew/include -O3 -DNDEBUG -std=c++2b -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk
+  INCLUDES = -I/Users/jim/work/redline -I/Users/jim/work/redline/_deps/spdlog-src/include -I/Users/jim/work/redline/_deps/spdlog-build/include -isystem /opt/homebrew/include
   OBJECT_DIR = CMakeFiles/simplagent.dir
   OBJECT_FILE_DIR = CMakeFiles/simplagent.dir
 
 build CMakeFiles/simplagent.dir/curl_utils.cpp.o: CXX_COMPILER__simplagent_unscanned_Release /Users/jim/work/redline/curl_utils.cpp || cmake_object_order_depends_target_simplagent
-  DEFINES = -DBOOST_CONTAINER_DYN_LINK -DBOOST_CONTAINER_NO_LIB -DBOOST_JSON_DYN_LINK -DBOOST_JSON_NO_LIB -DSPDLOG_COMPILED_LIB
+  DEFINES = -DBOOST_CONTAINER_DYN_LINK -DBOOST_CONTAINER_NO_LIB -DBOOST_JSON_DYN_LINK -DBOOST_JSON_NO_LIB -DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO -DSPDLOG_COMPILED_LIB
   DEP_FILE = CMakeFiles/simplagent.dir/curl_utils.cpp.o.d
-  FLAGS = -O3 -DNDEBUG -std=c++2b -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk
-  INCLUDES = -I/Users/jim/work/redline -I/Users/jim/work/redline/_deps/spdlog-src/include -isystem /opt/homebrew/include
+  FLAGS = -I/opt/homebrew/include -O3 -DNDEBUG -std=c++2b -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk
+  INCLUDES = -I/Users/jim/work/redline -I/Users/jim/work/redline/_deps/spdlog-src/include -I/Users/jim/work/redline/_deps/spdlog-build/include -isystem /opt/homebrew/include
   OBJECT_DIR = CMakeFiles/simplagent.dir
   OBJECT_FILE_DIR = CMakeFiles/simplagent.dir
 
 build CMakeFiles/simplagent.dir/openrouter_provider.cpp.o: CXX_COMPILER__simplagent_unscanned_Release /Users/jim/work/redline/openrouter_provider.cpp || cmake_object_order_depends_target_simplagent
-  DEFINES = -DBOOST_CONTAINER_DYN_LINK -DBOOST_CONTAINER_NO_LIB -DBOOST_JSON_DYN_LINK -DBOOST_JSON_NO_LIB -DSPDLOG_COMPILED_LIB
+  DEFINES = -DBOOST_CONTAINER_DYN_LINK -DBOOST_CONTAINER_NO_LIB -DBOOST_JSON_DYN_LINK -DBOOST_JSON_NO_LIB -DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO -DSPDLOG_COMPILED_LIB
   DEP_FILE = CMakeFiles/simplagent.dir/openrouter_provider.cpp.o.d
-  FLAGS = -O3 -DNDEBUG -std=c++2b -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk
-  INCLUDES = -I/Users/jim/work/redline -I/Users/jim/work/redline/_deps/spdlog-src/include -isystem /opt/homebrew/include
+  FLAGS = -I/opt/homebrew/include -O3 -DNDEBUG -std=c++2b -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk
+  INCLUDES = -I/Users/jim/work/redline -I/Users/jim/work/redline/_deps/spdlog-src/include -I/Users/jim/work/redline/_deps/spdlog-build/include -isystem /opt/homebrew/include
   OBJECT_DIR = CMakeFiles/simplagent.dir
   OBJECT_FILE_DIR = CMakeFiles/simplagent.dir
 
 build CMakeFiles/simplagent.dir/src/openai_provider.cpp.o: CXX_COMPILER__simplagent_unscanned_Release /Users/jim/work/redline/src/openai_provider.cpp || cmake_object_order_depends_target_simplagent
-  DEFINES = -DBOOST_CONTAINER_DYN_LINK -DBOOST_CONTAINER_NO_LIB -DBOOST_JSON_DYN_LINK -DBOOST_JSON_NO_LIB -DSPDLOG_COMPILED_LIB
+  DEFINES = -DBOOST_CONTAINER_DYN_LINK -DBOOST_CONTAINER_NO_LIB -DBOOST_JSON_DYN_LINK -DBOOST_JSON_NO_LIB -DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO -DSPDLOG_COMPILED_LIB
   DEP_FILE = CMakeFiles/simplagent.dir/src/openai_provider.cpp.o.d
-  FLAGS = -O3 -DNDEBUG -std=c++2b -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk
-  INCLUDES = -I/Users/jim/work/redline -I/Users/jim/work/redline/_deps/spdlog-src/include -isystem /opt/homebrew/include
+  FLAGS = -I/opt/homebrew/include -O3 -DNDEBUG -std=c++2b -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk
+  INCLUDES = -I/Users/jim/work/redline -I/Users/jim/work/redline/_deps/spdlog-src/include -I/Users/jim/work/redline/_deps/spdlog-build/include -isystem /opt/homebrew/include
   OBJECT_DIR = CMakeFiles/simplagent.dir
   OBJECT_FILE_DIR = CMakeFiles/simplagent.dir/src
 
 build CMakeFiles/simplagent.dir/src/provider_utils.cpp.o: CXX_COMPILER__simplagent_unscanned_Release /Users/jim/work/redline/src/provider_utils.cpp || cmake_object_order_depends_target_simplagent
-  DEFINES = -DBOOST_CONTAINER_DYN_LINK -DBOOST_CONTAINER_NO_LIB -DBOOST_JSON_DYN_LINK -DBOOST_JSON_NO_LIB -DSPDLOG_COMPILED_LIB
+  DEFINES = -DBOOST_CONTAINER_DYN_LINK -DBOOST_CONTAINER_NO_LIB -DBOOST_JSON_DYN_LINK -DBOOST_JSON_NO_LIB -DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO -DSPDLOG_COMPILED_LIB
   DEP_FILE = CMakeFiles/simplagent.dir/src/provider_utils.cpp.o.d
-  FLAGS = -O3 -DNDEBUG -std=c++2b -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk
-  INCLUDES = -I/Users/jim/work/redline -I/Users/jim/work/redline/_deps/spdlog-src/include -isystem /opt/homebrew/include
+  FLAGS = -I/opt/homebrew/include -O3 -DNDEBUG -std=c++2b -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk
+  INCLUDES = -I/Users/jim/work/redline -I/Users/jim/work/redline/_deps/spdlog-src/include -I/Users/jim/work/redline/_deps/spdlog-build/include -isystem /opt/homebrew/include
   OBJECT_DIR = CMakeFiles/simplagent.dir
   OBJECT_FILE_DIR = CMakeFiles/simplagent.dir/src
 
@@ -106,7 +106,7 @@ build CMakeFiles/simplagent.dir/src/provider_utils.cpp.o: CXX_COMPILER__simplage
 # Link the executable bin/simplagent
 
 build bin/simplagent: CXX_EXECUTABLE_LINKER__simplagent_Release CMakeFiles/simplagent.dir/simplagent.cpp.o CMakeFiles/simplagent.dir/providers.cpp.o CMakeFiles/simplagent.dir/curl_utils.cpp.o CMakeFiles/simplagent.dir/openrouter_provider.cpp.o CMakeFiles/simplagent.dir/src/openai_provider.cpp.o CMakeFiles/simplagent.dir/src/provider_utils.cpp.o | /opt/homebrew/lib/libboost_json.dylib /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk/usr/lib/libcurl.tbd _deps/spdlog-build/libspdlog.a /opt/homebrew/lib/libboost_container.dylib || _deps/spdlog-build/libspdlog.a
-  FLAGS = -O3 -DNDEBUG -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk
+  FLAGS = -I/opt/homebrew/include -O3 -DNDEBUG -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk
   LINK_LIBRARIES = /opt/homebrew/lib/libboost_json.dylib  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk/usr/lib/libcurl.tbd  _deps/spdlog-build/libspdlog.a  /opt/homebrew/lib/libboost_container.dylib
   OBJECT_DIR = CMakeFiles/simplagent.dir
   POST_BUILD = :
@@ -211,7 +211,7 @@ build cmake_object_order_depends_target_spdlog: phony || .
 build _deps/spdlog-build/CMakeFiles/spdlog.dir/src/spdlog.cpp.o: CXX_COMPILER__spdlog_unscanned_Release /Users/jim/work/redline/_deps/spdlog-src/src/spdlog.cpp || cmake_object_order_depends_target_spdlog
   DEFINES = -DSPDLOG_COMPILED_LIB
   DEP_FILE = _deps/spdlog-build/CMakeFiles/spdlog.dir/src/spdlog.cpp.o.d
-  FLAGS = -O3 -DNDEBUG -std=c++2b -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk
+  FLAGS = -I/opt/homebrew/include -O3 -DNDEBUG -std=c++2b -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk
   INCLUDES = -I/Users/jim/work/redline/_deps/spdlog-src/include
   OBJECT_DIR = _deps/spdlog-build/CMakeFiles/spdlog.dir
   OBJECT_FILE_DIR = _deps/spdlog-build/CMakeFiles/spdlog.dir/src
@@ -219,7 +219,7 @@ build _deps/spdlog-build/CMakeFiles/spdlog.dir/src/spdlog.cpp.o: CXX_COMPILER__s
 build _deps/spdlog-build/CMakeFiles/spdlog.dir/src/stdout_sinks.cpp.o: CXX_COMPILER__spdlog_unscanned_Release /Users/jim/work/redline/_deps/spdlog-src/src/stdout_sinks.cpp || cmake_object_order_depends_target_spdlog
   DEFINES = -DSPDLOG_COMPILED_LIB
   DEP_FILE = _deps/spdlog-build/CMakeFiles/spdlog.dir/src/stdout_sinks.cpp.o.d
-  FLAGS = -O3 -DNDEBUG -std=c++2b -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk
+  FLAGS = -I/opt/homebrew/include -O3 -DNDEBUG -std=c++2b -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk
   INCLUDES = -I/Users/jim/work/redline/_deps/spdlog-src/include
   OBJECT_DIR = _deps/spdlog-build/CMakeFiles/spdlog.dir
   OBJECT_FILE_DIR = _deps/spdlog-build/CMakeFiles/spdlog.dir/src
@@ -227,7 +227,7 @@ build _deps/spdlog-build/CMakeFiles/spdlog.dir/src/stdout_sinks.cpp.o: CXX_COMPI
 build _deps/spdlog-build/CMakeFiles/spdlog.dir/src/color_sinks.cpp.o: CXX_COMPILER__spdlog_unscanned_Release /Users/jim/work/redline/_deps/spdlog-src/src/color_sinks.cpp || cmake_object_order_depends_target_spdlog
   DEFINES = -DSPDLOG_COMPILED_LIB
   DEP_FILE = _deps/spdlog-build/CMakeFiles/spdlog.dir/src/color_sinks.cpp.o.d
-  FLAGS = -O3 -DNDEBUG -std=c++2b -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk
+  FLAGS = -I/opt/homebrew/include -O3 -DNDEBUG -std=c++2b -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk
   INCLUDES = -I/Users/jim/work/redline/_deps/spdlog-src/include
   OBJECT_DIR = _deps/spdlog-build/CMakeFiles/spdlog.dir
   OBJECT_FILE_DIR = _deps/spdlog-build/CMakeFiles/spdlog.dir/src
@@ -235,7 +235,7 @@ build _deps/spdlog-build/CMakeFiles/spdlog.dir/src/color_sinks.cpp.o: CXX_COMPIL
 build _deps/spdlog-build/CMakeFiles/spdlog.dir/src/file_sinks.cpp.o: CXX_COMPILER__spdlog_unscanned_Release /Users/jim/work/redline/_deps/spdlog-src/src/file_sinks.cpp || cmake_object_order_depends_target_spdlog
   DEFINES = -DSPDLOG_COMPILED_LIB
   DEP_FILE = _deps/spdlog-build/CMakeFiles/spdlog.dir/src/file_sinks.cpp.o.d
-  FLAGS = -O3 -DNDEBUG -std=c++2b -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk
+  FLAGS = -I/opt/homebrew/include -O3 -DNDEBUG -std=c++2b -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk
   INCLUDES = -I/Users/jim/work/redline/_deps/spdlog-src/include
   OBJECT_DIR = _deps/spdlog-build/CMakeFiles/spdlog.dir
   OBJECT_FILE_DIR = _deps/spdlog-build/CMakeFiles/spdlog.dir/src
@@ -243,7 +243,7 @@ build _deps/spdlog-build/CMakeFiles/spdlog.dir/src/file_sinks.cpp.o: CXX_COMPILE
 build _deps/spdlog-build/CMakeFiles/spdlog.dir/src/async.cpp.o: CXX_COMPILER__spdlog_unscanned_Release /Users/jim/work/redline/_deps/spdlog-src/src/async.cpp || cmake_object_order_depends_target_spdlog
   DEFINES = -DSPDLOG_COMPILED_LIB
   DEP_FILE = _deps/spdlog-build/CMakeFiles/spdlog.dir/src/async.cpp.o.d
-  FLAGS = -O3 -DNDEBUG -std=c++2b -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk
+  FLAGS = -I/opt/homebrew/include -O3 -DNDEBUG -std=c++2b -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk
   INCLUDES = -I/Users/jim/work/redline/_deps/spdlog-src/include
   OBJECT_DIR = _deps/spdlog-build/CMakeFiles/spdlog.dir
   OBJECT_FILE_DIR = _deps/spdlog-build/CMakeFiles/spdlog.dir/src
@@ -251,7 +251,7 @@ build _deps/spdlog-build/CMakeFiles/spdlog.dir/src/async.cpp.o: CXX_COMPILER__sp
 build _deps/spdlog-build/CMakeFiles/spdlog.dir/src/cfg.cpp.o: CXX_COMPILER__spdlog_unscanned_Release /Users/jim/work/redline/_deps/spdlog-src/src/cfg.cpp || cmake_object_order_depends_target_spdlog
   DEFINES = -DSPDLOG_COMPILED_LIB
   DEP_FILE = _deps/spdlog-build/CMakeFiles/spdlog.dir/src/cfg.cpp.o.d
-  FLAGS = -O3 -DNDEBUG -std=c++2b -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk
+  FLAGS = -I/opt/homebrew/include -O3 -DNDEBUG -std=c++2b -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk
   INCLUDES = -I/Users/jim/work/redline/_deps/spdlog-src/include
   OBJECT_DIR = _deps/spdlog-build/CMakeFiles/spdlog.dir
   OBJECT_FILE_DIR = _deps/spdlog-build/CMakeFiles/spdlog.dir/src
@@ -259,7 +259,7 @@ build _deps/spdlog-build/CMakeFiles/spdlog.dir/src/cfg.cpp.o: CXX_COMPILER__spdl
 build _deps/spdlog-build/CMakeFiles/spdlog.dir/src/bundled_fmtlib_format.cpp.o: CXX_COMPILER__spdlog_unscanned_Release /Users/jim/work/redline/_deps/spdlog-src/src/bundled_fmtlib_format.cpp || cmake_object_order_depends_target_spdlog
   DEFINES = -DSPDLOG_COMPILED_LIB
   DEP_FILE = _deps/spdlog-build/CMakeFiles/spdlog.dir/src/bundled_fmtlib_format.cpp.o.d
-  FLAGS = -O3 -DNDEBUG -std=c++2b -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk
+  FLAGS = -I/opt/homebrew/include -O3 -DNDEBUG -std=c++2b -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk
   INCLUDES = -I/Users/jim/work/redline/_deps/spdlog-src/include
   OBJECT_DIR = _deps/spdlog-build/CMakeFiles/spdlog.dir
   OBJECT_FILE_DIR = _deps/spdlog-build/CMakeFiles/spdlog.dir/src
@@ -274,7 +274,7 @@ build _deps/spdlog-build/CMakeFiles/spdlog.dir/src/bundled_fmtlib_format.cpp.o: 
 
 build _deps/spdlog-build/libspdlog.a: CXX_STATIC_LIBRARY_LINKER__spdlog_Release _deps/spdlog-build/CMakeFiles/spdlog.dir/src/spdlog.cpp.o _deps/spdlog-build/CMakeFiles/spdlog.dir/src/stdout_sinks.cpp.o _deps/spdlog-build/CMakeFiles/spdlog.dir/src/color_sinks.cpp.o _deps/spdlog-build/CMakeFiles/spdlog.dir/src/file_sinks.cpp.o _deps/spdlog-build/CMakeFiles/spdlog.dir/src/async.cpp.o _deps/spdlog-build/CMakeFiles/spdlog.dir/src/cfg.cpp.o _deps/spdlog-build/CMakeFiles/spdlog.dir/src/bundled_fmtlib_format.cpp.o
   ARCH_FLAGS = -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk
-  LANGUAGE_COMPILE_FLAGS = -O3 -DNDEBUG
+  LANGUAGE_COMPILE_FLAGS = -I/opt/homebrew/include -O3 -DNDEBUG
   OBJECT_DIR = _deps/spdlog-build/CMakeFiles/spdlog.dir
   POST_BUILD = :
   PRE_LINK = :

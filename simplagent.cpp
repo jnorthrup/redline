@@ -9,14 +9,17 @@
 #include <sstream>
 #include <thread>
 #include <csignal>
+#include <atomic>
+#include <ctime>
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <boost/json.hpp>
 #include "providers.h"
 
-// Define and initialize logger
-auto logger = spdlog::basic_logger_mt("simplagent_logger", "simplagent.log");
-logger->set_level(spdlog::level::warn); // Default to warn level
+using namespace std;
+
+// Declare logger
+std::shared_ptr<spdlog::logger> logger;
 
 void show_help() {
     logger->info("Displaying help information");
@@ -259,18 +262,21 @@ int main(int argc, char* argv[]) {
         if (arg == "--help") {
             show_help();
             return 0;
+        } else if (arg == "-v") {
+            spdlog::set_level(spdlog::level::info);
+            logger->set_level(spdlog::level::info);
+        } else if (arg == "-vv") {
+            spdlog::set_level(spdlog::level::debug);
+            logger->set_level(spdlog::level::debug);
+        } else if (arg == "-vvv") {
+            spdlog::set_level(spdlog::level::trace);
+            logger->set_level(spdlog::level::trace);
         } else if (arg == "--provider" && i + 1 < argc) {
             provider = argv[++i];
         } else if (arg == "--model" && i + 1 < argc) {
             model = argv[++i];
         } else if (arg == "--input" && i + 1 < argc) {
             input = argv[++i];
-        } else if (arg == "-v") {
-            logger->set_level(spdlog::level::info);
-        } else if (arg == "-vv") {
-            logger->set_level(spdlog::level::debug);
-        } else if (arg == "-vvv") {
-            logger->set_level(spdlog::level::trace);
         } else {
             std::cerr << "Unknown argument: " << arg << std::endl;
             show_help();

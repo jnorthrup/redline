@@ -81,12 +81,9 @@ FetchContent_Declare(
 # Make spdlog available
 FetchContent_MakeAvailable(spdlog)
 
-# Add spdlog include directories to global includes
-include_directories(${spdlog_SOURCE_DIR}/include ${spdlog_BINARY_DIR}/include)
-
 # Add the shell script as the main executable
 install(PROGRAMS simplagent.sh
-        DESTINATION bin
+        DESTINATION ${CMAKE_BINARY_DIR}/bin
         RENAME simplagent)
 
 # Set output directory for executables
@@ -96,7 +93,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 add_executable(simplagent simplagent.cpp providers.cpp curl_utils.cpp openrouter_provider.cpp src/openai_provider.cpp src/provider_utils.cpp)
 
 # Add include directories
-target_include_directories(simplagent PRIVATE ${CMAKE_SOURCE_DIR})
+target_include_directories(simplagent PRIVATE 
+    ${CMAKE_SOURCE_DIR}
+    /opt/homebrew/include
+    ${spdlog_SOURCE_DIR}/include
+    ${spdlog_BINARY_DIR}/include
+)
 
 # Link Boost libraries
 target_link_libraries(simplagent Boost::json)
@@ -106,7 +108,6 @@ target_link_libraries(simplagent CURL::libcurl)
 
 # Link spdlog library and pass log level
 target_link_libraries(simplagent spdlog::spdlog)
-target_include_directories(simplagent PRIVATE ${spdlog_SOURCE_DIR}/include ${spdlog_BINARY_DIR}/include)
 target_compile_definitions(simplagent PRIVATE SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_${LOG_LEVEL})
 
 # Create bin directory if it doesn't exist
@@ -114,7 +115,7 @@ file(MAKE_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 # Install the executables
 install(TARGETS simplagent
-        DESTINATION bin)
+        DESTINATION ${CMAKE_BINARY_DIR}/bin)
 
 # Add super clean target
 add_custom_target(superclean
