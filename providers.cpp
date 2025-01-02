@@ -116,7 +116,7 @@ ProviderContainer PROVIDER_CONFIGS;
 // ProviderFactory implementations
 ProviderConfig ProviderFactory::createLMStudio() {
     return ProviderConfig{
-        .name = "LMSTUDIO",
+        .name = "lmstudio",
         .base_url = "http://localhost:1234/api/v0",
         .endpoint = "/chat/completions",
         .models = {"Qwen2.5-Coder-0.5B-Instruct-128K-GGUF",       //     420.09 MB          Qwen2                   
@@ -142,132 +142,300 @@ ProviderConfig ProviderFactory::createLMStudio() {
     };
 }
 
-ProviderConfig ProviderFactory::createDeepSeek() {
-    return ProviderConfig{
-        .name = "DEEPSEEK",
-        .base_url = "https://api.deepseek.com",
-        .models = {"deepseek-chat"}
-    };
-}
+/*
+ * LMStudio Provider Demonstration
+ * 
+ * 1. Start LMStudio server:
+ *    $ lms --port 1234 --model Qwen2.5-Coder-0.5B-Instruct-128K-GGUF
+ * 
+ * 2. Example usage:
+ * 
+ *    // Create provider config
+ *    auto config = ProviderFactory::createLMStudio();
+ *    
+ *    // Create request
+ *    std::string request = R"({
+ *        "model": "Qwen2.5-Coder-0.5B-Instruct-128K-GGUF",
+ *        "messages": [
+ *            {"role": "system", "content": "You are a helpful assistant"},
+ *            {"role": "user", "content": "Hello!"}
+ *        ],
+ *        "temperature": 0.7,
+ *        "max_tokens": 100
+ *    })";
+ *    
+ *    // Send request
+ *    CurlClient client;
+ *    std::string response;
+ *    if (client.send_llm_request("lms", request, response)) {
+ *        std::cout << "Response: " << response << std::endl;
+ *    } else {
+ *        std::cerr << "Request failed" << std::endl;
+ *    }
+ * 
+ * 3. Key Features:
+ *    - Local inference with low latency
+ *    - Support for multiple GGUF models
+ *    - Streaming responses
+ *    - Detailed model statistics
+ */
 
-ProviderConfig ProviderFactory::createOpenRouter() {
-    return OpenRouterProvider::createConfig();
-}
 
-ProviderConfig ProviderFactory::createGemini() {
-    return ProviderConfig{
-        .name = "GEMINI",
-        .base_url = "https://generativelanguage.googleapis.com/v1beta",
-        .models = {"gemini-pro", "gemini-pro-vision", "gemini-ultra", "gemini-nano"}
-    };
-}
+class LMStudioStatusChecker {
+public:
+    static bool check_server_status(const std::string& base_url) {
+        try {
+            CurlClient client;
+            std::string response;
+            if (client.send_llm_request("lms", base_url + "/status", response)) {
+                auto json = boost::json::parse(response);
+                return json.at("status").as_string() == "ready";
+            }
+            return false;
+        } catch (...) {
+            return false;
+        }
+    }
 
-ProviderConfig ProviderFactory::createGrok() {
-    return ProviderConfig{
-        .name = "GROK",
-        .base_url = "https://api.x.ai",
-        .models = {"grok-2-1212", "grok-2-vision-1212", "grok-beta", "grok-vision-beta"}
-    };
-}
-
-ProviderConfig ProviderFactory::createPerplexity() {
-    return ProviderConfig{
-        .name = "PERPLEXITY",
-        .base_url = "https://api.perplexity.ai",
-        .models = {"llama-3.1-sonar-huge-128k-online", "llama-3.1-sonar-large-128k-online", 
-                  "llama-3.1-sonar-small-128k-online", "llama-3.1-8b-instruct", "llama-3.1-70b-instruct"}
-    };
-}
-
-ProviderConfig ProviderFactory::createAnthropic() {
-    return ProviderConfig{
-        .name = "ANTHROPIC",
-        .base_url = "https://api.anthropic.com/v1",
-        .models = {"anthropic:messages:claude-3-5-sonnet-20241022", "anthropic:messages:claude-3-5-haiku-20241022",
-                  "anthropic:messages:claude-3-opus-20240229", "anthropic:messages:claude-3-sonnet-20240229",
-                  "anthropic:messages:claude-3-haiku-20240307"}
-    };
-}
-
-ProviderConfig ProviderFactory::createOpenAI() {
-    return ProviderConfig{
-        .name = "OPENAI",
-        .base_url = "https://api.openai.com/v1",
-        .endpoint = "/chat/completions",
-        .models = {"gpt-4", "gpt-4-1106-preview", "gpt-3.5-turbo-1106", "gpt-3.5-turbo"}
-    };
-}
-
-ProviderConfig ProviderFactory::createClaude() {
-    return ProviderConfig{
-        .name = "CLAUDE",
-        .base_url = "https://api.anthropic.com/v1",
-        .models = {"anthropic:messages:claude-3-5-sonnet-20241022", "anthropic:messages:claude-3-5-haiku-20241022",
-                  "anthropic:messages:claude-3-opus-20240229", "anthropic:messages:claude-3-sonnet-20240229",
-                  "anthropic:messages:claude-3-haiku-20240307"}
-    };
-}
-
-ProviderConfig ProviderFactory::createHuggingFace() {
-    return ProviderConfig{
-        .name = "HUGGINGFACE",
-        .base_url = "https://api-inference.huggingface.co",
-        .models = {"meta-llama/Meta-Llama-3-8B-Instruct", "google/flan-t5-xxl", 
-                  "EleutherAI/gpt-neo-2.7B", "bigscience/bloom-7b1"}
-    };
-}
+    static bool restart_server(const std::string& base_url) {
+        try {
+            CurlClient client;
+            std::string response;
+            return client.send_llm_request("lms", base_url + "/restart", response);
+        } catch (...) {
+            return false;
+        }
+    }
+};
 
 std::string LMStudioRequestCreator::create_request_json(const std::string& input, const ProviderConfig& config, const std::string& endpoint_type) {
-    try {
-        // Parse input as JSON
-        auto input_json = boost::json::parse(input);
-        
-        boost::json::value request;
-        
-        if (endpoint_type == "chat") {
-            // Create messages array
-            boost::json::array messages;
-            if (input_json.is_object() && input_json.as_object().contains("messages")) {
-                messages = input_json.at("messages").as_array();
-            } else {
-                // Create default user message
-                messages.push_back({
-                    {"role", "user"},
-                    {"content", input}
-                });
+    const int max_retries = 3;
+    int attempt = 0;
+    
+    while (attempt < max_retries) {
+        try {
+            // Check server status before proceeding
+            if (!LMStudioStatusChecker::check_server_status(config.base_url)) {
+                logger->warn("LMStudio server not ready, attempting restart...");
+                if (!LMStudioStatusChecker::restart_server(config.base_url)) {
+                    throw std::runtime_error("Failed to restart LMStudio server");
+                }
+                std::this_thread::sleep_for(std::chrono::seconds(2));
+                continue;
+            }
+
+            // Parse input as JSON
+            auto input_json = boost::json::parse(input);
+            
+            // Build command line arguments
+            std::string cmd = "lms ";
+            cmd += "--model " + config.models[0] + " ";
+            
+            if (endpoint_type == "chat") {
+                cmd += "--chat ";
+                if (input_json.is_object() && input_json.as_object().contains("messages")) {
+                    for (const auto& msg : input_json.at("messages").as_array()) {
+                        cmd += std::string("--message \"") + msg.at("content").as_string().c_str() + "\" ";
+                    }
+                } else {
+                    cmd += "--message \"" + input + "\" ";
+                }
+            } else if (endpoint_type == "completion") {
+                cmd += "--prompt \"" + input + "\" ";
             }
             
-            request = {
-                {"model", config.models[0]}, // Use first model by default
-                {"messages", messages},
-                {"temperature", 0.7},
-                {"max_tokens", -1}, // Unlimited tokens
-                {"stream", true}
-            };
-        } else if (endpoint_type == "completion") {
-            request = {
-                {"model", config.models[0]},
-                {"prompt", input},
-                {"max_tokens", -1},
-                {"temperature", 0.7}
-            };
-        }
-        
-        // Override with any provided parameters
-        if (input_json.is_object()) {
-            for (const auto& [key, value] : input_json.as_object()) {
-                if ((endpoint_type == "chat" && key != "messages") || 
-                    (endpoint_type == "completion" && key != "prompt")) {
-                    request.as_object()[key] = value;
+            // Add optional parameters
+            if (input_json.is_object()) {
+                for (const auto& [key, value] : input_json.as_object()) {
+                    if (key == "temperature") {
+                        cmd += "--temperature " + std::to_string(value.as_double()) + " ";
+                    } else if (key == "max_tokens") {
+                        cmd += "--max-tokens " + std::to_string(value.as_int64()) + " ";
+                    }
                 }
             }
+            
+            return cmd;
+        } catch (const std::exception& e) {
+            attempt++;
+            logger->error("LMStudio request creation failed (attempt {}/{}): {}", attempt, max_retries, e.what());
+            
+            if (attempt < max_retries) {
+                std::this_thread::sleep_for(std::chrono::seconds(1));
+                continue;
+            }
+            
+            throw std::runtime_error("Max retries exceeded for LMStudio request creation");
         }
-        
-        return boost::json::serialize(request);
-    } catch (const std::exception& e) {
-        logger->error("Failed to create LMStudio request: {}", e.what());
-        throw;
     }
+    
+    throw std::runtime_error("Unexpected error in LMStudio request creation");
+}
+
+// Ollama request schema
+const char* OLLAMA_REQUEST_SCHEMA = R"({
+    "type": "object",
+    "properties": {
+        "model": {"type": "string"},
+        "prompt": {"type": "string"},
+        "system": {"type": "string"},
+        "template": {"type": "string"},
+        "context": {
+            "type": "array",
+            "items": {"type": "number"}
+        },
+        "options": {
+            "type": "object",
+            "properties": {
+                "num_ctx": {"type": "number"},
+                "num_predict": {"type": "number"},
+                "temperature": {"type": "number"},
+                "top_k": {"type": "number"},
+                "top_p": {"type": "number"}
+            }
+        }
+    },
+    "required": ["model", "prompt"]
+})";
+
+// Ollama response schema
+const char* OLLAMA_RESPONSE_SCHEMA = R"({
+    "type": "object",
+    "properties": {
+        "model": {"type": "string"},
+        "created_at": {"type": "string"},
+        "response": {"type": "string"},
+        "done": {"type": "boolean"},
+        "context": {
+            "type": "array",
+            "items": {"type": "number"}
+        },
+        "total_duration": {"type": "number"},
+        "load_duration": {"type": "number"},
+        "prompt_eval_count": {"type": "number"},
+        "prompt_eval_duration": {"type": "number"},
+        "eval_count": {"type": "number"},
+        "eval_duration": {"type": "number"}
+    },
+    "required": ["model", "response", "done"]
+})";
+
+class OllamaRequestCreator : public RequestCreator {
+public:
+    std::string create_request_json(const std::string& input, const ProviderConfig& config, const std::string& endpoint_type = "chat") override {
+        try {
+            auto json_request = boost::json::parse(input);
+            boost::json::object request_obj;
+            
+            request_obj["model"] = config.models[0];
+            request_obj["prompt"] = json_request.at("prompt").as_string();
+            
+            if (json_request.as_object().contains("options")) {
+                request_obj["options"] = json_request.at("options");
+            }
+            
+            if (endpoint_type == "chat") {
+                request_obj["messages"] = json_request.at("messages");
+            }
+            
+            return boost::json::serialize(request_obj);
+        } catch (const std::exception& e) {
+            logger->error("Failed to create Ollama request: {}", e.what());
+            throw;
+        }
+    }
+};
+
+ProviderConfig ProviderFactory::createOllama() {
+    return ProviderConfig{
+        .name = "ollama",
+        .base_url = "http://localhost:11434/api",
+        .endpoint = "/generate",
+        .models = {"llama2", "mistral", "codellama"},
+        .local_only = true,
+        .streaming = true,
+        .request_schema = OLLAMA_REQUEST_SCHEMA,
+        .response_schema = OLLAMA_RESPONSE_SCHEMA
+    };
+}
+
+// Llama.cpp request schema
+const char* LLAMA_CPP_REQUEST_SCHEMA = R"({
+    "type": "object",
+    "properties": {
+        "model": {"type": "string"},
+        "prompt": {"type": "string"},
+        "temperature": {"type": "number"},
+        "top_k": {"type": "number"},
+        "top_p": {"type": "number"},
+        "n_predict": {"type": "number"}
+    },
+    "required": ["model", "prompt"]
+})";
+
+// Llama.cpp response schema
+const char* LLAMA_CPP_RESPONSE_SCHEMA = R"({
+    "type": "object",
+    "properties": {
+        "model": {"type": "string"},
+        "created_at": {"type": "string"},
+        "response": {"type": "string"},
+        "done": {"type": "boolean"},
+        "total_duration": {"type": "number"},
+        "load_duration": {"type": "number"},
+        "prompt_eval_count": {"type": "number"},
+        "prompt_eval_duration": {"type": "number"},
+        "eval_count": {"type": "number"},
+        "eval_duration": {"type": "number"}
+    },
+    "required": ["model", "response", "done"]
+})";
+
+class LlamaCppRequestCreator : public RequestCreator {
+public:
+    std::string create_request_json(const std::string& input, const ProviderConfig& config, const std::string& endpoint_type = "chat") override {
+        try {
+            auto json_request = boost::json::parse(input);
+            boost::json::object request_obj;
+            
+            request_obj["model"] = config.models[0];
+            request_obj["prompt"] = json_request.at("prompt").as_string();
+            
+            if (json_request.as_object().contains("temperature")) {
+                request_obj["temperature"] = json_request.at("temperature");
+            }
+            
+            if (json_request.as_object().contains("top_k")) {
+                request_obj["top_k"] = json_request.at("top_k");
+            }
+            
+            if (json_request.as_object().contains("top_p")) {
+                request_obj["top_p"] = json_request.at("top_p");
+            }
+            
+            if (json_request.as_object().contains("n_predict")) {
+                request_obj["n_predict"] = json_request.at("n_predict");
+            }
+            
+            return boost::json::serialize(request_obj);
+        } catch (const std::exception& e) {
+            logger->error("Failed to create Llama.cpp request: {}", e.what());
+            throw;
+        }
+    }
+};
+
+ProviderConfig ProviderFactory::createLlamaCpp() {
+    return ProviderConfig{
+        .name = "llamacpp",
+        .base_url = "http://localhost:8080",
+        .endpoint = "/completion",
+        .models = {"llama2", "mistral", "codellama"},
+        .local_only = true,
+        .streaming = true,
+        .request_schema = LLAMA_CPP_REQUEST_SCHEMA,
+        .response_schema = LLAMA_CPP_RESPONSE_SCHEMA
+    };
 }
 
 void initialize_providers() {
@@ -281,13 +449,6 @@ void initialize_providers() {
     }
 
     PROVIDER_CONFIGS.insert(ProviderFactory::createLMStudio());
-    PROVIDER_CONFIGS.insert(ProviderFactory::createDeepSeek());
-    PROVIDER_CONFIGS.insert(ProviderFactory::createOpenRouter());
-    PROVIDER_CONFIGS.insert(ProviderFactory::createGemini());
-    PROVIDER_CONFIGS.insert(ProviderFactory::createGrok());
-    PROVIDER_CONFIGS.insert(ProviderFactory::createPerplexity());
-    PROVIDER_CONFIGS.insert(ProviderFactory::createAnthropic());
-    PROVIDER_CONFIGS.insert(ProviderFactory::createOpenAI());
-    PROVIDER_CONFIGS.insert(ProviderFactory::createClaude());
-    PROVIDER_CONFIGS.insert(ProviderFactory::createHuggingFace());
+    PROVIDER_CONFIGS.insert(ProviderFactory::createOllama());
+    PROVIDER_CONFIGS.insert(ProviderFactory::createLlamaCpp());
 }

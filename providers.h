@@ -96,7 +96,8 @@ public:
     static ProviderConfig createAnthropic();
     static ProviderConfig createOpenAI();
     static ProviderConfig createClaude();
-    static ProviderConfig createHuggingFace();
+    static ProviderConfig createOllama();
+    static ProviderConfig createLlamaCpp();
 };
 
 void initialize_providers();

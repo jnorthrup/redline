@@ -27,7 +27,7 @@ void show_help() {
               << "Usage: simplagent [options]\n\n"
               << "Options:\n"
               << "  --help               Show this help message\n"
-              << "  --provider <name>    Set the LLM provider (default: LMSTUDIO)\n"
+              << "  --provider <name>    Set the LLM provider (default: lms)\n"
               << "  --model <name>       Set the model to use\n"
               << "  --input <text>       Process the given input text\n"
               << "  -v                   Set verbosity to info level\n"
@@ -209,7 +209,7 @@ void signal_handler(int signal) {
 
 class SimplAgent {
 public:
-    SimplAgent(const std::string& provider = "LMSTUDIO") {
+    SimplAgent(const std::string& provider = "lmstudio") {
         signal(SIGINT, signal_handler);
         signal(SIGTERM, signal_handler);
         
@@ -252,7 +252,7 @@ private:
 
 int main(int argc, char* argv[]) {
     initialize_providers();
-    std::string provider = "LMSTUDIO";
+    std::string provider = "lmstudio";
     std::string model;
     std::string input;
 
@@ -301,7 +301,27 @@ int main(int argc, char* argv[]) {
                     break;
                 }
                 std::string response = agent.process_input(line);
+                try {
+                auto json = boost::json::parse(response);
+                if (json.is_object() && json.as_object().contains("choices")) {
+                    auto& choices = json.at("choices").as_array();
+                    if (!choices.empty()) {
+                        auto& message = choices[0].at("message");
+                        std::string content = std::string(message.at("content").as_string().c_str());
+                        // Remove <|im_end|> marker if present
+                        size_t pos = content.find("<|im_end|>");
+                        if (pos != std::string::npos) {
+                            content = content.substr(0, pos);
+                        }
+                        // Format response with proper line breaks
+                        std::cout << "\nAssistant:\n" << content << "\n\n> ";
+                        continue;
+                    }
+                }
                 std::cout << "Response: " << response << std::endl;
+            } catch (...) {
+                std::cout << "Response: " << response << std::endl;
+            }
             }
         }
     } catch (const std::exception& e) {

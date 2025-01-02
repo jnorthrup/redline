@@ -50,17 +50,15 @@ if(NOT HAS_CXX23)
     message(FATAL_ERROR "The compiler does not fully support C++23")
 endif()
 
-# Set Boost paths explicitly
-set(Boost_ROOT ${HOMEBREW_PREFIX}/Cellar/boost/1.87.0)
-set(Boost_INCLUDEDIR ${Boost_ROOT}/include)
-set(Boost_LIBRARYDIR ${Boost_ROOT}/lib)
-
-# Add Boost components directory to search path without overriding
-list(APPEND CMAKE_PREFIX_PATH "${Boost_LIBRARYDIR}/cmake")
-list(REMOVE_DUPLICATES CMAKE_PREFIX_PATH)
-
-# Find the Boost library
-find_package(Boost 1.87 REQUIRED COMPONENTS json container)
+# Find Boost with version flexibility
+find_package(Boost 1.87.0 REQUIRED COMPONENTS json container)
+if(Boost_FOUND)
+    message(STATUS "Found Boost version ${Boost_VERSION}")
+    message(STATUS "Boost include dir: ${Boost_INCLUDE_DIRS}")
+    message(STATUS "Boost library dir: ${Boost_LIBRARY_DIRS}")
+else()
+    message(FATAL_ERROR "Boost not found - please install via 'brew install boost'")
+endif()
 
 # Enable detailed logging
 set(CMAKE_VERBOSE_MAKEFILE ON)
@@ -71,11 +69,11 @@ find_package(CURL REQUIRED)
 # Include FetchContent for external dependencies
 include(FetchContent)
 
-# Fetch and make spdlog available
+# Fetch latest stable spdlog
 FetchContent_Declare(
   spdlog
   GIT_REPOSITORY https://github.com/gabime/spdlog.git
-  GIT_TAG        v1.12.0
+  GIT_TAG        v1.13.0
 )
 
 # Make spdlog available
@@ -90,7 +88,26 @@ install(PROGRAMS simplagent.sh
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Add the C++ components as an executable
-add_executable(simplagent simplagent.cpp providers.cpp curl_utils.cpp openrouter_provider.cpp src/openai_provider.cpp src/provider_utils.cpp)
+add_executable(simplagent 
+    simplagent.cpp 
+    providers.cpp 
+    curl_utils.cpp 
+    openrouter_provider.cpp 
+    src/openai_provider.cpp 
+    src/provider_utils.cpp
+    src/robots/src/iris.cpp 
+    src/robots/src/waldo.cpp
+    src/robots/src/sensa.cpp 
+    src/robots/src/auda.cpp 
+    src/robots/src/poet.cpp 
+    src/robots/src/whiz.cpp
+)
+    
+# Ensure the binary is built in the correct location
+set_target_properties(simplagent PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+    OUTPUT_NAME simplagent
+)
 
 # Add include directories
 target_include_directories(simplagent PRIVATE 
@@ -98,9 +115,11 @@ target_include_directories(simplagent PRIVATE
     /opt/homebrew/include
     ${spdlog_SOURCE_DIR}/include
     ${spdlog_BINARY_DIR}/include
+    ${CMAKE_SOURCE_DIR}/include
 )
 
 # Link Boost libraries
+target_link_directories(simplagent PRIVATE /opt/homebrew/Cellar/boost/1.87.0/lib)
 target_link_libraries(simplagent Boost::json)
 
 # Link libcurl library
